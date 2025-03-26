@@ -30,14 +30,14 @@ pub mod typedefs;
 pub mod vcpu;
 
 use crate::error;
-use crate::event::event_type::EventType;
 use crate::event::{
     bp::BpEvent, common::EventCommon, context_switch::ContextSwitchEvent, destroy::DestroyEvent,
-    drq::DrqEvent, empty::EmptyEvent, exregs::ExregsEvent, factory::FactoryEvent,
-    fullsize::FullsizeEvent, gate::GateEvent, ieh::IehEvent, ipc::IpcEvent, ipc_res::IpcResEvent,
-    ipfh::IpfhEvent, irq::IrqEvent, ke::KeEvent, ke_bin::KeBinEvent, ke_reg::KeRegEvent,
-    migration::MigrationEvent, nam::NamEvent, pf::PfEvent, rcu::RcuEvent, sched::SchedEvent,
-    svm::SvmEvent, timer::TimerEvent, tmap::TmapEvent, trap::TrapEvent, vcpu::VcpuEvent,
+    drq::DrqEvent, empty::EmptyEvent, event_type::EventType, exregs::ExregsEvent,
+    factory::FactoryEvent, fullsize::FullsizeEvent, gate::GateEvent, ieh::IehEvent, ipc::IpcEvent,
+    ipc_res::IpcResEvent, ipfh::IpfhEvent, irq::IrqEvent, ke::KeEvent, ke_bin::KeBinEvent,
+    ke_reg::KeRegEvent, migration::MigrationEvent, nam::NamEvent, pf::PfEvent, rcu::RcuEvent,
+    sched::SchedEvent, svm::SvmEvent, timer::TimerEvent, tmap::TmapEvent, trap::TrapEvent,
+    vcpu::VcpuEvent,
 };
 use binrw::BinRead;
 use num_enum::TryFromPrimitiveError;
