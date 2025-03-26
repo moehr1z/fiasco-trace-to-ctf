@@ -1,0 +1,8 @@
+[package]
+name = "l4re_tracestream"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+l4re_traceconv = { path = "./converter" }
+l4re_traceparse = { path = "./parser" }

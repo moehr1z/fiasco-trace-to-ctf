@@ -1,0 +1,17 @@
+/* Note, automatically generated from Fiasco binary */
+
+use super::*;
+use binrw::BinRead;
+
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+#[br(little)]
+pub struct TmapEvent {
+    pub common: EventCommon,
+
+    pub __pre_pad: [i8; 2],
+    pub id: L4_ktrace_t__Mword,
+    pub mask: L4_ktrace_t__Mword,
+    pub fpage: L4_ktrace_t__Mword,
+    pub map: u8,
+}
+
