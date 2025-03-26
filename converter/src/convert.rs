@@ -1,8 +1,9 @@
 use crate::events::*;
 use crate::types::{BorrowedCtfState, StringCache};
 use babeltrace2_sys::{ffi, BtResultExt, Error};
-use l4re_traceparse::event::l4_event::EventCommon;
-use l4re_traceparse::event::{Event, EventType};
+use l4re_traceparse::event::common::EventCommon;
+use l4re_traceparse::event::event_type::EventType;
+use l4re_traceparse::event::Event;
 use std::collections::{hash_map::Entry, HashMap};
 use std::ptr;
 

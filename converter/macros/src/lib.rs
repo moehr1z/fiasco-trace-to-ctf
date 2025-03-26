@@ -161,7 +161,7 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
 
     let event_class_impl = if name_from_event_type {
         quote! {
-            pub(crate) fn event_class(event_type: l4re_traceparse::event::EventType, stream_class: *mut babeltrace2_sys::ffi::bt_stream_class) -> Result<*mut babeltrace2_sys::ffi::bt_event_class, babeltrace2_sys::Error> {
+            pub(crate) fn event_class(event_type: l4re_traceparse::event::event_type::EventType, stream_class: *mut babeltrace2_sys::ffi::bt_stream_class) -> Result<*mut babeltrace2_sys::ffi::bt_event_class, babeltrace2_sys::Error> {
                 use babeltrace2_sys::{ffi, BtResultExt};
                 use std::ffi::CString;
 

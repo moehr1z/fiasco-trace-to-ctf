@@ -1,199 +1,46 @@
-/* Note, automatically generated from Fiasco binary */
-
-pub mod l4_event;
-pub mod drq;
-pub mod vcpu;
-pub mod factory;
-pub mod gate;
-pub mod irq;
-pub mod destroy;
-pub mod nam;
-pub mod rcu;
-pub mod tmap;
 pub mod bp;
+pub mod common;
 pub mod context_switch;
+pub mod destroy;
+pub mod drq;
 pub mod empty;
+pub mod event_type;
+pub mod exregs;
+pub mod factory;
+pub mod fullsize;
+pub mod gate;
+pub mod ieh;
 pub mod ipc;
 pub mod ipc_res;
+pub mod ipfh;
+pub mod irq;
 pub mod ke;
 pub mod ke_bin;
 pub mod ke_reg;
-pub mod pf;
-pub mod sched;
-pub mod trap;
-pub mod fullsize;
-pub mod ieh;
-pub mod ipfh;
-pub mod exregs;
 pub mod migration;
-pub mod timer;
+pub mod nam;
+pub mod pf;
+pub mod rcu;
+pub mod sched;
 pub mod svm;
+pub mod timer;
+pub mod tmap;
+pub mod trap;
+pub mod typedefs;
+pub mod vcpu;
 
-use crate::event::drq::DrqEvent;
-use crate::event::vcpu::VcpuEvent;
-use crate::event::factory::FactoryEvent;
-use crate::event::gate::GateEvent;
-use crate::event::irq::IrqEvent;
-use crate::event::destroy::DestroyEvent;
-use crate::event::nam::NamEvent;
-use crate::event::rcu::RcuEvent;
-use crate::event::tmap::TmapEvent;
-use crate::event::bp::BpEvent;
-use crate::event::context_switch::ContextSwitchEvent;
-use crate::event::empty::EmptyEvent;
-use crate::event::ipc::IpcEvent;
-use crate::event::ipc_res::IpcResEvent;
-use crate::event::ke::KeEvent;
-use crate::event::ke_bin::KeBinEvent;
-use crate::event::ke_reg::KeRegEvent;
-use crate::event::pf::PfEvent;
-use crate::event::sched::SchedEvent;
-use crate::event::trap::TrapEvent;
-use crate::event::fullsize::FullsizeEvent;
-use crate::event::ieh::IehEvent;
-use crate::event::ipfh::IpfhEvent;
-use crate::event::exregs::ExregsEvent;
-use crate::event::migration::MigrationEvent;
-use crate::event::timer::TimerEvent;
-use crate::event::svm::SvmEvent;
-
-use core::fmt;
+use crate::error;
+use crate::event::event_type::EventType;
+use crate::event::{
+    bp::BpEvent, common::EventCommon, context_switch::ContextSwitchEvent, destroy::DestroyEvent,
+    drq::DrqEvent, empty::EmptyEvent, exregs::ExregsEvent, factory::FactoryEvent,
+    fullsize::FullsizeEvent, gate::GateEvent, ieh::IehEvent, ipc::IpcEvent, ipc_res::IpcResEvent,
+    ipfh::IpfhEvent, irq::IrqEvent, ke::KeEvent, ke_bin::KeBinEvent, ke_reg::KeRegEvent,
+    migration::MigrationEvent, nam::NamEvent, pf::PfEvent, rcu::RcuEvent, sched::SchedEvent,
+    svm::SvmEvent, timer::TimerEvent, tmap::TmapEvent, trap::TrapEvent, vcpu::VcpuEvent,
+};
 use binrw::BinRead;
-
-use num_enum::{IntoPrimitive, TryFromPrimitive, TryFromPrimitiveError};use crate::error;
-use l4_event::EventCommon;
-
-pub type L4Addr = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Address = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Cap_index = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Context = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Context__Drq = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Context__Drq_log__Type = u32;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Cpu_number = u32;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Irq_base = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Irq_chip = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Kobject = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__L4_error = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__L4_msg_tag = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__L4_obj_ref = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__L4_timeout_pair = u32;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Mword = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Rcu_item = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Sched_context = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Smword = i64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Space = L4Addr;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Unsigned16 = u16;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Unsigned32 = u32;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Unsigned64 = u64;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__Unsigned8 = u8;
-#[allow(non_camel_case_types)]
-pub type L4_ktrace_t__cxx__Type_info = L4Addr;
-
-
-#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, TryFromPrimitive, IntoPrimitive)]
-#[repr(u8)]
-pub enum EventType {
-    Unused = 0,
-    Pf = 1,
-    Ipc = 2,
-    IpcRes = 3,
-    IpcTrace = 4,
-    Ke = 5,
-    KeReg = 6,
-    Breakpoint = 7,
-    KeBin = 8,
-    ContextSwitch = 9,
-    DrqHandling = 10,
-    ExRegs = 11,
-    ExceptionInvalidHandler = 12,
-    Exceptions = 13,
-    FactoryDelete = 14,
-    IpcGateInvoke = 15,
-    IrqObjectTriggers = 16,
-    KobjectCreate = 17,
-    KobjectDelete = 18,
-    KobjectDeleteGeneric = 19,
-    KobjectDestroy = 20,
-    KobjectNames = 21,
-    PageFaultInvalidPager = 22,
-    RcuCall = 23,
-    RcuCallbacks = 24,
-    RcuIdle = 25,
-    SchedulingContextLoad = 26,
-    SchedulingContextSave = 27,
-    TaskMap = 28,
-    TaskUnmap = 29,
-    ThreadMigration = 30,
-    TimerIrqsKernelScheduling = 31,
-    VcpuEvents = 32,
-    VmSvm = 33,
-    Hidden = 128,
-}
-
-impl fmt::Display for EventType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        use EventType::*;
-        match self {
-            Unused => write!(f, "UNUSED"), 
-            Pf => write!(f, "PF"), 
-            Ipc => write!(f, "IPC"), 
-            IpcRes => write!(f, "IPCRES"), 
-            IpcTrace => write!(f, "IPCTRACE"), 
-            Ke => write!(f, "KE"), 
-            KeReg => write!(f, "KEREG"), 
-            Breakpoint => write!(f, "BREAKPOINT"), 
-            KeBin => write!(f, "KEBIN"), 
-            ContextSwitch => write!(f, "CONTEXTSWITCH"), 
-            DrqHandling => write!(f, "DRQHANDLING"), 
-            ExRegs => write!(f, "EXREGS"), 
-            ExceptionInvalidHandler => write!(f, "EXCEPTIONINVALIDHANDLER"), 
-            Exceptions => write!(f, "EXCEPTIONS"), 
-            FactoryDelete => write!(f, "FACTORYDELETE"), 
-            IpcGateInvoke => write!(f, "IPCGATEINVOKE"), 
-            IrqObjectTriggers => write!(f, "IRQOBJECTTRIGGERS"), 
-            KobjectCreate => write!(f, "KOBJECTCREATE"), 
-            KobjectDelete => write!(f, "KOBJECTDELETE"), 
-            KobjectDeleteGeneric => write!(f, "KOBJECTDELETEGENERIC"), 
-            KobjectDestroy => write!(f, "KOBJECTDESTROY"), 
-            KobjectNames => write!(f, "KOBJECTNAMES"), 
-            PageFaultInvalidPager => write!(f, "PAGEFAULTINVALIDPAGER"), 
-            RcuCall => write!(f, "RCUCALL"), 
-            RcuCallbacks => write!(f, "RCUCALLBACKS"), 
-            RcuIdle => write!(f, "RCUIDLE"), 
-            SchedulingContextLoad => write!(f, "SCHEDULINGCONTEXTLOAD"), 
-            SchedulingContextSave => write!(f, "SCHEDULINGCONTEXTSAVE"), 
-            TaskMap => write!(f, "TASKMAP"), 
-            TaskUnmap => write!(f, "TASKUNMAP"), 
-            ThreadMigration => write!(f, "THREADMIGRATION"), 
-            TimerIrqsKernelScheduling => write!(f, "TIMERIRQSKERNELSCHEDULING"), 
-            VcpuEvents => write!(f, "VCPUEVENTS"), 
-            VmSvm => write!(f, "VMSVM"), 
-            Hidden => write!(f, "HIDDEN"), 
-        }
-    }
-}
+use num_enum::TryFromPrimitiveError;
 
 #[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 pub enum Event {
@@ -299,4 +146,3 @@ impl From<TryFromPrimitiveError<EventType>> for error::Error {
         error::Error::EventTypeError(err.number)
     }
 }
-

@@ -1,5 +1,5 @@
 use babeltrace2_sys::{ffi, Error, MessageIteratorStatus, SelfMessageIterator};
-use l4re_traceparse::event::EventType;
+use l4re_traceparse::event::event_type::EventType;
 use std::collections::{hash_map, HashMap};
 use std::ffi::{CStr, CString};
 

@@ -1,6 +1,8 @@
 /* Note, automatically generated from Fiasco binary */
 
-use super::*;
+#![allow(unused_imports)]
+use crate::event::common::EventCommon;
+use crate::event::typedefs::*;
 use binrw::BinRead;
 
 //TODO not yet implemented

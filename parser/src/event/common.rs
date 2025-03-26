@@ -1,6 +1,6 @@
 /* Note, automatically generated from Fiasco binary */
 
-use super::*;
+use crate::event::typedefs::*;
 use binrw::BinRead;
 
 #[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]

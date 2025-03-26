@@ -2,7 +2,7 @@ use crate::types::StringCache;
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 use enum_iterator::Sequence;
-use l4re_traceparse::event::EventType;
+use l4re_traceparse::event::event_type::EventType;
 use l4re_traceparse::event::{
     context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent,
     nam::NamEvent, pf::PfEvent,

@@ -337,7 +337,7 @@ class Fiasco_tbuf(gdb.Command):
         if self.mode == "parser":
             self.printlog("/* Note, automatically generated from Fiasco binary */\n")
             self.printlog("\n")
-            self.printlog("use super::*;\n")
+            self.printlog("use crate::event::typedefs::*;\n")
             self.printlog("use binrw::BinRead;\n\n")
             self.print_derive_traits()
             self.printlog("#[br(little)]\n")
@@ -348,7 +348,7 @@ class Fiasco_tbuf(gdb.Command):
             self.printlog("}\n")
             self.printlog("\n")
 
-            self.printlog_write("l4_event.rs")
+            self.printlog_write("common.rs")
 
         # Print structs for individual event types
         for i in sorted(tbentry_types, key=lambda t: t.name):
@@ -362,7 +362,9 @@ class Fiasco_tbuf(gdb.Command):
                 self.events.append(name)
 
                 if self.mode == "parser":
-                    self.printlog("use super::*;\n")
+                    self.printlog("#![allow(unused_imports)]\n")
+                    self.printlog("use crate::event::common::EventCommon;\n")
+                    self.printlog("use crate::event::typedefs::*;\n")
                     self.printlog("use binrw::BinRead;\n\n")
                 else:
                     self.printlog("use crate::types::StringCache;\n")
@@ -385,10 +387,16 @@ class Fiasco_tbuf(gdb.Command):
                     "Missing '%s' in internal knowledge base. Please add." % (i.name)
                 )
 
+        # print EventType enum
+        self.gen_event_type()
+
+        # print Event struct
+        # self.gen_event()
+
         # generate mod.rs
         if self.mode == "parser":
-            self.gen_mod_rs()
-            self.printlog_write("mod.rs")
+            self.gen_typedefs()
+            self.printlog_write("typedefs.rs")
 
     def get_tbentry_classes(self):
         print("Querying Tb_entry types. This might take a while.")
@@ -428,44 +436,58 @@ class Fiasco_tbuf(gdb.Command):
                 "#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
             )
 
-    def gen_mod_rs(self):
+    def gen_event(self):
+        # Event enum
+        self.print_derive_traits()
+        self.printlog("pub enum Event {\n")
+        for event in self.events:
+            self.printlogi(
+                1 * INDENT_SIZE,
+                "%s(%sEvent),\n"
+                % (self.to_camel_case(event), self.to_camel_case(event)),
+            )
+        self.printlog("}\n\n")
+
+        # Event enum impl
+        self.printlog("impl Event {\n")
+        self.printlogi(1 * INDENT_SIZE, "pub fn event_common(&self) -> EventCommon {\n")
+        self.printlogi(2 * INDENT_SIZE, "use Event::*;\n")
+        self.printlogi(2 * INDENT_SIZE, "match self {\n")
+        for event in self.events:
+            self.printlogi(
+                3 * INDENT_SIZE, "%s(e) => e.common,\n" % self.to_camel_case(event)
+            )
+        self.printlogi(2 * INDENT_SIZE, "}\n")
+        self.printlogi(1 * INDENT_SIZE, "}\n")
+        self.printlog("\n")
+        self.printlogi(1 * INDENT_SIZE, "pub fn event_type(&self) -> EventType {\n")
+        self.printlogi(2 * INDENT_SIZE, "use EventType::*;\n")
+        self.printlogi(2 * INDENT_SIZE, "match self {\n")
+        for event in self.events:
+            event = self.to_camel_case(event)
+            if event in self.event_to_num.keys():
+                self.printlogi(
+                    3 * INDENT_SIZE,
+                    "Event::%s(_) => %s,\n" % (event, event),
+                )
+            else:
+                # TODO appropriate event type?
+                self.printlogi(
+                    3 * INDENT_SIZE,
+                    "Event::%s(_) => Unused,\n" % (event),
+                )
+        self.printlogi(2 * INDENT_SIZE, "}\n")
+        self.printlogi(1 * INDENT_SIZE, "}\n")
+        self.printlog("}\n\n")
+
+    def gen_event_type(self):
         self.printlog("/* Note, automatically generated from Fiasco binary */\n")
         self.printlog("\n")
 
-        # mod all events
-        self.printlog("pub mod l4_event;\n")
-        for event in self.events:
-            self.printlog("pub mod %s;\n" % event)
-        self.printlog("\n")
-
-        # use all events
-        for event in self.events:
-            self.printlog(
-                "use crate::event::"
-                + event
-                + "::"
-                + self.to_camel_case(event)
-                + "Event;\n"
-            )
-        self.printlog("\n")
-
-        # other uses
         self.printlog("use core::fmt;\n")
-        self.printlog("use binrw::BinRead;\n\n")
-        self.printlog(
-            "use num_enum::{IntoPrimitive, TryFromPrimitive, TryFromPrimitiveError};"
-        )
-        self.printlog("use crate::error;\n")
-        self.printlog("use l4_event::EventCommon;\n\n")
+        self.printlog("use num_enum::{IntoPrimitive, TryFromPrimitive};\n")
+        self.printlog("\n")
 
-        # typedefs
-        self.printlog("pub type L4Addr = u64;\n")
-        for i in sorted(self.typedefs.keys()):
-            self.printlog("#[allow(non_camel_case_types)]\n")
-            self.printlog("pub type %s = %s;\n" % (i, self.typedefs[i]))
-        self.printlog("\n\n")
-
-        # EventType enum
         self.print_derive_traits
         self.printlog(
             "#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, TryFromPrimitive, IntoPrimitive)]\n"
@@ -491,62 +513,18 @@ class Fiasco_tbuf(gdb.Command):
         self.printlogi(2 * INDENT_SIZE, "}\n")
         self.printlogi(1 * INDENT_SIZE, "}\n")
         self.printlog("}\n\n")
+        self.printlog_write("event_type.rs")
 
-        # Event enum
-        self.print_derive_traits()
-        self.printlog("pub enum Event {\n")
-        for event in self.events:
-            self.printlogi(
-                1 * INDENT_SIZE,
-                "%s(%sEvent),\n"
-                % (self.to_camel_case(event), self.to_camel_case(event)),
-            )
-        self.printlog("}\n\n")
-
-        # Event enum impl
-        self.printlog("impl Event {\n")
-        self.printlogi(1 * INDENT_SIZE, "pub fn event_common(&self) -> EventCommon {\n")
-        self.printlogi(2 * INDENT_SIZE, "use Event::*;\n")
-        self.printlogi(2 * INDENT_SIZE, "match self {\n")
-        for event in self.events:
-            self.printlogi(
-                3 * INDENT_SIZE, "%s(e) => e.common,\n" % self.to_camel_case(event)
-            )
-        self.printlogi(2 * INDENT_SIZE, "}\n")
-        self.printlogi(1 * INDENT_SIZE, "}\n")
+    def gen_typedefs(self):
+        self.printlog("/* Note, automatically generated from Fiasco binary */\n")
         self.printlog("\n")
-        # TODO fix this (i think it would make most sense to just impl the Event by hand as it will only change if events are added or removed but not modified, so there should be seldom changes)
-        self.printlogi(1 * INDENT_SIZE, "pub fn event_type(&self) -> EventType {\n")
-        self.printlogi(2 * INDENT_SIZE, "use EventType::*;\n")
-        self.printlogi(2 * INDENT_SIZE, "match self {\n")
-        for event in self.events:
-            event = self.to_camel_case(event)
-            if event in self.event_to_num.keys():
-                self.printlogi(
-                    3 * INDENT_SIZE,
-                    "Event::%s(_) => %s,\n" % (event, event),
-                )
-            else:
-                # TODO appropriate event type?
-                self.printlogi(
-                    3 * INDENT_SIZE,
-                    "Event::%s(_) => Unused,\n" % (event),
-                )
-        self.printlogi(2 * INDENT_SIZE, "}\n")
-        self.printlogi(1 * INDENT_SIZE, "}\n")
-        self.printlog("}\n\n")
 
-        # error conversion
-        self.printlog(
-            "impl From<TryFromPrimitiveError<EventType>> for error::Error {\n"
-        )
-        self.printlogi(
-            1 * INDENT_SIZE,
-            "fn from(err: TryFromPrimitiveError<EventType>) -> Self {\n",
-        )
-        self.printlogi(2 * INDENT_SIZE, "error::Error::EventTypeError(err.number)\n")
-        self.printlogi(1 * INDENT_SIZE, "}\n")
-        self.printlog("}\n\n")
+        # typedefs
+        self.printlog("pub type L4Addr = u64;\n")
+        for i in sorted(self.typedefs.keys()):
+            self.printlog("#[allow(non_camel_case_types)]\n")
+            self.printlog("pub type %s = %s;\n" % (i, self.typedefs[i]))
+        self.printlog("\n\n")
 
     def invoke(self, argument, from_tty):
         argv = gdb.string_to_argv(argument)
