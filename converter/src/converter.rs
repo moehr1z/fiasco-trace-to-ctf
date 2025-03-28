@@ -3,31 +3,24 @@
 use crate::interruptor::Interruptor;
 use crate::opts::Opts;
 use crate::plugin::{TrcPlugin, TrcPluginState};
-use crate::{convert::TrcCtfConverter, types::BorrowedCtfState};
 use babeltrace2_sys::{
-    ffi, source_plugin_descriptors, BtResult, BtResultExt, CtfPluginSinkFsInitParams,
-    EncoderPipeline, Error, LoggingLevel, MessageIteratorStatus, Plugin, RunStatus, SelfComponent,
-    SelfMessageIterator, SourcePluginDescriptor, SourcePluginHandler,
+    CtfPluginSinkFsInitParams, EncoderPipeline, LoggingLevel, RunStatus, SourcePluginHandler,
 };
-use chrono::prelude::{DateTime, Utc};
-use clap::Parser;
-use l4re_traceparse::{event::Event, parser::EventParser};
-use std::io::Cursor;
-use std::{
-    ffi::{CStr, CString},
-    fs::File,
-    io::BufReader,
-    path::PathBuf,
-    ptr,
-};
-use tracing::{debug, error, info, warn};
+use l4re_traceparse::event::typedefs::L4Addr;
+use l4re_traceparse::event::Event;
+use std::collections::HashMap;
+use std::ffi::{CStr, CString};
+use tracing::debug;
 
 pub struct Converter {
     pipeline: EncoderPipeline,
 }
 
 impl Converter {
-    pub fn new(events: Vec<Event>) -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn new(
+        events: Vec<Event>,
+        name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
         let opts = Opts {
             clock_name: "monotonic".to_string(),
             trace_name: "l4re".to_string(),
@@ -65,7 +58,7 @@ impl Converter {
         )?;
 
         let state_inner: Box<dyn SourcePluginHandler> =
-            Box::new(TrcPluginState::new(intr, events, &opts)?);
+            Box::new(TrcPluginState::new(intr, events, &opts, name_db)?);
         let state = Box::new(state_inner);
 
         let mut pipeline = EncoderPipeline::new::<TrcPlugin>(opts.log_level, state, &params)?;

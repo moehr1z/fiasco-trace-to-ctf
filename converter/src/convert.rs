@@ -3,6 +3,7 @@ use crate::types::{BorrowedCtfState, StringCache};
 use babeltrace2_sys::{ffi, BtResultExt, Error};
 use l4re_traceparse::event::common::EventCommon;
 use l4re_traceparse::event::event_type::EventType;
+use l4re_traceparse::event::typedefs::L4Addr;
 use l4re_traceparse::event::Event;
 use std::collections::{hash_map::Entry, HashMap};
 use std::ptr;
@@ -17,7 +18,7 @@ pub struct TrcCtfConverter {
     sched_wakeup_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: HashMap<u64, String>,
+    name_map: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
 }
 
 impl Drop for TrcCtfConverter {
@@ -37,7 +38,7 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new() -> Self {
+    pub fn new(name_map: HashMap<L4Addr, Vec<(String, Option<u64>)>>) -> Self {
         Self {
             unknown_event_class: ptr::null_mut(),
             user_event_class: ptr::null_mut(),
@@ -47,7 +48,7 @@ impl TrcCtfConverter {
             sched_wakeup_event_class: ptr::null_mut(),
             event_classes: Default::default(),
             string_cache: Default::default(),
-            name_map: HashMap::new(),
+            name_map,
         }
     }
 
@@ -235,8 +236,7 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_id, event_common, ctf_event)?;
-                Nam::try_from((ev, &mut self.string_cache, &mut self.name_map))?
-                    .emit_event(ctf_event)?;
+                Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::Pf(ev) => {

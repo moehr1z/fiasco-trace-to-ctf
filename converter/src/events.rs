@@ -3,6 +3,7 @@ use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 use enum_iterator::Sequence;
 use l4re_traceparse::event::event_type::EventType;
+use l4re_traceparse::event::typedefs::L4Addr;
 use l4re_traceparse::event::{
     context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent,
     nam::NamEvent, pf::PfEvent,
@@ -68,23 +69,17 @@ pub struct Nam<'a> {
     pub name: &'a CStr,
 }
 
-impl<'a> TryFrom<(NamEvent, &'a mut StringCache, &'a mut HashMap<u64, String>)> for Nam<'a> {
+impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
     type Error = Error;
 
-    fn try_from(
-        value: (NamEvent, &'a mut StringCache, &'a mut HashMap<u64, String>),
-    ) -> Result<Self, Self::Error> {
+    fn try_from(value: (NamEvent, &'a mut StringCache)) -> Result<Self, Self::Error> {
         let event = value.0;
         let cache = value.1;
-        let name_map = value.2;
 
         let bind = &event.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
         let name = str::from_utf8(&bind)?;
         let name = name.replace('\0', "");
         cache.insert_str(&name)?;
-        if name != "" {
-            name_map.insert(event.obj, name.clone());
-        }
 
         Ok(Self {
             obj: event.obj,
@@ -181,7 +176,7 @@ impl<'a>
         EventType,
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut HashMap<u64, String>,
+        &'a mut HashMap<L4Addr, Vec<(String, Option<u64>)>>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -192,25 +187,39 @@ impl<'a>
             EventType,
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut HashMap<u64, String>,
+            &'a mut HashMap<L4Addr, Vec<(String, Option<u64>)>>,
         ),
     ) -> Result<Self, Self::Error> {
         let event_type = value.0;
         let event = value.1;
+        let ts = event.common.tsc;
         let cache = value.2;
         let name_map = value.3;
 
         let src = event.from_sched;
         let dst = event.dst;
 
+        let src = src & 0xFFFFFFFFFFFFF000; // TODO
+        let dst = dst & 0xFFFFFFFFFFFFF000; // TODO
+
         let mut prev_comm = src.to_string();
         if let Some(s) = name_map.get(&src) {
-            prev_comm = s.to_string();
+            for (name, valid_until) in s {
+                if valid_until.is_none() || ts < valid_until.unwrap() {
+                    prev_comm = name.clone();
+                    break;
+                }
+            }
         }
 
         let mut next_comm = dst.to_string();
         if let Some(d) = name_map.get(&dst) {
-            next_comm = d.to_string();
+            for (name, valid_until) in d {
+                if valid_until.is_none() || ts < valid_until.unwrap() {
+                    next_comm = name.clone();
+                    break;
+                }
+            }
         }
 
         cache.insert_type(event_type)?;

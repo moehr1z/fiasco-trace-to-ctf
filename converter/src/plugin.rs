@@ -8,7 +8,9 @@ use babeltrace2_sys::{
 };
 use chrono::prelude::{DateTime, Utc};
 use clap::Parser;
+use l4re_traceparse::event::typedefs::L4Addr;
 use l4re_traceparse::{event::Event, parser::EventParser};
+use std::collections::HashMap;
 use std::io::Cursor;
 use std::{
     ffi::{CStr, CString},
@@ -36,7 +38,12 @@ pub struct TrcPluginState {
 }
 
 impl TrcPluginState {
-    pub fn new(interruptor: Interruptor, events: Vec<Event>, opts: &Opts) -> Result<Self, Error> {
+    pub fn new(
+        interruptor: Interruptor,
+        events: Vec<Event>,
+        opts: &Opts,
+        name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+    ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
         let input_file_name = CString::new(opts.input.file_name().unwrap().to_str().unwrap())?;
@@ -54,7 +61,7 @@ impl TrcPluginState {
             // NOTE: timestamp/event trackers get re-initialized on the first event
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
-            converter: TrcCtfConverter::new(),
+            converter: TrcCtfConverter::new(name_db),
         })
     }
 
