@@ -1,7 +1,9 @@
+use core::str;
 use l4re_traceconv::converter::Converter;
-use l4re_traceparse::event::Event;
+use l4re_traceparse::event::{Event, typedefs::L4Addr};
 use l4re_traceparse::parser::EventParser;
 use std::{
+    collections::HashMap,
     io::{Cursor, Read},
     net::TcpListener,
 };
@@ -36,9 +38,63 @@ fn main() {
     // Sort
     events.sort_by_key(|e| e.event_common().tsc);
 
-    // TODO in the converter keep a mapping db
+    // create mapping DB of pointer -> name, timestamp until valid
+    let mut name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>> = HashMap::new(); // vector of entries because you could reassign a pointer or rename the object
+    for e in &events {
+        let ts = e.event_common().tsc;
+
+        // TODO are these all relevant events?
+        match e {
+            Event::Nam(ev) => {
+                let addr = ev.obj;
+                let addr = addr & 0xFFFFFFFFFFFFF000; // TODO somehow the last 3 bits of ctx are always 0, look up why
+
+                let entry = name_db.get_mut(&addr);
+
+                let bind = &ev.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
+                let name = str::from_utf8(bind).unwrap(); // TODO error handling
+                let name = name.replace('\0', "");
+                if name.is_empty() {
+                    continue;
+                }
+
+                match entry {
+                    None => {
+                        name_db.insert(addr, vec![(name, None)]);
+                    }
+                    Some(entry) => {
+                        // there already were some names for this pointer
+                        for e in &mut *entry {
+                            // the pointer was renamed so the prev name is only valid until the time of rename
+                            if e.1.is_none() {
+                                e.1 = Some(ts);
+                            }
+                        }
+                        entry.push((name, None));
+                    }
+                }
+            }
+            Event::Destroy(ev) => {
+                let addr = ev.obj;
+                let entry = name_db.get_mut(&addr);
+
+                // if it is none, some unnamed object was destroyed, so we don't care
+                if let Some(entry) = entry {
+                    for e in &mut *entry {
+                        // deleting the objects invalidates its name at time of deletion
+                        if e.1.is_none() {
+                            e.1 = Some(ts);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+
+    println!("{:?}", name_db);
 
     // Convert to CTF
-    let mut converter = Converter::new(events).unwrap();
+    let mut converter = Converter::new(events, name_db).unwrap();
     converter.convert().unwrap();
 }
