@@ -1,7 +1,11 @@
+mod converter;
+mod parser;
+
+use converter::converter::Converter;
 use core::str;
-use l4re_traceconv::converter::Converter;
-use l4re_traceparse::event::{Event, typedefs::L4Addr};
-use l4re_traceparse::parser::EventParser;
+use parser::event::{Event, typedefs::L4Addr};
+use parser::parser::EventParser;
+use std::collections::VecDeque;
 use std::{
     collections::HashMap,
     io::{Cursor, Read},
@@ -11,7 +15,7 @@ use std::{
 fn main() {
     let listener = TcpListener::bind("0.0.0.0:8888").unwrap();
     let mut events_bytes: Vec<u8> = Vec::new();
-    let mut events: Vec<Event> = Vec::new();
+    let mut events: VecDeque<Event> = VecDeque::new();
 
     match listener.accept() {
         Ok((mut stream, _addr)) => {
@@ -29,14 +33,14 @@ fn main() {
     loop {
         let event = EventParser::next_event(&mut reader).unwrap();
         if let Some(e) = event {
-            events.push(e)
+            events.push_back(e)
         } else {
             break;
         }
     }
 
     // Sort
-    events.sort_by_key(|e| e.event_common().tsc);
+    // events.sort_by_key(|e| e.event_common().tsc);
 
     // create mapping DB of pointer -> name, timestamp until valid
     let mut name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>> = HashMap::new(); // vector of entries because you could reassign a pointer or rename the object

@@ -4,5 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-l4re_traceconv = { path = "./converter" }
-l4re_traceparse = { path = "./parser" }
+ctf-macros = { path = "src/macros" }
+clap = { version = "4.5", features = ["derive", "env", "color"] }
+ctrlc = { version = "3.4", features = ["termination"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+enum-iterator = "2.1"
+chrono = "0.4"
+babeltrace2-sys = { git = "https://github.com/auxoncorp/babeltrace2-sys.git", branch = "src-component-support" }
+byteorder = "1.5.0"
+thiserror = "2.0.11"
+num_enum = "0.7.3"
+binrw = "0.14.1"

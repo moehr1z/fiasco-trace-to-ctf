@@ -150,7 +150,7 @@ class Fiasco_tbuf(gdb.Command):
         self.printlog_buf_current = section
 
     def printlog_write(self, file):
-        dir = "../parser/src/event"
+        dir = "../src/parser/event"
         os.makedirs(dir, exist_ok=True)
 
         with open(dir + "/" + file, "w") as f:
@@ -337,7 +337,7 @@ class Fiasco_tbuf(gdb.Command):
         if self.mode == "parser":
             self.printlog("/* Note, automatically generated from Fiasco binary */\n")
             self.printlog("\n")
-            self.printlog("use crate::event::typedefs::*;\n")
+            self.printlog("use super::typedefs::*;\n")
             self.printlog("use binrw::BinRead;\n\n")
             self.print_derive_traits()
             self.printlog("#[br(little)]\n")
@@ -363,10 +363,11 @@ class Fiasco_tbuf(gdb.Command):
 
                 if self.mode == "parser":
                     self.printlog("#![allow(unused_imports)]\n")
-                    self.printlog("use crate::event::common::EventCommon;\n")
-                    self.printlog("use crate::event::typedefs::*;\n")
+                    self.printlog("use super::common::EventCommon;\n")
+                    self.printlog("use super::typedefs::*;\n")
                     self.printlog("use binrw::BinRead;\n\n")
                 else:
+                    # TODO traceparse imports
                     self.printlog("use crate::types::StringCache;\n")
                     self.printlog("use babeltrace2_sys::Error;\n")
                     self.printlog("use ctf_macros::CtfEventClass;\n")
