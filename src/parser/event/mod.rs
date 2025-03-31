@@ -143,6 +143,6 @@ impl Event {
 
 impl From<TryFromPrimitiveError<EventType>> for error::Error {
     fn from(err: TryFromPrimitiveError<EventType>) -> Self {
-        error::Error::EventTypeError(err.number)
+        error::Error::EventType(err.number)
     }
 }

@@ -15,6 +15,7 @@ use std::str;
 
 // TODO - any way to use serde-reflection to synthesize these?
 
+#[allow(dead_code)] // TODO
 #[derive(CtfEventClass)]
 #[event_name = "FACTORY"]
 pub struct Factory {
@@ -39,6 +40,7 @@ impl TryFrom<FactoryEvent> for Factory {
     }
 }
 
+#[allow(dead_code)] // TODO
 #[derive(CtfEventClass)]
 #[event_name = "DESTROY"]
 pub struct Destroy {
@@ -77,7 +79,7 @@ impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
         let cache = value.1;
 
         let bind = &event.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
-        let name = str::from_utf8(&bind)?;
+        let name = str::from_utf8(bind)?;
         let name = name.replace('\0', "");
         cache.insert_str(&name)?;
 
@@ -135,22 +137,21 @@ pub enum TaskState {
 
 impl TaskState {
     fn as_ffi(&self) -> *const i8 {
-        let ptr = match self {
-            TaskState::Running => b"TASK_RUNNING\0".as_ptr(),
-            TaskState::Interruptible => b"TASK_INTERRUPTIBLE\0".as_ptr(),
-            TaskState::UnInterruptible => b"TASK_UNINTERRUPTIBLE\0".as_ptr(),
-            TaskState::Stopped => b"TASK_STOPPED\0".as_ptr(),
-            TaskState::Traced => b"TASK_TRACED\0".as_ptr(),
-            TaskState::ExitDead => b"EXIT_DEAD\0".as_ptr(),
-            TaskState::ExitZombie => b"EXIT_ZOMBIE\0".as_ptr(),
-            TaskState::Parked => b"TASK_PARKED\0".as_ptr(),
-            TaskState::Dead => b"TASK_DEAD\0".as_ptr(),
-            TaskState::WakeKill => b"TASK_WAKEKILL\0".as_ptr(),
-            TaskState::Waking => b"TASK_WAKING\0".as_ptr(),
-            TaskState::NoLoad => b"TASK_NOLOAD\0".as_ptr(),
-            TaskState::New => b"TASK_NEW\0".as_ptr(),
-        };
-        ptr as *const i8
+        match self {
+            TaskState::Running => c"TASK_RUNNING".as_ptr(),
+            TaskState::Interruptible => c"TASK_INTERRUPTIBLE".as_ptr(),
+            TaskState::UnInterruptible => c"TASK_UNINTERRUPTIBLE".as_ptr(),
+            TaskState::Stopped => c"TASK_STOPPED".as_ptr(),
+            TaskState::Traced => c"TASK_TRACED".as_ptr(),
+            TaskState::ExitDead => c"EXIT_DEAD".as_ptr(),
+            TaskState::ExitZombie => c"EXIT_ZOMBIE".as_ptr(),
+            TaskState::Parked => c"TASK_PARKED".as_ptr(),
+            TaskState::Dead => c"TASK_DEAD".as_ptr(),
+            TaskState::WakeKill => c"TASK_WAKEKILL".as_ptr(),
+            TaskState::Waking => c"TASK_WAKING".as_ptr(),
+            TaskState::NoLoad => c"TASK_NOLOAD".as_ptr(),
+            TaskState::New => c"TASK_NEW".as_ptr(),
+        }
     }
 
     fn as_i64(&self) -> i64 {

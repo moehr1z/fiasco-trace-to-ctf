@@ -1,22 +1,6 @@
-use super::interruptor::Interruptor;
-use super::plugin::{TrcPlugin, TrcPluginState};
-use super::{convert::TrcCtfConverter, types::BorrowedCtfState};
-use crate::parser::{event::Event, parser::EventParser};
-use babeltrace2_sys::{
-    BtResult, BtResultExt, CtfPluginSinkFsInitParams, EncoderPipeline, Error, LoggingLevel,
-    MessageIteratorStatus, Plugin, RunStatus, SelfComponent, SelfMessageIterator,
-    SourcePluginDescriptor, SourcePluginHandler, ffi, source_plugin_descriptors,
-};
-use chrono::prelude::{DateTime, Utc};
+use babeltrace2_sys::LoggingLevel;
 use clap::Parser;
-use std::{
-    ffi::{CStr, CString},
-    fs::File,
-    io::BufReader,
-    path::PathBuf,
-    ptr,
-};
-use tracing::{debug, error, info, warn};
+use std::path::PathBuf;
 
 /// Convert FreeRTOS trace-recorder traces to CTF
 #[derive(Parser, Debug, Clone)]

@@ -1,10 +1,10 @@
 mod converter;
 mod parser;
 
-use converter::converter::Converter;
+use converter::Converter;
 use core::str;
+use parser::EventParser;
 use parser::event::{Event, typedefs::L4Addr};
-use parser::parser::EventParser;
 use std::collections::VecDeque;
 use std::{
     collections::HashMap,

@@ -68,7 +68,7 @@ impl TrcCtfConverter {
         );
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"id\0".as_ptr() as _,
+                c"id".as_ptr() as _,
                 event_id_field,
             );
             ret.capi_result()?;
@@ -76,7 +76,7 @@ impl TrcCtfConverter {
             let event_count_field = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"event_count\0".as_ptr() as _,
+                c"event_count".as_ptr() as _,
                 event_count_field,
             );
             ret.capi_result()?;
@@ -88,7 +88,7 @@ impl TrcCtfConverter {
         );
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"ip\0".as_ptr() as _,
+                c"ip".as_ptr() as _,
                 event_ip_field,
             );
             ret.capi_result()?;
@@ -96,7 +96,7 @@ impl TrcCtfConverter {
             let timer_field = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"timer\0".as_ptr() as _,
+                c"timer".as_ptr() as _,
                 timer_field,
             );
             ret.capi_result()?;
@@ -108,7 +108,7 @@ impl TrcCtfConverter {
         );
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"ctx\0".as_ptr() as _,
+                c"ctx".as_ptr() as _,
                 event_ctx_field,
             );
             ret.capi_result()?;
@@ -116,7 +116,7 @@ impl TrcCtfConverter {
             let event_pmc1_field = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"pmc1\0".as_ptr() as _,
+                c"pmc1".as_ptr() as _,
                 event_pmc1_field,
             );
             ret.capi_result()?;
@@ -124,7 +124,7 @@ impl TrcCtfConverter {
             let event_pmc2_field = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"pmc2\0".as_ptr() as _,
+                c"pmc2".as_ptr() as _,
                 event_pmc2_field,
             );
             ret.capi_result()?;
@@ -132,7 +132,7 @@ impl TrcCtfConverter {
             let event_kclock_field = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 base_event_context,
-                b"kclock\0".as_ptr() as _,
+                c"kclock".as_ptr() as _,
                 event_kclock_field,
             );
             ret.capi_result()?;

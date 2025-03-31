@@ -19,7 +19,6 @@ use tracing::debug;
 pub struct TrcPluginState {
     interruptor: Interruptor,
     events: VecDeque<Event>,
-    event_idx: usize,
     clock_name: CString,
     trace_name: CString,
     input_file_name: CString,
@@ -45,7 +44,6 @@ impl TrcPluginState {
         Ok(Self {
             interruptor,
             events,
-            event_idx: 0,
             clock_name,
             trace_name,
             input_file_name,
@@ -58,10 +56,6 @@ impl TrcPluginState {
             packet: ptr::null_mut(),
             converter: TrcCtfConverter::new(name_db),
         })
-    }
-
-    pub fn close_stream(&mut self) {
-        self.stream_is_open = false;
     }
 
     pub fn create_metadata_and_stream_objects(
@@ -115,7 +109,7 @@ impl TrcPluginState {
             let cpu_id_fc = ffi::bt_field_class_integer_unsigned_create(trace_class);
             let ret = ffi::bt_field_class_structure_append_member(
                 packet_context_fc,
-                b"cpu_id\0".as_ptr() as _,
+                c"cpu_id".as_ptr() as _,
                 cpu_id_fc,
             );
             ret.capi_result()?;
@@ -149,20 +143,20 @@ impl TrcPluginState {
             let trace = ffi::bt_stream_borrow_trace(self.stream);
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"hostname\0".as_ptr() as _,
-                b"l4re_trace\0".as_ptr() as _,
+                c"hostname".as_ptr() as _,
+                c"l4re_trace".as_ptr() as _,
             );
             ret.capi_result()?;
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"domain\0".as_ptr() as _,
-                b"kernel\0".as_ptr() as _,
+                c"domain".as_ptr() as _,
+                c"kernel".as_ptr() as _,
             );
             ret.capi_result()?;
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"tracer_name\0".as_ptr() as _,
-                b"lttng-modules\0".as_ptr() as _,
+                c"tracer_name".as_ptr() as _,
+                c"lttng-modules".as_ptr() as _,
             );
             ret.capi_result()?;
             // TODO
@@ -203,7 +197,7 @@ impl TrcPluginState {
             // ret.capi_result()?;
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"input_file\0".as_ptr() as _,
+                c"input_file".as_ptr() as _,
                 self.input_file_name.as_c_str().as_ptr(),
             );
             ret.capi_result()?;
@@ -213,14 +207,14 @@ impl TrcPluginState {
             ))?;
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"trace_creation_datetime\0".as_ptr() as _,
+                c"trace_creation_datetime".as_ptr() as _,
                 val.as_c_str().as_ptr(),
             );
             ret.capi_result()?;
             let val = CString::new(format!("{}", self.trace_creation_time))?;
             let ret = ffi::bt_trace_set_environment_entry_string(
                 trace,
-                b"trace_creation_datetime_utc\0".as_ptr() as _,
+                c"trace_creation_datetime_utc".as_ptr() as _,
                 val.as_c_str().as_ptr(),
             );
             ret.capi_result()?;
