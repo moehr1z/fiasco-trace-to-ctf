@@ -15,6 +15,9 @@ use opts::Opts;
 use plugin::{TrcPlugin, TrcPluginState};
 use std::collections::{HashMap, VecDeque};
 use std::ffi::CString;
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
 use tracing::debug;
 
 pub struct Converter {
@@ -23,8 +26,9 @@ pub struct Converter {
 
 impl Converter {
     pub fn new(
-        events: VecDeque<Event>,
+        events: Arc<Mutex<VecDeque<Event>>>,
         name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+        eof_signal: Arc<AtomicBool>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let opts = Opts {
             clock_name: "monotonic".to_string(),
@@ -62,8 +66,9 @@ impl Converter {
             &output_path,
         )?;
 
-        let state_inner: Box<dyn SourcePluginHandler> =
-            Box::new(TrcPluginState::new(intr, events, &opts, name_db)?);
+        let state_inner: Box<dyn SourcePluginHandler> = Box::new(TrcPluginState::new(
+            intr, events, &opts, name_db, eof_signal,
+        )?);
         let state = Box::new(state_inner);
 
         let pipeline = EncoderPipeline::new::<TrcPlugin>(opts.log_level, state, &params)?;
@@ -78,6 +83,11 @@ impl Converter {
                 break;
             }
         }
+        Ok(())
+    }
+
+    pub fn convert_once(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        self.pipeline.graph.run_once()?;
         Ok(())
     }
 }

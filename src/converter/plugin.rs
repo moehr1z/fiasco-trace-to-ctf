@@ -10,6 +10,9 @@ use babeltrace2_sys::{
 };
 use chrono::prelude::{DateTime, Utc};
 use std::collections::{HashMap, VecDeque};
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::Relaxed;
+use std::sync::{Arc, Mutex};
 use std::{
     ffi::{CStr, CString},
     ptr,
@@ -18,13 +21,13 @@ use tracing::debug;
 
 pub struct TrcPluginState {
     interruptor: Interruptor,
-    events: VecDeque<Event>,
+    events: Arc<Mutex<VecDeque<Event>>>,
     clock_name: CString,
     trace_name: CString,
     input_file_name: CString,
     trace_creation_time: DateTime<Utc>,
     first_event_observed: bool,
-    eof_reached: bool,
+    eof_reached: Arc<AtomicBool>,
     stream_is_open: bool,
     stream: *mut ffi::bt_stream,
     packet: *mut ffi::bt_packet,
@@ -34,9 +37,10 @@ pub struct TrcPluginState {
 impl TrcPluginState {
     pub fn new(
         interruptor: Interruptor,
-        events: VecDeque<Event>,
+        events: Arc<Mutex<VecDeque<Event>>>,
         opts: &Opts,
         name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+        eof_signal: Arc<AtomicBool>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
@@ -49,7 +53,7 @@ impl TrcPluginState {
             input_file_name,
             trace_creation_time: Utc::now(),
             first_event_observed: false,
-            eof_reached: false,
+            eof_reached: eof_signal,
             stream_is_open: false,
             // NOTE: timestamp/event trackers get re-initialized on the first event
             stream: ptr::null_mut(),
@@ -239,7 +243,8 @@ impl TrcPluginState {
     }
 
     pub fn read_event(&mut self) -> Result<Option<Event>, Error> {
-        if let Some(event) = self.events.pop_front() {
+        let mut events = self.events.lock().unwrap(); // TODO error handling
+        if let Some(event) = events.pop_front() {
             Ok(Some(event))
         } else {
             Ok(None)
@@ -295,9 +300,9 @@ impl SourcePluginHandler for TrcPluginState {
 
         let mut ctf_state = BorrowedCtfState::new(self.stream, self.packet, msg_iter, messages);
 
-        if self.interruptor.is_set() & !self.eof_reached {
+        if self.interruptor.is_set() & !self.eof_reached.load(Relaxed) {
             debug!("Early shutdown");
-            self.eof_reached = true;
+            self.eof_reached.store(true, Relaxed);
 
             // Add packet end message
             let msg = unsafe {
@@ -345,15 +350,12 @@ impl SourcePluginHandler for TrcPluginState {
                 Ok(ctf_state.release())
             }
             None => {
-                if self.stream_is_open {
-                    // Trace restart condition
-                    Ok(MessageIteratorStatus::NoMessages)
-                } else if self.eof_reached {
+                if !self.stream_is_open && self.first_event_observed {
                     // Last iteration can't have messages
                     Ok(MessageIteratorStatus::Done)
-                } else {
+                } else if self.eof_reached.load(Relaxed) {
                     debug!("End of file reached");
-                    self.eof_reached = true;
+                    self.eof_reached.store(true, Relaxed);
 
                     // Add packet end message
                     let msg = unsafe {
@@ -367,7 +369,11 @@ impl SourcePluginHandler for TrcPluginState {
                     };
                     ctf_state.push_message(msg)?;
 
+                    self.stream_is_open = false;
+
                     Ok(ctf_state.release())
+                } else {
+                    Ok(MessageIteratorStatus::NoMessages)
                 }
             }
         }

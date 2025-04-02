@@ -3,102 +3,191 @@ mod parser;
 
 use converter::Converter;
 use core::str;
+use log::warn;
+use log::{debug, error, info};
 use parser::EventParser;
-use parser::event::{Event, typedefs::L4Addr};
+use parser::event::Event;
 use std::collections::VecDeque;
-use std::{
-    collections::HashMap,
-    io::{Cursor, Read},
-    net::TcpListener,
-};
+use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::Ordering::Relaxed;
+use std::{collections::HashMap, io::Cursor};
+use tokio::io::{AsyncReadExt, BufReader};
+use tokio::net::TcpListener;
+use tokio::sync::mpsc;
+use tokio::{join, task};
 
-fn main() {
-    let listener = TcpListener::bind("0.0.0.0:8888").unwrap();
-    let mut events_bytes: Vec<u8> = Vec::new();
-    let mut events: VecDeque<Event> = VecDeque::new();
+const IP_ADDRESS: &str = "0.0.0.0:8888";
 
-    match listener.accept() {
-        Ok((mut stream, _addr)) => {
-            let mut buf: [u8; 128] = [0; 128];
+#[tokio::main]
+async fn main() {
+    env_logger::init();
 
-            while stream.read(&mut buf).unwrap() != 0 {
-                events_bytes.append(&mut buf.to_vec());
+    // network -> parser
+    let (net_tx, mut parser_rx) = mpsc::channel(32);
+    // parser -> converter
+    let (parser_tx, mut converter_rx) = mpsc::channel::<Event>(32);
+    // converter -> filesystem
+    //           -> live session
+    // let (converter_tx, mut fs_rx) = broadcast::channel(32);
+    // let live_rx = fs_rx.clone();
+
+    let event_buf: Arc<Mutex<VecDeque<Event>>> = Arc::new(Mutex::new(VecDeque::new()));
+
+    // TODO error handling
+    // TODO name mapping
+
+    // Receive the event bytes from the network and pass them to the parser
+    let network_handle = task::spawn(async move {
+        info!("Listening on {}", IP_ADDRESS);
+        let listener = TcpListener::bind(IP_ADDRESS).await.unwrap();
+        match listener.accept().await {
+            Ok((stream, addr)) => {
+                info!("Accepted connection from {:?}", addr);
+                let mut reader = BufReader::new(stream);
+                let mut buf: [u8; 128] = [0; 128];
+
+                while reader.read_exact(&mut buf).await.is_ok() {
+                    net_tx.send(buf).await.unwrap();
+                    debug!("Read and sent event bytes");
+                }
+            }
+            Err(e) => error!("Error accepting TCP connection ({:?})", e),
+        }
+    });
+
+    // Parse the event bytes and pass the to the converter
+    let event_buf_c = event_buf.clone();
+    let parser_handle = task::spawn(async move {
+        let mut first_event_observed = false;
+        let mut biggest_event_num: u64 = 0;
+
+        while let Some(event_bytes) = parser_rx.recv().await {
+            debug!("Received event bytes");
+            let mut reader = Cursor::new(event_bytes);
+            let event = EventParser::next_event(&mut reader);
+            match event {
+                Ok(event) => {
+                    if let Some(e) = event {
+                        let event_number = e.event_common().number;
+                        if event_number > biggest_event_num || !first_event_observed {
+                            biggest_event_num = event_number;
+                            first_event_observed = true;
+                            parser_tx.send(e).await.unwrap();
+                            debug!("Parsed and sent event");
+                        } else {
+                            // TODO this should somehow be handled instead of just dropping it, but
+                            // i believe the best way is to prevent it in the first place with a
+                            // buffer redesign
+                            debug!("Found duplicate/out of order event");
+                        }
+                    }
+                }
+                Err(e) => {
+                    warn!("Could not parse event ({:?})", e);
+                }
             }
         }
-        Err(e) => println!("Error accepting TCP connection ({:?})", e),
-    }
+    });
 
-    // Parse
-    let mut reader = Cursor::new(events_bytes);
-    loop {
-        let event = EventParser::next_event(&mut reader).unwrap();
-        if let Some(e) = event {
-            events.push_back(e)
-        } else {
-            break;
-        }
-    }
+    // Convert the events to CTF and pass the to the disk writer and live streamer
+    let local = task::LocalSet::new();
+    local
+        .run_until(async move {
+            let eof_signal = Arc::new(AtomicBool::new(false));
+            let mut conv =
+                Converter::new(event_buf.clone(), HashMap::new(), eof_signal.clone()).unwrap();
+            let _ = task::spawn_local(async move {
+                while let Some(event) = converter_rx.recv().await {
+                    debug!("Received event");
+                    {
+                        let mut event_buf = event_buf_c.lock().unwrap();
+                        event_buf.push_back(event);
+                    }
+                    debug!("Trying to convert event...");
+                    match conv.convert_once() {
+                        Ok(_) => debug!("Succesfully converted event"),
+                        Err(e) => error!("Error converting event ({:?})", e),
+                    }
+                }
+
+                // TODO read converter output and send to live and file system
+
+                // this should close the converter stream
+                debug!("Closing converter stream...");
+                eof_signal.store(true, Relaxed);
+                match conv.convert() {
+                    Ok(_) => debug!("Succesfully closed converter stream"),
+                    Err(e) => error!("Error closing converter stream ({:?})", e),
+                }
+            })
+            .await;
+        })
+        .await;
+
+    let _ = join!(network_handle, parser_handle);
+
+    //
+    // let converter = task::spawn_blocking(move || {
+    //     let mut converter = Converter::new(event_buf, HashMap::new()).unwrap();
+    //     converter.convert().unwrap();
+    // });
 
     // Sort
     // events.sort_by_key(|e| e.event_common().tsc);
 
     // create mapping DB of pointer -> name, timestamp until valid
-    let mut name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>> = HashMap::new(); // vector of entries because you could reassign a pointer or rename the object
-    for e in &events {
-        let ts = e.event_common().tsc;
-
-        // TODO are these all relevant events?
-        match e {
-            Event::Nam(ev) => {
-                let addr = ev.obj;
-                let addr = addr & 0xFFFFFFFFFFFFF000; // TODO somehow the last 3 bits of ctx are always 0, look up why
-
-                let entry = name_db.get_mut(&addr);
-
-                let bind = &ev.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
-                let name = str::from_utf8(bind).unwrap(); // TODO error handling
-                let name = name.replace('\0', "");
-                if name.is_empty() {
-                    continue;
-                }
-
-                match entry {
-                    None => {
-                        name_db.insert(addr, vec![(name, None)]);
-                    }
-                    Some(entry) => {
-                        // there already were some names for this pointer
-                        for e in &mut *entry {
-                            // the pointer was renamed so the prev name is only valid until the time of rename
-                            if e.1.is_none() {
-                                e.1 = Some(ts);
-                            }
-                        }
-                        entry.push((name, None));
-                    }
-                }
-            }
-            Event::Destroy(ev) => {
-                let addr = ev.obj;
-                let entry = name_db.get_mut(&addr);
-
-                // if it is none, some unnamed object was destroyed, so we don't care
-                if let Some(entry) = entry {
-                    for e in &mut *entry {
-                        // deleting the objects invalidates its name at time of deletion
-                        if e.1.is_none() {
-                            e.1 = Some(ts);
-                        }
-                    }
-                }
-            }
-            _ => {}
-        }
-    }
-
-    println!("{:?}", name_db);
-
-    // Convert to CTF
-    let mut converter = Converter::new(events, name_db).unwrap();
-    converter.convert().unwrap();
+    // let mut name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>> = HashMap::new(); // vector of entries because you could reassign a pointer or rename the object
+    // for e in &events {
+    //     let ts = e.event_common().tsc;
+    //
+    //     // TODO are these all relevant events?
+    //     match e {
+    //         Event::Nam(ev) => {
+    //             let addr = ev.obj;
+    //             let addr = addr & 0xFFFFFFFFFFFFF000; // TODO somehow the last 3 bits of ctx are always 0, look up why
+    //
+    //             let entry = name_db.get_mut(&addr);
+    //
+    //             let bind = &ev.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
+    //             let name = str::from_utf8(bind).unwrap(); // TODO error handling
+    //             let name = name.replace('\0', "");
+    //             if name.is_empty() {
+    //                 continue;
+    //             }
+    //
+    //             match entry {
+    //                 None => {
+    //                     name_db.insert(addr, vec![(name, None)]);
+    //                 }
+    //                 Some(entry) => {
+    //                     // there already were some names for this pointer
+    //                     for e in &mut *entry {
+    //                         // the pointer was renamed so the prev name is only valid until the time of rename
+    //                         if e.1.is_none() {
+    //                             e.1 = Some(ts);
+    //                         }
+    //                     }
+    //                     entry.push((name, None));
+    //                 }
+    //             }
+    //         }
+    //         Event::Destroy(ev) => {
+    //             let addr = ev.obj;
+    //             let entry = name_db.get_mut(&addr);
+    //
+    //             // if it is none, some unnamed object was destroyed, so we don't care
+    //             if let Some(entry) = entry {
+    //                 for e in &mut *entry {
+    //                     // deleting the objects invalidates its name at time of deletion
+    //                     if e.1.is_none() {
+    //                         e.1 = Some(ts);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         _ => {}
+    //     }
+    // }
 }
