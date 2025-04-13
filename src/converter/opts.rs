@@ -2,7 +2,7 @@ use babeltrace2_sys::LoggingLevel;
 use clap::Parser;
 use std::path::PathBuf;
 
-/// Convert FreeRTOS trace-recorder traces to CTF
+/// Convert L4Re traces to CTF
 #[derive(Parser, Debug, Clone)]
 #[clap(version)]
 pub struct Opts {
@@ -21,7 +21,4 @@ pub struct Opts {
     /// Output directory to write traces to
     #[clap(short = 'o', long, default_value = "ctf_trace")]
     pub output: PathBuf,
-
-    /// Path to the input trace recorder binary file (psf) to read
-    pub input: PathBuf,
 }

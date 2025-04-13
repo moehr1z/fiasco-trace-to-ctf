@@ -1,5 +1,6 @@
 use super::types::StringCache;
 use crate::parser::event::event_type::EventType;
+use crate::parser::event::ipc::IpcEvent;
 use crate::parser::event::typedefs::L4Addr;
 use crate::parser::event::{
     context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent,

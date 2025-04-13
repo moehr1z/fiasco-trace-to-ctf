@@ -24,7 +24,6 @@ pub struct TrcPluginState {
     events: Arc<Mutex<VecDeque<Event>>>,
     clock_name: CString,
     trace_name: CString,
-    input_file_name: CString,
     trace_creation_time: DateTime<Utc>,
     first_event_observed: bool,
     eof_reached: Arc<AtomicBool>,
@@ -44,13 +43,11 @@ impl TrcPluginState {
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
-        let input_file_name = CString::new(opts.input.file_name().unwrap().to_str().unwrap())?;
         Ok(Self {
             interruptor,
             events,
             clock_name,
             trace_name,
-            input_file_name,
             trace_creation_time: Utc::now(),
             first_event_observed: false,
             eof_reached: eof_signal,
@@ -199,12 +196,6 @@ impl TrcPluginState {
             //     val.as_c_str().as_ptr(),
             // );
             // ret.capi_result()?;
-            let ret = ffi::bt_trace_set_environment_entry_string(
-                trace,
-                c"input_file".as_ptr() as _,
-                self.input_file_name.as_c_str().as_ptr(),
-            );
-            ret.capi_result()?;
             let val = CString::new(format!(
                 "{}",
                 self.trace_creation_time.format("%Y%m%dT%H%M%S+0000")

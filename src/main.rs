@@ -1,13 +1,16 @@
 mod converter;
 mod parser;
 
+use babeltrace2_sys::LoggingLevel;
 use converter::Converter;
+use converter::opts::Opts;
 use core::str;
 use log::warn;
 use log::{debug, error, info};
 use parser::EventParser;
 use parser::event::Event;
 use std::collections::VecDeque;
+use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
@@ -20,6 +23,11 @@ use tokio::{join, task};
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";
 
+// enum ConvMsg {
+//     Meta(Vec<u8>),
+//     Stream(Vec<u8>),
+// }
+
 #[tokio::main]
 async fn main() {
     env_logger::init();
@@ -28,10 +36,8 @@ async fn main() {
     let (net_tx, mut parser_rx) = mpsc::channel(32);
     // parser -> converter
     let (parser_tx, mut converter_rx) = mpsc::channel::<Event>(32);
-    // converter -> filesystem
-    //           -> live session
-    // let (converter_tx, mut fs_rx) = broadcast::channel(32);
-    // let live_rx = fs_rx.clone();
+    // converter -> live session
+    // let (converter_tx, mut live_rx) = mpsc::channel(32);
 
     let event_buf: Arc<Mutex<VecDeque<Event>>> = Arc::new(Mutex::new(VecDeque::new()));
 
@@ -67,11 +73,21 @@ async fn main() {
             debug!("Received event bytes");
             let mut reader = Cursor::new(event_bytes);
             let event = EventParser::next_event(&mut reader);
+
             match event {
                 Ok(event) => {
                     if let Some(e) = event {
                         let event_number = e.event_common().number;
+                        debug!("Event count: {event_number}");
                         if event_number > biggest_event_num || !first_event_observed {
+                            let dropped_events = if first_event_observed {
+                                event_number - biggest_event_num - 1
+                            } else {
+                                0
+                            };
+                            if dropped_events > 0 {
+                                warn!("Dropped {dropped_events} events");
+                            }
                             biggest_event_num = event_number;
                             first_event_observed = true;
                             parser_tx.send(e).await.unwrap();
@@ -80,7 +96,9 @@ async fn main() {
                             // TODO this should somehow be handled instead of just dropping it, but
                             // i believe the best way is to prevent it in the first place with a
                             // buffer redesign
-                            debug!("Found duplicate/out of order event");
+                            debug!(
+                                "Found duplicate/out of order event (event nr: {event_number}, max nr: {biggest_event_num}"
+                            );
                         }
                     }
                 }
@@ -95,9 +113,32 @@ async fn main() {
     let local = task::LocalSet::new();
     local
         .run_until(async move {
+            let ctf_dir_path = "/dev/shm/ctf_trace/";
+            let ctf_dir = Path::new(ctf_dir_path); // we use a tmpfs dir
+            // because babeltrace only has a file system ctf sink, but we don't want to read the
+            // data in again from disk to send it to the live session
+            let opts = Opts {
+                clock_name: "monotonic".to_string(),
+                trace_name: "l4re".to_string(),
+                log_level: LoggingLevel::Warn,
+                output: ctf_dir.to_str().unwrap().into(),
+            };
             let eof_signal = Arc::new(AtomicBool::new(false));
             let mut conv =
-                Converter::new(event_buf.clone(), HashMap::new(), eof_signal.clone()).unwrap();
+                Converter::new(event_buf.clone(), HashMap::new(), eof_signal.clone(), opts)
+                    .unwrap();
+
+            // let mut stream_file_path = ctf_dir_path.to_string();
+            // stream_file_path.push_str("stream");
+            // println!("PATH: {}", stream_file_path);
+            // let mut stream_file = File::create(&stream_file_path).await.unwrap();
+            // let mut stream_buf = Vec::new();
+
+            // let mut meta_file_path = ctf_dir_path.to_string();
+            // meta_file_path.push_str("metadata");
+            // let mut meta_file = File::open(&meta_file_path).await.unwrap();
+            // let mut meta_buf = Vec::new();
+
             let _ = task::spawn_local(async move {
                 while let Some(event) = converter_rx.recv().await {
                     debug!("Received event");
@@ -107,14 +148,24 @@ async fn main() {
                     }
                     debug!("Trying to convert event...");
                     match conv.convert_once() {
-                        Ok(_) => debug!("Succesfully converted event"),
+                        Ok(_) => {
+                            debug!("Succesfully converted event");
+
+                            // stream_file.read_to_end(&mut stream_buf).await.unwrap();
+
+                            // send to live session handler
+                            // TODO don't copy
+                            // converter_tx
+                            //     .send(ConvMsg::Stream(stream_buf.clone()))
+                            //     .await
+                            //     .unwrap();
+
+                            // TODO commit to disk
+                        }
                         Err(e) => error!("Error converting event ({:?})", e),
                     }
                 }
 
-                // TODO read converter output and send to live and file system
-
-                // this should close the converter stream
                 debug!("Closing converter stream...");
                 eof_signal.store(true, Relaxed);
                 match conv.convert() {

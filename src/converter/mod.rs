@@ -1,15 +1,13 @@
 mod convert;
 mod events;
 mod interruptor;
-mod opts;
+pub mod opts;
 mod plugin;
 mod types;
 
 use crate::parser::event::Event;
 use crate::parser::event::typedefs::L4Addr;
-use babeltrace2_sys::{
-    CtfPluginSinkFsInitParams, EncoderPipeline, LoggingLevel, RunStatus, SourcePluginHandler,
-};
+use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
 use interruptor::Interruptor;
 use opts::Opts;
 use plugin::{TrcPlugin, TrcPluginState};
@@ -29,15 +27,8 @@ impl Converter {
         events: Arc<Mutex<VecDeque<Event>>>,
         name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
         eof_signal: Arc<AtomicBool>,
+        opts: Opts,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        let opts = Opts {
-            clock_name: "monotonic".to_string(),
-            trace_name: "l4re".to_string(),
-            log_level: LoggingLevel::Warn,
-            output: "ctf_trace".into(),
-            input: "test".into(),
-        };
-
         let intr = Interruptor::new();
         let intr_clone = intr.clone();
         ctrlc::set_handler(move || {

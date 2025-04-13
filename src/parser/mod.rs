@@ -15,6 +15,7 @@ use crate::parser::event::nam::NamEvent;
 use crate::parser::event::{ipc::IpcEvent, pf::PfEvent};
 use binrw::BinRead;
 use byteorder::ReadBytesExt;
+use event::empty::EmptyEvent;
 use std::io::{ErrorKind, Read, Seek};
 
 pub struct EventParser {}
@@ -68,6 +69,11 @@ impl EventParser {
             EventType::IpcRes => {
                 let event = IpcResEvent::read(&mut reader)?;
                 Ok(Some(Event::IpcRes(event)))
+            }
+            EventType::Ke => {
+                // TODO this is just a placeholder for testing, the real event has yet to be implemented
+                let event = EmptyEvent::read(&mut reader)?;
+                Ok(Some(Event::Empty(event)))
             }
             _ => todo!("Event type not yet implemented ({:?})", event_type_num),
         }
