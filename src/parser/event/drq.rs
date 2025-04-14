@@ -1,21 +1,22 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "DRQ"]
 #[br(little)]
 pub struct DrqEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub func: L4Addr,
-    pub thread: L4_ktrace_t__Context,
-    pub rq: L4_ktrace_t__Context__Drq,
-    pub target_cpu: L4_ktrace_t__Cpu_number,
-    pub type_: L4_ktrace_t__Context__Drq_log__Type,
+    pub func: u64,
+    pub thread: u64,
+    pub rq: u64,
+    pub target_cpu: u32,
+    pub type_: u32,
     pub wait: u8,
 }
 

@@ -1,22 +1,23 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "CONTEXTSWITCH"]
 #[br(little)]
 pub struct ContextSwitchEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub dst: L4_ktrace_t__Context,
-    pub dst_orig: L4_ktrace_t__Context,
-    pub kernel_ip: L4_ktrace_t__Address,
-    pub lock_cnt: L4_ktrace_t__Mword,
-    pub from_space: L4_ktrace_t__Space,
-    pub from_sched: L4_ktrace_t__Sched_context,
-    pub from_prio: L4_ktrace_t__Mword,
+    pub dst: u64,
+    pub dst_orig: u64,
+    pub kernel_ip: u64,
+    pub lock_cnt: u64,
+    pub from_space: u64,
+    pub from_sched: u64,
+    pub from_prio: u64,
 }
 

@@ -1,19 +1,20 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "TMAP"]
 #[br(little)]
 pub struct TmapEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub id: L4_ktrace_t__Mword,
-    pub mask: L4_ktrace_t__Mword,
-    pub fpage: L4_ktrace_t__Mword,
+    pub id: u64,
+    pub mask: u64,
+    pub fpage: u64,
     pub map: u8,
 }
 

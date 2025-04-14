@@ -1,7 +1,5 @@
 use super::types::StringCache;
 use crate::parser::event::event_type::EventType;
-use crate::parser::event::ipc::IpcEvent;
-use crate::parser::event::typedefs::L4Addr;
 use crate::parser::event::{
     context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent,
     nam::NamEvent, pf::PfEvent,
@@ -178,7 +176,7 @@ impl<'a>
         EventType,
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+        &'a mut HashMap<u64, Vec<(String, Option<u64>)>>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -189,7 +187,7 @@ impl<'a>
             EventType,
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+            &'a mut HashMap<u64, Vec<(String, Option<u64>)>>,
         ),
     ) -> Result<Self, Self::Error> {
         let event_type = value.0;

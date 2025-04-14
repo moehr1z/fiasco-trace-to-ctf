@@ -6,7 +6,6 @@ mod plugin;
 mod types;
 
 use crate::parser::event::Event;
-use crate::parser::event::typedefs::L4Addr;
 use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
 use interruptor::Interruptor;
 use opts::Opts;
@@ -25,7 +24,7 @@ pub struct Converter {
 impl Converter {
     pub fn new(
         events: Arc<Mutex<VecDeque<Event>>>,
-        name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+        name_db: HashMap<u64, Vec<(String, Option<u64>)>>,
         eof_signal: Arc<AtomicBool>,
         opts: Opts,
     ) -> Result<Self, Box<dyn std::error::Error>> {

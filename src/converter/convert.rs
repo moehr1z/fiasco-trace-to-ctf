@@ -3,7 +3,6 @@ use super::types::{BorrowedCtfState, StringCache};
 use crate::parser::event::Event;
 use crate::parser::event::common::EventCommon;
 use crate::parser::event::event_type::EventType;
-use crate::parser::event::typedefs::L4Addr;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
@@ -18,7 +17,7 @@ pub struct TrcCtfConverter {
     sched_wakeup_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+    name_map: HashMap<u64, Vec<(String, Option<u64>)>>,
 }
 
 impl Drop for TrcCtfConverter {
@@ -38,7 +37,7 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new(name_map: HashMap<L4Addr, Vec<(String, Option<u64>)>>) -> Self {
+    pub fn new(name_map: HashMap<u64, Vec<(String, Option<u64>)>>) -> Self {
         Self {
             unknown_event_class: ptr::null_mut(),
             user_event_class: ptr::null_mut(),

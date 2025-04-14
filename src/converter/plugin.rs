@@ -2,7 +2,6 @@ use super::interruptor::Interruptor;
 use super::opts::Opts;
 use super::{convert::TrcCtfConverter, types::BorrowedCtfState};
 use crate::parser::event::Event;
-use crate::parser::event::typedefs::L4Addr;
 use babeltrace2_sys::{
     BtResult, BtResultExt, Error, MessageIteratorStatus, Plugin, SelfComponent,
     SelfMessageIterator, SourcePluginDescriptor, SourcePluginHandler, ffi,
@@ -38,7 +37,7 @@ impl TrcPluginState {
         interruptor: Interruptor,
         events: Arc<Mutex<VecDeque<Event>>>,
         opts: &Opts,
-        name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>>,
+        name_db: HashMap<u64, Vec<(String, Option<u64>)>>,
         eof_signal: Arc<AtomicBool>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;

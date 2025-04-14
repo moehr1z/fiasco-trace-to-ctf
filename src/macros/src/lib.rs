@@ -15,7 +15,18 @@ use syn::{parse_macro_input, spanned::Spanned, Data, DeriveInput, Expr, Fields, 
 #[proc_macro_derive(CtfEventClass, attributes(event_name, event_name_from_event_type))]
 pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
     // TODO generic enum handling, TaskState is an enum
-    let supported_types = ["i64", "u64", "CStr", "TaskState"];
+    let supported_types = [
+        "i8",
+        "i32",
+        "i64",
+        "u8",
+        "u16",
+        "u32",
+        "u64",
+        "CStr",
+        "TaskState",
+    ];
+    let skip_field_names = ["common", "__pre_pad", "__pad_1", "__pad_2", "padding"];
 
     let input = parse_macro_input!(input as DeriveInput);
 
@@ -70,6 +81,11 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
                     .ident
                     .as_ref()
                     .expect("Failed to get struct field identifier.");
+
+                if skip_field_names.contains(&field_name.to_string().as_str()) {
+                    continue;
+                }
+
                 match field.ty {
                     Type::Path(t) => {
                         let typ = t
@@ -251,9 +267,34 @@ fn event_class_field_class(field_name: &Ident, typ: &str) -> TokenStream2 {
     let name_bytes = format!("{}\0", field_name);
     let byte_str = Literal::byte_string(name_bytes.as_bytes());
     let fc_create = match typ {
+        "i8" => {
+            quote! {
+                let fc = ffi::bt_field_class_integer_signed_create(trace_class);
+            }
+        }
+        "i32" => {
+            quote! {
+                let fc = ffi::bt_field_class_integer_signed_create(trace_class);
+            }
+        }
         "i64" => {
             quote! {
                 let fc = ffi::bt_field_class_integer_signed_create(trace_class);
+            }
+        }
+        "u8" => {
+            quote! {
+                let fc = ffi::bt_field_class_integer_unsigned_create(trace_class);
+            }
+        }
+        "u16" => {
+            quote! {
+                let fc = ffi::bt_field_class_integer_unsigned_create(trace_class);
+            }
+        }
+        "u32" => {
+            quote! {
+                let fc = ffi::bt_field_class_integer_unsigned_create(trace_class);
             }
         }
         "u64" => {
@@ -307,9 +348,34 @@ fn event_class_field_class(field_name: &Ident, typ: &str) -> TokenStream2 {
 
 fn event_field(field_index: usize, field_name: &Ident, typ: &str) -> TokenStream2 {
     let f_set = match typ {
+        "i8" => {
+            quote! {
+                ffi::bt_field_integer_signed_set_value(f, self.#field_name.into());
+            }
+        }
+        "i32" => {
+            quote! {
+                ffi::bt_field_integer_signed_set_value(f, self.#field_name.into());
+            }
+        }
         "i64" => {
             quote! {
                 ffi::bt_field_integer_signed_set_value(f, self.#field_name);
+            }
+        }
+        "u8" => {
+            quote! {
+                ffi::bt_field_integer_unsigned_set_value(f, self.#field_name.into());
+            }
+        }
+        "u16" => {
+            quote! {
+                ffi::bt_field_integer_unsigned_set_value(f, self.#field_name.into());
+            }
+        }
+        "u32" => {
+            quote! {
+                ffi::bt_field_integer_unsigned_set_value(f, self.#field_name.into());
             }
         }
         "u64" => {

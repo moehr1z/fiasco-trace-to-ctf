@@ -1,20 +1,21 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "RCU"]
 #[br(little)]
 pub struct RcuEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub cpu: L4_ktrace_t__Cpu_number,
+    pub cpu: u32,
     pub __pad_1: [i8; 4],
-    pub item: L4_ktrace_t__Rcu_item,
-    pub cb: L4Addr,
+    pub item: u64,
+    pub cb: u64,
     pub event: u8,
 }
 

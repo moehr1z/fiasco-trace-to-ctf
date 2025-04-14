@@ -26,7 +26,6 @@ pub mod svm;
 pub mod timer;
 pub mod tmap;
 pub mod trap;
-pub mod typedefs;
 pub mod vcpu;
 
 use super::error;

@@ -1,25 +1,26 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "TRAP"]
 #[br(little)]
 pub struct TrapEvent {
     pub common: EventCommon,
 
     pub trapno: i8,
     pub __pad_1: [i8; 1],
-    pub error: L4_ktrace_t__Unsigned16,
+    pub error: u16,
     pub __pad_2: [i8; 6],
-    pub rbp: L4_ktrace_t__Mword,
-    pub cr2: L4_ktrace_t__Mword,
-    pub rax: L4_ktrace_t__Mword,
-    pub rflags: L4_ktrace_t__Mword,
-    pub rsp: L4_ktrace_t__Mword,
-    pub cs: L4_ktrace_t__Unsigned16,
-    pub ds: L4_ktrace_t__Unsigned16,
+    pub rbp: u64,
+    pub cr2: u64,
+    pub rax: u64,
+    pub rflags: u64,
+    pub rsp: u64,
+    pub cs: u16,
+    pub ds: u16,
 }
 

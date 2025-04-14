@@ -59,13 +59,14 @@ class Fiasco_tbuf(gdb.Command):
     base_block_size = 0
     tb_entry_size = 0
     mode = "parser"
-    typedefs = {}
     events = []
     event_to_num = {}
     log_table = {}
 
+    # events where the babeltrace impl macro should not be added because they require some custom handling
+    no_bt_impl = ["Ipc", "IpcRes", "KeBin", "Nam"]
+
     # some shortnames from the event structs are different than the ones from the log table...
-    # TODO some structs don't even exist in the logtable and vice versa
     dyn_shortnames = {
         "csw": "context_switch",
         "des": "destroy",
@@ -128,7 +129,7 @@ class Fiasco_tbuf(gdb.Command):
         "long": "i64",
         "unsigned long": "u64",
         "unsigned long long": "u64",
-        "void": "L4Addr",
+        "void": "u64",
     }
 
     printlog_buf_current = 0
@@ -160,24 +161,17 @@ class Fiasco_tbuf(gdb.Command):
 
         self.printlog_buf = ["", "", ""]
 
-    def convert_name_to_c(self, name):
-        return "L4_ktrace_t__" + name.replace("::", "__")
-
     def handle_type_pointer(self, t):
         rt = str(t)
 
         if rt != "void" and rt != "char":
-            rt = self.convert_name_to_c(rt)
-            self.typedefs[rt] = self.convert_c_type_to_rust("void")
-            return rt
+            return self.convert_c_type_to_rust("void")
         else:
             return self.convert_c_type_to_rust(rt)
 
     def handle_type(self, t):
         if t.name in self.known_types_map:
-            st__ = self.convert_name_to_c(t.name)
-            self.typedefs[st__] = self.known_types_map[t.name]
-            return st__
+            return self.known_types_map[t.name]
 
         if t.name == "bool":
             return "u8"
@@ -185,9 +179,7 @@ class Fiasco_tbuf(gdb.Command):
         rtbasic = str(gdb.types.get_basic_type(t))
 
         if str(rtbasic) != t.name:
-            n = self.convert_name_to_c(t.name)
-            self.typedefs[n] = self.convert_c_type_to_rust(rtbasic)
-            return n
+            return self.convert_c_type_to_rust(rtbasic)
         return self.convert_c_type_to_rust(t.name)
 
     def print_members(self, t, prepad, postpad=False, indent=INDENT_SIZE):
@@ -286,14 +278,14 @@ class Fiasco_tbuf(gdb.Command):
         # TODO ke and ke_reg are a bit complicated to implement, have to do that sometime
         if sname == "Ke" or sname == "KeReg":
             self.printlogi(0, "//TODO not yet implemented\n")
-            self.print_derive_traits()
+            self.print_derive_traits(sname)
             self.printlog("#[br(little)]\n")
             self.printlogi(0, "pub struct %sEvent {\n" % sname)
             self.printlogi(INDENT_SIZE, "pub common: EventCommon,\n\n")
             self.printlogi(0, "}\n")
             return
 
-        self.print_derive_traits()
+        self.print_derive_traits(sname)
         if self.mode == "parser":
             self.printlog("#[br(little)]\n")
             self.printlogi(0, "pub struct %sEvent {\n" % sname)
@@ -337,7 +329,6 @@ class Fiasco_tbuf(gdb.Command):
         if self.mode == "parser":
             self.printlog("/* Note, automatically generated from Fiasco binary */\n")
             self.printlog("\n")
-            self.printlog("use super::typedefs::*;\n")
             self.printlog("use binrw::BinRead;\n\n")
             self.print_derive_traits()
             self.printlog("#[br(little)]\n")
@@ -362,10 +353,10 @@ class Fiasco_tbuf(gdb.Command):
                 self.events.append(name)
 
                 if self.mode == "parser":
-                    self.printlog("#![allow(unused_imports)]\n")
+                    self.printlog("#[allow(unused_imports)]\n")
+                    self.printlog("use ctf_macros::CtfEventClass;\n\n")
                     self.printlog("use super::common::EventCommon;\n")
-                    self.printlog("use super::typedefs::*;\n")
-                    self.printlog("use binrw::BinRead;\n\n")
+                    self.printlog("use binrw::BinRead;\n")
                 else:
                     # TODO traceparse imports
                     self.printlog("use crate::types::StringCache;\n")
@@ -390,14 +381,6 @@ class Fiasco_tbuf(gdb.Command):
 
         # print EventType enum
         self.gen_event_type()
-
-        # print Event struct
-        # self.gen_event()
-
-        # generate mod.rs
-        if self.mode == "parser":
-            self.gen_typedefs()
-            self.printlog_write("typedefs.rs")
 
     def get_tbentry_classes(self):
         print("Querying Tb_entry types. This might take a while.")
@@ -427,59 +410,21 @@ class Fiasco_tbuf(gdb.Command):
         s = s.replace("_", "")
         return s
 
-    def print_derive_traits(self):
+    def print_derive_traits(self, name=""):
         if self.mode == "parser":
-            self.printlog(
-                "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
-            )
+            if name != "" and name not in self.no_bt_impl:
+                self.printlog(
+                    "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]\n"
+                )
+                self.printlog('#[event_name = "%s"]\n' % name.upper())
+            else:
+                self.printlog(
+                    "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
+                )
         else:
             self.printlog(
                 "#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
             )
-
-    def gen_event(self):
-        # Event enum
-        self.print_derive_traits()
-        self.printlog("pub enum Event {\n")
-        for event in self.events:
-            self.printlogi(
-                1 * INDENT_SIZE,
-                "%s(%sEvent),\n"
-                % (self.to_camel_case(event), self.to_camel_case(event)),
-            )
-        self.printlog("}\n\n")
-
-        # Event enum impl
-        self.printlog("impl Event {\n")
-        self.printlogi(1 * INDENT_SIZE, "pub fn event_common(&self) -> EventCommon {\n")
-        self.printlogi(2 * INDENT_SIZE, "use Event::*;\n")
-        self.printlogi(2 * INDENT_SIZE, "match self {\n")
-        for event in self.events:
-            self.printlogi(
-                3 * INDENT_SIZE, "%s(e) => e.common,\n" % self.to_camel_case(event)
-            )
-        self.printlogi(2 * INDENT_SIZE, "}\n")
-        self.printlogi(1 * INDENT_SIZE, "}\n")
-        self.printlog("\n")
-        self.printlogi(1 * INDENT_SIZE, "pub fn event_type(&self) -> EventType {\n")
-        self.printlogi(2 * INDENT_SIZE, "use EventType::*;\n")
-        self.printlogi(2 * INDENT_SIZE, "match self {\n")
-        for event in self.events:
-            event = self.to_camel_case(event)
-            if event in self.event_to_num.keys():
-                self.printlogi(
-                    3 * INDENT_SIZE,
-                    "Event::%s(_) => %s,\n" % (event, event),
-                )
-            else:
-                # TODO appropriate event type?
-                self.printlogi(
-                    3 * INDENT_SIZE,
-                    "Event::%s(_) => Unused,\n" % (event),
-                )
-        self.printlogi(2 * INDENT_SIZE, "}\n")
-        self.printlogi(1 * INDENT_SIZE, "}\n")
-        self.printlog("}\n\n")
 
     def gen_event_type(self):
         self.printlog("/* Note, automatically generated from Fiasco binary */\n")
@@ -489,7 +434,6 @@ class Fiasco_tbuf(gdb.Command):
         self.printlog("use num_enum::{IntoPrimitive, TryFromPrimitive};\n")
         self.printlog("\n")
 
-        self.print_derive_traits
         self.printlog(
             "#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, TryFromPrimitive, IntoPrimitive)]\n"
         )
@@ -515,17 +459,6 @@ class Fiasco_tbuf(gdb.Command):
         self.printlogi(1 * INDENT_SIZE, "}\n")
         self.printlog("}\n\n")
         self.printlog_write("event_type.rs")
-
-    def gen_typedefs(self):
-        self.printlog("/* Note, automatically generated from Fiasco binary */\n")
-        self.printlog("\n")
-
-        # typedefs
-        self.printlog("pub type L4Addr = u64;\n")
-        for i in sorted(self.typedefs.keys()):
-            self.printlog("#[allow(non_camel_case_types)]\n")
-            self.printlog("pub type %s = %s;\n" % (i, self.typedefs[i]))
-        self.printlog("\n\n")
 
     def invoke(self, argument, from_tty):
         argv = gdb.string_to_argv(argument)

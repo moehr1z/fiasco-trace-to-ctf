@@ -1,18 +1,19 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "PF"]
 #[br(little)]
 pub struct PfEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub pfa: L4_ktrace_t__Address,
-    pub error: L4_ktrace_t__Mword,
-    pub space: L4_ktrace_t__Space,
+    pub pfa: u64,
+    pub error: u64,
+    pub space: u64,
 }
 

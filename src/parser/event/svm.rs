@@ -1,19 +1,20 @@
 /* Note, automatically generated from Fiasco binary */
 
-#![allow(unused_imports)]
-use super::common::EventCommon;
-use super::typedefs::*;
-use binrw::BinRead;
+#[allow(unused_imports)]
+use ctf_macros::CtfEventClass;
 
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
+use super::common::EventCommon;
+use binrw::BinRead;
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
+#[event_name = "SVM"]
 #[br(little)]
 pub struct SvmEvent {
     pub common: EventCommon,
 
     pub __pre_pad: [i8; 2],
-    pub exitcode: L4_ktrace_t__Mword,
-    pub exitinfo1: L4_ktrace_t__Mword,
-    pub exitinfo2: L4_ktrace_t__Mword,
-    pub rip: L4_ktrace_t__Mword,
+    pub exitcode: u64,
+    pub exitinfo1: u64,
+    pub exitinfo2: u64,
+    pub rip: u64,
 }
 
