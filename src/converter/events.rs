@@ -1,4 +1,6 @@
 use super::types::StringCache;
+use crate::event::ipc::IpcEvent;
+use crate::event::ipc_res::IpcResEvent;
 use crate::event::{context_switch::ContextSwitchEvent, event_type::EventType, nam::NamEvent};
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
@@ -9,6 +11,68 @@ use std::ffi::CStr;
 use std::str;
 
 // TODO - any way to use serde-reflection to synthesize these?
+
+#[derive(CtfEventClass)]
+#[event_name = "IPC"]
+pub struct Ipc {
+    tag: u64,
+    dword_1: u64,
+    dword_2: u64,
+    dst: u64,
+    dbg_id: u64,
+    label: u64,
+    timeout: u32,
+    to_abs_rcv: u64,
+}
+
+impl TryFrom<IpcEvent> for Ipc {
+    type Error = Error;
+
+    fn try_from(value: IpcEvent) -> Result<Self, Self::Error> {
+        Ok(Self {
+            tag: value.tag,
+            dword_1: value.dword[0],
+            dword_2: value.dword[1],
+            dst: value.dst,
+            dbg_id: value.dbg_id,
+            label: value.label,
+            timeout: value.timeout,
+            to_abs_rcv: value.to_abs_rcv,
+        })
+    }
+}
+
+#[derive(CtfEventClass)]
+#[event_name = "IPCRES"]
+pub struct IpcRes {
+    have_snd: u8,
+    is_np: u8,
+    tag: u64,
+    dword_1: u64,
+    dword_2: u64,
+    result: u64,
+    from: u64,
+    dst: u64,
+    pair_event: u64,
+}
+
+impl TryFrom<IpcResEvent> for IpcRes {
+    type Error = Error;
+
+    fn try_from(value: IpcResEvent) -> Result<Self, Self::Error> {
+        Ok(Self {
+            have_snd: value.have_snd,
+            is_np: value.is_np,
+            tag: value.tag,
+            dword_1: value.dword[0],
+            dword_2: value.dword[1],
+            result: value.result,
+            from: value.from,
+            dst: value.dst,
+            pair_event: value.pair_event,
+        })
+    }
+}
 
 #[derive(CtfEventClass)]
 #[event_name = "NAM"]

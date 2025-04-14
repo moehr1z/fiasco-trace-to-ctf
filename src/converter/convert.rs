@@ -270,9 +270,30 @@ impl TrcCtfConverter {
                 .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
+            Event::Ipc(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class = self.event_class(stream_class, event_type, Ipc::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+                Ipc::try_from(ev)?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
+            Event::IpcRes(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class =
+                    self.event_class(stream_class, event_type, IpcRes::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+                IpcRes::try_from(ev)?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
+
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),
             Event::Factory(ev) => emit_event!(FactoryEvent, self, ev, ctf_state, event_common),
             Event::Destroy(ev) => emit_event!(DestroyEvent, self, ev, ctf_state, event_common),
+
             // The rest are named events with no payload
             _ => {
                 let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
