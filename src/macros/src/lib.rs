@@ -74,9 +74,10 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
 
     let mut field_class_impls = Vec::new();
     let mut field_impls = Vec::new();
+    let mut field_index: usize = 0;
     match struct_fields {
         Fields::Named(fields) => {
-            for (field_index, field) in fields.named.into_iter().enumerate() {
+            for field in fields.named.into_iter() {
                 let field_name = field
                     .ident
                     .as_ref()
@@ -138,6 +139,8 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
                         .into()
                     }
                 }
+
+                field_index += 1;
             }
         }
         _ => {
