@@ -58,7 +58,6 @@ class Log_table(gdb.Command):
 class Fiasco_tbuf(gdb.Command):
     base_block_size = 0
     tb_entry_size = 0
-    mode = "parser"
     events = []
     event_to_num = {}
     log_table = {}
@@ -151,7 +150,7 @@ class Fiasco_tbuf(gdb.Command):
         self.printlog_buf_current = section
 
     def printlog_write(self, file):
-        dir = "../src/parser/event"
+        dir = "../src/event"
         os.makedirs(dir, exist_ok=True)
 
         with open(dir + "/" + file, "w") as f:
@@ -203,16 +202,12 @@ class Fiasco_tbuf(gdb.Command):
                     if self.base_block_size != 0 and byteoff != self.base_block_size:
                         # Add padding
                         padding = byteoff - self.base_block_size
-                        if self.mode == "parser":
-                            self.printlogi(
-                                indent, "pub __pre_pad: [i8; %d],\n" % padding
-                            )
+                        self.printlogi(indent, "pub __pre_pad: [i8; %d],\n" % padding)
                 elif cur_size < byteoff:
                     padding = byteoff - cur_size
-                    if self.mode == "parser":
-                        self.printlogi(
-                            indent, "pub __pad_%d: [i8; %d],\n" % (padidx, padding)
-                        )
+                    self.printlogi(
+                        indent, "pub __pad_%d: [i8; %d],\n" % (padidx, padding)
+                    )
                     padidx += 1
 
                 behind_last_member = byteoff + f.type.sizeof
@@ -266,11 +261,10 @@ class Fiasco_tbuf(gdb.Command):
                     % (t.name, self.tb_entry_size)
                 )
             sz = self.tb_entry_size - behind_last_member
-            if self.mode == "parser":
-                self.printlogi(
-                    indent,
-                    "char __post_pad[%d],\n" % (sz),
-                )
+            self.printlogi(
+                indent,
+                "char __post_pad[%d],\n" % (sz),
+            )
 
         return behind_last_member
 
@@ -286,20 +280,11 @@ class Fiasco_tbuf(gdb.Command):
             return
 
         self.print_derive_traits(sname)
-        if self.mode == "parser":
-            self.printlog("#[br(little)]\n")
-            self.printlogi(0, "pub struct %sEvent {\n" % sname)
-            self.printlogi(INDENT_SIZE, "pub common: EventCommon,\n\n")
-        else:
-            self.printlog("#[derive(CtfEventClass)]\n")
-            self.printlog('#[event_name = "%s"]\n' % sname.to_upper())
-            self.printlogi(0, "pub struct %s {\n" % sname)
+        self.printlog("#[br(little)]\n")
+        self.printlogi(0, "pub struct %sEvent {\n" % sname)
+        self.printlogi(INDENT_SIZE, "pub common: EventCommon,\n\n")
         self.print_members(t, True, sname == "fullsize", INDENT_SIZE)
         self.printlogi(0, "}\n")
-
-        # implement TryFrom
-        # TODO without the structs which are mapped
-        # if self.mode == "converter":
 
     def gen_ktrace_events(self, tbentry_types):
         # get event numbers (fixed and dyn)
@@ -326,20 +311,17 @@ class Fiasco_tbuf(gdb.Command):
         print("Guessed Tb_entry size:", self.tb_entry_size)
 
         # Print struct for common event
-        if self.mode == "parser":
-            self.printlog("/* Note, automatically generated from Fiasco binary */\n")
-            self.printlog("\n")
-            self.printlog("use binrw::BinRead;\n\n")
-            self.print_derive_traits()
-            self.printlog("#[br(little)]\n")
-            self.printlog("pub struct EventCommon {\n")
-            self.base_block_size = self.print_members(
-                gdb.lookup_type("Tb_entry"), False
-            )
-            self.printlog("}\n")
-            self.printlog("\n")
+        self.printlog("/* Note, automatically generated from Fiasco binary */\n")
+        self.printlog("\n")
+        self.printlog("use binrw::BinRead;\n\n")
+        self.print_derive_traits()
+        self.printlog("#[br(little)]\n")
+        self.printlog("pub struct EventCommon {\n")
+        self.base_block_size = self.print_members(gdb.lookup_type("Tb_entry"), False)
+        self.printlog("}\n")
+        self.printlog("\n")
 
-            self.printlog_write("common.rs")
+        self.printlog_write("common.rs")
 
         # Print structs for individual event types
         for i in sorted(tbentry_types, key=lambda t: t.name):
@@ -352,25 +334,10 @@ class Fiasco_tbuf(gdb.Command):
                 name = self.ktrace_shortnames[i.name]
                 self.events.append(name)
 
-                if self.mode == "parser":
-                    self.printlog("#[allow(unused_imports)]\n")
-                    self.printlog("use ctf_macros::CtfEventClass;\n\n")
-                    self.printlog("use super::common::EventCommon;\n")
-                    self.printlog("use binrw::BinRead;\n")
-                else:
-                    # TODO traceparse imports
-                    self.printlog("use crate::types::StringCache;\n")
-                    self.printlog("use babeltrace2_sys::Error;\n")
-                    self.printlog("use ctf_macros::CtfEventClass;\n")
-                    self.printlog("use enum_iterator::Sequence;\n")
-                    self.printlog("use l4re_traceparse::event::EventType;\n")
-                    self.printlog(
-                        "use l4re_traceparse::event::%s::%sEvent;\n"
-                        % (name, self.to_camel_case(name))
-                    )
-                    self.printlog("use std::collections::HashMap;\n")
-                    self.printlog("use std::convert::TryFrom;\n")
-                    self.printlog("use std::ffi::CStr;\n")
+                self.printlog("#[allow(unused_imports)]\n")
+                self.printlog("use ctf_macros::CtfEventClass;\n\n")
+                self.printlog("use super::common::EventCommon;\n")
+                self.printlog("use binrw::BinRead;\n")
                 self.print_single_struct(i, self.to_camel_case(name))
                 self.printlog("\n")
                 self.printlog_write(name + ".rs")
@@ -411,19 +378,14 @@ class Fiasco_tbuf(gdb.Command):
         return s
 
     def print_derive_traits(self, name=""):
-        if self.mode == "parser":
-            if name != "" and name not in self.no_bt_impl:
-                self.printlog(
-                    "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]\n"
-                )
-                self.printlog('#[event_name = "%s"]\n' % name.upper())
-            else:
-                self.printlog(
-                    "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
-                )
+        if name != "" and name not in self.no_bt_impl:
+            self.printlog(
+                "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]\n"
+            )
+            self.printlog('#[event_name = "%s"]\n' % name.upper())
         else:
             self.printlog(
-                "#[derive(Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
+                "#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]\n"
             )
 
     def gen_event_type(self):
@@ -465,10 +427,7 @@ class Fiasco_tbuf(gdb.Command):
         if len(argv) < 1:
             print("Need 1st arg img file")
             exit(1)
-        if argv[1] != "parser" and argv[1] != "converter":
-            print('2nd arg "parser" or "converter"')
         tbentry_types = self.get_tbentry_classes()
-        self.mode = argv[1]
         self.log_table = Log_table([argv[0]]).get_log_table()
         self.gen_ktrace_events(tbentry_types)
 
