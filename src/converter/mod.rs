@@ -5,7 +5,7 @@ pub mod opts;
 mod plugin;
 mod types;
 
-use crate::parser::event::Event;
+use crate::event::Event;
 use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
 use interruptor::Interruptor;
 use opts::Opts;

@@ -1,7 +1,7 @@
 use super::types::StringCache;
-use crate::parser::event::event_type::EventType;
-use crate::parser::event::{
-    context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent, nam::NamEvent,
+use crate::event::{
+    context_switch::ContextSwitchEvent, destroy::DestroyEvent, event_type::EventType,
+    factory::FactoryEvent, nam::NamEvent,
 };
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;

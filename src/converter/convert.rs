@@ -1,8 +1,9 @@
 use super::events::*;
 use super::types::{BorrowedCtfState, StringCache};
-use crate::parser::event::destroy::DestroyEvent;
-use crate::parser::event::factory::FactoryEvent;
-use crate::parser::event::{Event, common::EventCommon, event_type::EventType, pf::PfEvent};
+use crate::event::{
+    Event, common::EventCommon, destroy::DestroyEvent, event_type::EventType,
+    factory::FactoryEvent, pf::PfEvent,
+};
 use babeltrace2_sys::{BtResultExt, Error, ffi};
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;

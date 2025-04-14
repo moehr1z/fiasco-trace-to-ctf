@@ -1,4 +1,4 @@
-use crate::parser::event::event_type::EventType;
+use crate::event::event_type::EventType;
 use babeltrace2_sys::{Error, MessageIteratorStatus, SelfMessageIterator, ffi};
 use std::collections::{HashMap, hash_map};
 use std::ffi::{CStr, CString};

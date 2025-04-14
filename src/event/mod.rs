@@ -28,7 +28,6 @@ pub mod tmap;
 pub mod trap;
 pub mod vcpu;
 
-use super::error;
 use super::event::{
     bp::BpEvent, common::EventCommon, context_switch::ContextSwitchEvent, destroy::DestroyEvent,
     drq::DrqEvent, empty::EmptyEvent, event_type::EventType, exregs::ExregsEvent,
@@ -38,6 +37,7 @@ use super::event::{
     sched::SchedEvent, svm::SvmEvent, timer::TimerEvent, tmap::TmapEvent, trap::TrapEvent,
     vcpu::VcpuEvent,
 };
+use crate::parser::error;
 use binrw::BinRead;
 use num_enum::TryFromPrimitiveError;
 

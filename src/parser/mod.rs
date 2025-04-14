@@ -1,21 +1,20 @@
 pub mod error;
-pub mod event;
 
 const EVENT_SIZE: usize = 128;
 const EVENT_TYPE_POSITION: i64 = 44;
 
+use crate::event::Event;
+use crate::event::context_switch::ContextSwitchEvent;
+use crate::event::destroy::DestroyEvent;
+use crate::event::empty::EmptyEvent;
+use crate::event::event_type::EventType;
+use crate::event::factory::FactoryEvent;
+use crate::event::ipc_res::IpcResEvent;
+use crate::event::nam::NamEvent;
+use crate::event::{ipc::IpcEvent, pf::PfEvent};
 use crate::parser::error::Error;
-use crate::parser::event::Event;
-use crate::parser::event::context_switch::ContextSwitchEvent;
-use crate::parser::event::destroy::DestroyEvent;
-use crate::parser::event::event_type::EventType;
-use crate::parser::event::factory::FactoryEvent;
-use crate::parser::event::ipc_res::IpcResEvent;
-use crate::parser::event::nam::NamEvent;
-use crate::parser::event::{ipc::IpcEvent, pf::PfEvent};
 use binrw::BinRead;
 use byteorder::ReadBytesExt;
-use event::empty::EmptyEvent;
 use std::io::{ErrorKind, Read, Seek};
 
 pub struct EventParser {}

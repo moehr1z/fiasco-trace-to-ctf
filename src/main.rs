@@ -1,6 +1,8 @@
 mod converter;
+mod event;
 mod parser;
 
+use crate::event::Event;
 use babeltrace2_sys::LoggingLevel;
 use converter::Converter;
 use converter::opts::Opts;
@@ -8,7 +10,6 @@ use core::str;
 use log::warn;
 use log::{debug, error, info};
 use parser::EventParser;
-use parser::event::Event;
 use std::collections::VecDeque;
 use std::path::Path;
 use std::sync::Arc;

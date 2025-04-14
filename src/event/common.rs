@@ -15,4 +15,3 @@ pub struct EventCommon {
     pub type_: u8,
     pub cpu: u8,
 }
-
