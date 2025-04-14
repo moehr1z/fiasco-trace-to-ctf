@@ -1,8 +1,5 @@
 use super::types::StringCache;
-use crate::event::{
-    context_switch::ContextSwitchEvent, destroy::DestroyEvent, event_type::EventType,
-    factory::FactoryEvent, nam::NamEvent,
-};
+use crate::event::{context_switch::ContextSwitchEvent, event_type::EventType, nam::NamEvent};
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 use enum_iterator::Sequence;
@@ -12,54 +9,6 @@ use std::ffi::CStr;
 use std::str;
 
 // TODO - any way to use serde-reflection to synthesize these?
-
-#[allow(dead_code)] // TODO
-#[derive(CtfEventClass)]
-#[event_name = "FACTORY"]
-pub struct Factory {
-    pub op: i64,
-    pub buffer: u64,
-    pub id: u64,
-    pub ram: u64,
-    pub newo: u64,
-}
-
-impl TryFrom<FactoryEvent> for Factory {
-    type Error = Error;
-
-    fn try_from(value: FactoryEvent) -> Result<Self, Self::Error> {
-        Ok(Self {
-            op: value.op,
-            buffer: value.buffer,
-            id: value.id,
-            ram: value.ram,
-            newo: value.newo,
-        })
-    }
-}
-
-#[allow(dead_code)] // TODO
-#[derive(CtfEventClass)]
-#[event_name = "DESTROY"]
-pub struct Destroy {
-    pub obj: u64,
-    pub id: u64,
-    pub type_: u64,
-    pub ram: u64,
-}
-
-impl TryFrom<DestroyEvent> for Destroy {
-    type Error = Error;
-
-    fn try_from(value: DestroyEvent) -> Result<Self, Self::Error> {
-        Ok(Self {
-            obj: value.obj,
-            id: value.id,
-            type_: value.type_,
-            ram: value.ram,
-        })
-    }
-}
 
 #[derive(CtfEventClass)]
 #[event_name = "NAM"]
