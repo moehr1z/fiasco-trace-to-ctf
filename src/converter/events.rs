@@ -1,8 +1,7 @@
 use super::types::StringCache;
 use crate::parser::event::event_type::EventType;
 use crate::parser::event::{
-    context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent,
-    nam::NamEvent, pf::PfEvent,
+    context_switch::ContextSwitchEvent, destroy::DestroyEvent, factory::FactoryEvent, nam::NamEvent,
 };
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
@@ -86,26 +85,6 @@ impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
             obj: event.obj,
             id: event.id,
             name: cache.get_str(&name),
-        })
-    }
-}
-
-#[derive(CtfEventClass)]
-#[event_name = "PF"]
-pub struct Pf {
-    pub pfa: u64,
-    pub error: u64,
-    pub space: u64,
-}
-
-impl TryFrom<PfEvent> for Pf {
-    type Error = Error;
-
-    fn try_from(value: PfEvent) -> Result<Self, Self::Error> {
-        Ok(Self {
-            pfa: value.pfa,
-            error: value.error,
-            space: value.space,
         })
     }
 }

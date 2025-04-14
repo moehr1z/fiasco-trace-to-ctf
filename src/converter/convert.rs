@@ -1,11 +1,29 @@
 use super::events::*;
 use super::types::{BorrowedCtfState, StringCache};
-use crate::parser::event::Event;
-use crate::parser::event::common::EventCommon;
-use crate::parser::event::event_type::EventType;
+use crate::parser::event::destroy::DestroyEvent;
+use crate::parser::event::factory::FactoryEvent;
+use crate::parser::event::{Event, common::EventCommon, event_type::EventType, pf::PfEvent};
 use babeltrace2_sys::{BtResultExt, Error, ffi};
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
+
+// macro to emit basic events which don't require special processing (basically everything which
+// uses the CtfEventClass macro)
+macro_rules! emit_event {
+    ($evt:ty, $conv:ident, $ev:ident, $ctf_state:ident, $event_common:ident) => {{
+        let stream_class = unsafe { ffi::bt_stream_borrow_class($ctf_state.stream_mut()) };
+        let event_class = $conv.event_class(
+            stream_class,
+            $event_common.type_.try_into().unwrap(),
+            <$evt>::event_class,
+        )?;
+        let msg = $ctf_state.create_message(event_class, $event_common.tsc);
+        let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+        $conv.add_event_common_ctx($event_common, ctf_event)?;
+        $ev.emit_event(ctf_event)?;
+        $ctf_state.push_message(msg)?;
+    }};
+}
 
 // TODO remove unused event classes
 pub struct TrcCtfConverter {
@@ -159,10 +177,11 @@ impl TrcCtfConverter {
 
     fn add_event_common_ctx(
         &mut self,
-        event_id: u8,
         common: EventCommon,
         event: *mut ffi::bt_event,
     ) -> Result<(), Error> {
+        let event_id = common.type_;
+
         unsafe {
             let common_ctx_field = ffi::bt_event_borrow_common_context_field(event);
 
@@ -224,33 +243,23 @@ impl TrcCtfConverter {
     pub fn convert(&mut self, event: Event, ctf_state: &mut BorrowedCtfState) -> Result<(), Error> {
         let event_type = event.event_type();
         let event_common = event.event_common();
-        let event_id: u8 = event.event_type().into();
         let event_timestamp = event_common.tsc;
-
-        let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
 
         match event {
             Event::Nam(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
                 let event_class = self.event_class(stream_class, event_type, Nam::event_class)?;
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_id, event_common, ctf_event)?;
+                self.add_event_common_ctx(event_common, ctf_event)?;
                 Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
-                ctf_state.push_message(msg)?;
-            }
-            Event::Pf(ev) => {
-                let event_class = self.event_class(stream_class, event_type, Pf::event_class)?;
-                let msg = ctf_state.create_message(event_class, event_timestamp);
-                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_id, event_common, ctf_event)?;
-                Pf::try_from(ev)?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::ContextSwitch(ev) => {
                 let event_class = self.sched_switch_event_class;
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_id, event_common, ctf_event)?;
+                self.add_event_common_ctx(event_common, ctf_event)?;
                 SchedSwitch::try_from((
                     event_type,
                     ev,
@@ -260,14 +269,18 @@ impl TrcCtfConverter {
                 .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
+            Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),
+            Event::Factory(ev) => emit_event!(FactoryEvent, self, ev, ctf_state, event_common),
+            Event::Destroy(ev) => emit_event!(DestroyEvent, self, ev, ctf_state, event_common),
             // The rest are named events with no payload
             _ => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
                 let event_class = self.event_class(stream_class, event_type, |stream_class| {
                     Unsupported::event_class(event_type, stream_class)
                 })?;
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_id, event_common, ctf_event)?;
+                self.add_event_common_ctx(event_common, ctf_event)?;
                 Unsupported {}.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
