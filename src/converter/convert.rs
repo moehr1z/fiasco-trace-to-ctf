@@ -4,7 +4,9 @@ use crate::event::{
     Event, common::EventCommon, destroy::DestroyEvent, event_type::EventType,
     factory::FactoryEvent, pf::PfEvent,
 };
+use crate::helpers;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
+use log::warn;
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
 
@@ -36,7 +38,7 @@ pub struct TrcCtfConverter {
     sched_wakeup_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: HashMap<u64, Vec<(String, Option<u64>)>>,
+    name_map: HashMap<u64, (String, String)>, // ctx pointer -> (name, dbg_id)
 }
 
 impl Drop for TrcCtfConverter {
@@ -56,7 +58,10 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new(name_map: HashMap<u64, Vec<(String, Option<u64>)>>) -> Self {
+    pub fn new() -> Self {
+        let mut string_cache: StringCache = Default::default();
+        string_cache.insert_str("").unwrap(); // TODO error handling
+
         Self {
             unknown_event_class: ptr::null_mut(),
             user_event_class: ptr::null_mut(),
@@ -65,8 +70,8 @@ impl TrcCtfConverter {
             irq_handler_exit_event_class: ptr::null_mut(),
             sched_wakeup_event_class: ptr::null_mut(),
             event_classes: Default::default(),
-            string_cache: Default::default(),
-            name_map,
+            string_cache,
+            name_map: HashMap::new(),
         }
     }
 
@@ -155,6 +160,22 @@ impl TrcCtfConverter {
             );
             ret.capi_result()?;
 
+            let event_name_field = ffi::bt_field_class_string_create(trace_class);
+            let ret = ffi::bt_field_class_structure_append_member(
+                base_event_context,
+                c"name".as_ptr() as _,
+                event_name_field,
+            );
+            ret.capi_result()?;
+
+            let event_dbg_id_field = ffi::bt_field_class_string_create(trace_class);
+            let ret = ffi::bt_field_class_structure_append_member(
+                base_event_context,
+                c"dbg_id".as_ptr() as _,
+                event_dbg_id_field,
+            );
+            ret.capi_result()?;
+
             ffi::bt_field_class_put_ref(event_id_field);
             ffi::bt_field_class_put_ref(event_count_field);
             ffi::bt_field_class_put_ref(event_ip_field);
@@ -163,6 +184,8 @@ impl TrcCtfConverter {
             ffi::bt_field_class_put_ref(event_pmc1_field);
             ffi::bt_field_class_put_ref(event_pmc2_field);
             ffi::bt_field_class_put_ref(event_kclock_field);
+            ffi::bt_field_class_put_ref(event_name_field);
+            ffi::bt_field_class_put_ref(event_dbg_id_field);
 
             Ok(base_event_context)
         }
@@ -204,7 +227,7 @@ impl TrcCtfConverter {
 
             let ctx_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 4);
-            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx);
+            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx & 0xFFFFFFFFFFFFF000); // TODO
 
             let pmc1_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 5);
@@ -217,6 +240,26 @@ impl TrcCtfConverter {
             let kclock_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 7);
             ffi::bt_field_integer_unsigned_set_value(kclock_field, common.kclock as u64);
+
+            let name_dbg_tuple = self.name_map.get(&(common.ctx & 0xFFFFFFFFFFFFF000));
+
+            let name_field =
+                ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 8);
+            let c_name = if let Some((n, _)) = name_dbg_tuple {
+                self.string_cache.get_str(n)
+            } else {
+                self.string_cache.get_str("")
+            };
+            ffi::bt_field_string_set_value(name_field, c_name.as_ptr());
+
+            let dbg_id_field =
+                ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 9);
+            let c_dbg_id = if let Some((_, d)) = name_dbg_tuple {
+                self.string_cache.get_str(d)
+            } else {
+                self.string_cache.get_str("")
+            };
+            ffi::bt_field_string_set_value(dbg_id_field, c_dbg_id.as_ptr());
 
             Ok(())
         }
@@ -248,13 +291,40 @@ impl TrcCtfConverter {
 
         match event {
             Event::Nam(ev) => {
-                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
-                let event_class = self.event_class(stream_class, event_type, Nam::event_class)?;
-                let msg = ctf_state.create_message(event_class, event_timestamp);
-                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_common, ctf_event)?;
-                Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
-                ctf_state.push_message(msg)?;
+                let mut was_valid = true;
+                let name = helpers::i8_array_to_string(ev.name);
+                let name = if let Ok(n) = name {
+                    n
+                } else {
+                    // TODO not sure why, but sometimes when you enable IPC events there's some
+                    // gibberish in some name fields
+                    warn!(
+                        "Could not convert Nam event bytes to name string! Not converting this event. (event nr: {}, bytes: {:?})",
+                        ev.common.number, ev.name
+                    );
+                    was_valid = false;
+                    "".to_string()
+                };
+
+                self.name_map.insert(
+                    ev.obj & 0xFFFFFFFFFFFFF000,
+                    (name.clone(), ev.id.to_string()),
+                );
+                self.string_cache.insert_str(&name)?;
+                self.string_cache.insert_str(&ev.id.to_string())?;
+
+                if was_valid {
+                    let stream_class =
+                        unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                    let event_class =
+                        self.event_class(stream_class, event_type, Nam::event_class)?;
+                    let msg = ctf_state.create_message(event_class, event_timestamp);
+                    let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                    self.add_event_common_ctx(event_common, ctf_event)?;
+
+                    Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
+                    ctf_state.push_message(msg)?;
+                }
             }
             Event::ContextSwitch(ev) => {
                 let event_class = self.sched_switch_event_class;
@@ -276,7 +346,20 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                Ipc::try_from(ev)?.emit_event(ctf_event)?;
+
+                // TODO this is slow, use an id -> name map
+                let res = self
+                    .name_map
+                    .iter()
+                    .find(|(_, (_name, id))| *id == ev.dbg_id.to_string());
+                let rcv_name = if let Some((_, (name, _))) = res {
+                    name.to_string()
+                } else {
+                    "".to_string()
+                };
+                let rcv_name = self.string_cache.get_str(&rcv_name);
+
+                Ipc::try_from((ev, rcv_name))?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::IpcRes(ev) => {
@@ -290,9 +373,20 @@ impl TrcCtfConverter {
                 ctf_state.push_message(msg)?;
             }
 
+            Event::Destroy(ev) => {
+                self.name_map.remove(&(ev.obj & 0xFFFFFFFFFFFFF000));
+                emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Factory(ev) => {
+                self.name_map.insert(
+                    ev.newo & 0xFFFFFFFFFFFFF000,
+                    ("".to_string(), ev.id.to_string()),
+                );
+                self.string_cache.insert_str(&ev.id.to_string())?;
+                emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
+            }
+
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),
-            Event::Factory(ev) => emit_event!(FactoryEvent, self, ev, ctf_state, event_common),
-            Event::Destroy(ev) => emit_event!(DestroyEvent, self, ev, ctf_state, event_common),
 
             // The rest are named events with no payload
             _ => {

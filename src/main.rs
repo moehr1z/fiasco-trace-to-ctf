@@ -1,5 +1,6 @@
 mod converter;
 mod event;
+mod helpers;
 mod parser;
 
 use crate::event::Event;
@@ -11,12 +12,12 @@ use log::warn;
 use log::{debug, error, info};
 use parser::EventParser;
 use std::collections::VecDeque;
+use std::io::Cursor;
 use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
-use std::{collections::HashMap, io::Cursor};
 use tokio::io::{AsyncReadExt, BufReader};
 use tokio::net::TcpListener;
 use tokio::sync::mpsc;
@@ -125,9 +126,7 @@ async fn main() {
                 output: ctf_dir.to_str().unwrap().into(),
             };
             let eof_signal = Arc::new(AtomicBool::new(false));
-            let mut conv =
-                Converter::new(event_buf.clone(), HashMap::new(), eof_signal.clone(), opts)
-                    .unwrap();
+            let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts).unwrap();
 
             // let mut stream_file_path = ctf_dir_path.to_string();
             // stream_file_path.push_str("stream");

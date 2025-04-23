@@ -8,7 +8,7 @@ use babeltrace2_sys::{
     source_plugin_descriptors,
 };
 use chrono::prelude::{DateTime, Utc};
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::{Arc, Mutex};
@@ -37,7 +37,6 @@ impl TrcPluginState {
         interruptor: Interruptor,
         events: Arc<Mutex<VecDeque<Event>>>,
         opts: &Opts,
-        name_db: HashMap<u64, Vec<(String, Option<u64>)>>,
         eof_signal: Arc<AtomicBool>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
@@ -54,7 +53,7 @@ impl TrcPluginState {
             // NOTE: timestamp/event trackers get re-initialized on the first event
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
-            converter: TrcCtfConverter::new(name_db),
+            converter: TrcCtfConverter::new(),
         })
     }
 

@@ -1,20 +1,21 @@
 use super::types::StringCache;
 use crate::event::ipc::IpcEvent;
 use crate::event::ipc_res::IpcResEvent;
-use crate::event::{context_switch::ContextSwitchEvent, event_type::EventType, nam::NamEvent};
+use crate::event::nam::NamEvent;
+use crate::event::{context_switch::ContextSwitchEvent, event_type::EventType};
+use crate::helpers;
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 use enum_iterator::Sequence;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ffi::CStr;
-use std::str;
 
 // TODO - any way to use serde-reflection to synthesize these?
 
 #[derive(CtfEventClass)]
 #[event_name = "IPC"]
-pub struct Ipc {
+pub struct Ipc<'a> {
     tag: u64,
     dword_1: u64,
     dword_2: u64,
@@ -23,12 +24,16 @@ pub struct Ipc {
     label: u64,
     timeout: u32,
     to_abs_rcv: u64,
+    rcv_name: &'a CStr,
 }
 
-impl TryFrom<IpcEvent> for Ipc {
+impl<'a> TryFrom<(IpcEvent, &'a CStr)> for Ipc<'a> {
     type Error = Error;
 
-    fn try_from(value: IpcEvent) -> Result<Self, Self::Error> {
+    fn try_from(v: (IpcEvent, &'a CStr)) -> Result<Self, Self::Error> {
+        let value = v.0;
+        let rcv_name = v.1;
+
         Ok(Self {
             tag: value.tag,
             dword_1: value.dword[0],
@@ -38,6 +43,7 @@ impl TryFrom<IpcEvent> for Ipc {
             label: value.label,
             timeout: value.timeout,
             to_abs_rcv: value.to_abs_rcv,
+            rcv_name,
         })
     }
 }
@@ -89,15 +95,10 @@ impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
         let event = value.0;
         let cache = value.1;
 
-        let bind = &event.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
-        let name = str::from_utf8(bind)?;
-        let name = name.replace('\0', "");
-        cache.insert_str(&name)?;
-
         Ok(Self {
             obj: event.obj,
             id: event.id,
-            name: cache.get_str(&name),
+            name: cache.get_str(&helpers::i8_array_to_string(event.name)?),
         })
     }
 }
@@ -168,7 +169,7 @@ impl<'a>
         EventType,
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut HashMap<u64, Vec<(String, Option<u64>)>>,
+        &'a mut HashMap<u64, (String, String)>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -179,12 +180,11 @@ impl<'a>
             EventType,
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut HashMap<u64, Vec<(String, Option<u64>)>>,
+            &'a mut HashMap<u64, (String, String)>,
         ),
     ) -> Result<Self, Self::Error> {
         let event_type = value.0;
         let event = value.1;
-        let ts = event.common.tsc;
         let cache = value.2;
         let name_map = value.3;
 
@@ -195,23 +195,13 @@ impl<'a>
         let dst = dst & 0xFFFFFFFFFFFFF000; // TODO
 
         let mut prev_comm = src.to_string();
-        if let Some(s) = name_map.get(&src) {
-            for (name, valid_until) in s {
-                if valid_until.is_none() || ts < valid_until.unwrap() {
-                    prev_comm = name.clone();
-                    break;
-                }
-            }
+        if let Some((name, _dbg_id)) = name_map.get(&src) {
+            prev_comm = name.clone();
         }
 
         let mut next_comm = dst.to_string();
-        if let Some(d) = name_map.get(&dst) {
-            for (name, valid_until) in d {
-                if valid_until.is_none() || ts < valid_until.unwrap() {
-                    next_comm = name.clone();
-                    break;
-                }
-            }
+        if let Some((name, _dbg_id)) = name_map.get(&dst) {
+            next_comm = name.clone();
         }
 
         cache.insert_type(event_type)?;

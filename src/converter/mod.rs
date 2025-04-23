@@ -10,7 +10,7 @@ use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, Sou
 use interruptor::Interruptor;
 use opts::Opts;
 use plugin::{TrcPlugin, TrcPluginState};
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::ffi::CString;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -24,7 +24,6 @@ pub struct Converter {
 impl Converter {
     pub fn new(
         events: Arc<Mutex<VecDeque<Event>>>,
-        name_db: HashMap<u64, Vec<(String, Option<u64>)>>,
         eof_signal: Arc<AtomicBool>,
         opts: Opts,
     ) -> Result<Self, Box<dyn std::error::Error>> {
@@ -56,9 +55,8 @@ impl Converter {
             &output_path,
         )?;
 
-        let state_inner: Box<dyn SourcePluginHandler> = Box::new(TrcPluginState::new(
-            intr, events, &opts, name_db, eof_signal,
-        )?);
+        let state_inner: Box<dyn SourcePluginHandler> =
+            Box::new(TrcPluginState::new(intr, events, &opts, eof_signal)?);
         let state = Box::new(state_inner);
 
         let pipeline = EncoderPipeline::new::<TrcPlugin>(opts.log_level, state, &params)?;
