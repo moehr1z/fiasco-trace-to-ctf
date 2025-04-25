@@ -188,20 +188,33 @@ impl<'a>
         let cache = value.2;
         let name_map = value.3;
 
-        let src = event.from_sched;
-        let dst = event.dst;
-
-        let src = src & 0xFFFFFFFFFFFFF000; // TODO
-        let dst = dst & 0xFFFFFFFFFFFFF000; // TODO
+        let src = event.common.ctx & 0xFFFFFFFFFFFFF000;
+        let dst = event.dst & 0xFFFFFFFFFFFFF000;
 
         let mut prev_comm = src.to_string();
-        if let Some((name, _dbg_id)) = name_map.get(&src) {
-            prev_comm = name.clone();
+        let mut prev_tid: i64 = src as i64;
+        if let Some((name, dbg_id)) = name_map.get(&src) {
+            if !name.is_empty() {
+                prev_comm = name.clone();
+            } else {
+                prev_comm = dbg_id.clone();
+            }
+            if let Ok(tid_i64) = dbg_id.parse() {
+                prev_tid = tid_i64
+            }
         }
 
         let mut next_comm = dst.to_string();
-        if let Some((name, _dbg_id)) = name_map.get(&dst) {
-            next_comm = name.clone();
+        let mut next_tid: i64 = dst as i64;
+        if let Some((name, dbg_id)) = name_map.get(&dst) {
+            if !name.is_empty() {
+                next_comm = name.clone();
+            } else {
+                next_comm = dbg_id.clone();
+            }
+            if let Ok(tid_i64) = dbg_id.parse() {
+                next_tid = tid_i64
+            }
         }
 
         cache.insert_type(event_type)?;
@@ -211,15 +224,14 @@ impl<'a>
         cache.insert_str(&next_comm)?;
 
         // TODO type casts
-        // TODO no comm info in event
         Ok(Self {
             src_event_type: cache.get_type(&event_type),
             prev_comm: cache.get_str(&prev_comm),
-            prev_tid: src as i64,
+            prev_tid,
             prev_prio: event.from_prio as i64,
             prev_state: TaskState::Running, // TODO always running?
             next_comm: cache.get_str(&next_comm),
-            next_tid: dst as i64,
+            next_tid,
             next_prio: 9999, // TODO get actual next prio
         })
     }
