@@ -33,6 +33,7 @@ pub struct TrcCtfConverter {
     unknown_event_class: *mut ffi::bt_event_class,
     user_event_class: *mut ffi::bt_event_class,
     sched_switch_event_class: *mut ffi::bt_event_class,
+    sched_migrate_task_event_class: *mut ffi::bt_event_class,
     irq_handler_entry_event_class: *mut ffi::bt_event_class,
     irq_handler_exit_event_class: *mut ffi::bt_event_class,
     sched_wakeup_event_class: *mut ffi::bt_event_class,
@@ -51,6 +52,7 @@ impl Drop for TrcCtfConverter {
             ffi::bt_event_class_put_ref(self.irq_handler_entry_event_class);
             ffi::bt_event_class_put_ref(self.irq_handler_exit_event_class);
             ffi::bt_event_class_put_ref(self.sched_switch_event_class);
+            ffi::bt_event_class_put_ref(self.sched_migrate_task_event_class);
             ffi::bt_event_class_put_ref(self.user_event_class);
             ffi::bt_event_class_put_ref(self.unknown_event_class);
         }
@@ -66,6 +68,7 @@ impl TrcCtfConverter {
             unknown_event_class: ptr::null_mut(),
             user_event_class: ptr::null_mut(),
             sched_switch_event_class: ptr::null_mut(),
+            sched_migrate_task_event_class: ptr::null_mut(),
             irq_handler_entry_event_class: ptr::null_mut(),
             irq_handler_exit_event_class: ptr::null_mut(),
             sched_wakeup_event_class: ptr::null_mut(),
@@ -196,6 +199,7 @@ impl TrcCtfConverter {
     pub fn create_event_classes(&mut self, stream: *mut ffi::bt_stream) -> Result<(), Error> {
         let stream_class = unsafe { ffi::bt_stream_borrow_class(stream) };
         self.sched_switch_event_class = SchedSwitch::event_class(stream_class)?;
+        self.sched_switch_event_class = SchedMigrateTask::event_class(stream_class)?;
         Ok(())
     }
 
@@ -336,6 +340,15 @@ impl TrcCtfConverter {
                     &mut self.name_map,
                 ))?
                 .emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
+            Event::Migration(ev) => {
+                let event_class = self.sched_migrate_task_event_class;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+                SchedMigrateTask::try_from((ev, &mut self.string_cache, &mut self.name_map))?
+                    .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::Ipc(ev) => {
