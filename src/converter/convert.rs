@@ -1,5 +1,5 @@
-use super::events::*;
 use super::types::{BorrowedCtfState, StringCache};
+use super::{CTX_MASK, events::*};
 use crate::event::{
     Event, common::EventCommon, destroy::DestroyEvent, event_type::EventType,
     factory::FactoryEvent, pf::PfEvent,
@@ -227,7 +227,7 @@ impl TrcCtfConverter {
 
             let ctx_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 4);
-            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx & 0xFFFFFFFFFFFFF000); // TODO
+            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx & CTX_MASK); // TODO
 
             let pmc1_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 5);
@@ -241,7 +241,7 @@ impl TrcCtfConverter {
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 7);
             ffi::bt_field_integer_unsigned_set_value(kclock_field, common.kclock as u64);
 
-            let name_dbg_tuple = self.name_map.get(&(common.ctx & 0xFFFFFFFFFFFFF000));
+            let name_dbg_tuple = self.name_map.get(&(common.ctx & CTX_MASK));
 
             let name_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 8);
@@ -306,10 +306,8 @@ impl TrcCtfConverter {
                     "".to_string()
                 };
 
-                self.name_map.insert(
-                    ev.obj & 0xFFFFFFFFFFFFF000,
-                    (name.clone(), ev.id.to_string()),
-                );
+                self.name_map
+                    .insert(ev.obj & CTX_MASK, (name.clone(), ev.id.to_string()));
                 self.string_cache.insert_str(&name)?;
                 self.string_cache.insert_str(&ev.id.to_string())?;
 
@@ -374,14 +372,12 @@ impl TrcCtfConverter {
             }
 
             Event::Destroy(ev) => {
-                self.name_map.remove(&(ev.obj & 0xFFFFFFFFFFFFF000));
+                self.name_map.remove(&(ev.obj & CTX_MASK));
                 emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
-                self.name_map.insert(
-                    ev.newo & 0xFFFFFFFFFFFFF000,
-                    ("".to_string(), ev.id.to_string()),
-                );
+                self.name_map
+                    .insert(ev.newo & CTX_MASK, ("".to_string(), ev.id.to_string()));
                 self.string_cache.insert_str(&ev.id.to_string())?;
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }

@@ -1,3 +1,4 @@
+use super::CTX_MASK;
 use super::types::StringCache;
 use crate::event::ipc::IpcEvent;
 use crate::event::ipc_res::IpcResEvent;
@@ -188,8 +189,8 @@ impl<'a>
         let cache = value.2;
         let name_map = value.3;
 
-        let src = event.common.ctx & 0xFFFFFFFFFFFFF000;
-        let dst = event.dst & 0xFFFFFFFFFFFFF000;
+        let src = event.common.ctx & CTX_MASK;
+        let dst = event.dst & CTX_MASK;
 
         let mut prev_comm = src.to_string();
         let mut prev_tid: i64 = src as i64;

@@ -17,6 +17,8 @@ use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use tracing::debug;
 
+const CTX_MASK: u64 = 0xFFFFFFFFFFFFF000;
+
 pub struct Converter {
     pipeline: EncoderPipeline,
 }
