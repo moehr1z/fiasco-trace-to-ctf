@@ -199,7 +199,7 @@ impl TrcCtfConverter {
     pub fn create_event_classes(&mut self, stream: *mut ffi::bt_stream) -> Result<(), Error> {
         let stream_class = unsafe { ffi::bt_stream_borrow_class(stream) };
         self.sched_switch_event_class = SchedSwitch::event_class(stream_class)?;
-        self.sched_switch_event_class = SchedMigrateTask::event_class(stream_class)?;
+        self.sched_migrate_task_event_class = SchedMigrateTask::event_class(stream_class)?;
         Ok(())
     }
 
