@@ -1,5 +1,5 @@
 mod convert;
-mod events;
+mod event;
 mod interruptor;
 pub mod opts;
 mod plugin;
