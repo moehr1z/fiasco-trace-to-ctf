@@ -309,7 +309,7 @@ impl TrcCtfConverter {
                     // TODO not sure why, but sometimes when you enable IPC events there's some
                     // gibberish in some name fields
                     warn!(
-                        "Could not convert Nam event bytes to name string! Not converting this event. (event nr: {}, bytes: {:?})",
+                        "Could not convert Nam event bytes to name string! (event nr: {}, bytes: {:?})",
                         ev.common.number, ev.name
                     );
                     was_valid = false;
