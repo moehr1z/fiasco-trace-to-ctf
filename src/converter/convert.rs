@@ -385,7 +385,7 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                IpcRes::try_from(ev)?.emit_event(ctf_event)?;
+                IpcRes::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
 
