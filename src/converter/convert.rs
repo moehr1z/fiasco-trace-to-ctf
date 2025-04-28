@@ -374,9 +374,8 @@ impl TrcCtfConverter {
                 } else {
                     "".to_string()
                 };
-                let rcv_name = self.string_cache.get_str(&rcv_name);
 
-                Ipc::try_from((ev, rcv_name))?.emit_event(ctf_event)?;
+                Ipc::try_from((ev, &rcv_name, &mut self.string_cache))?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::IpcRes(ev) => {
