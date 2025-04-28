@@ -2,30 +2,10 @@ use std::ffi::CStr;
 
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
-use log::warn;
-use num_enum::TryFromPrimitive;
 
 use crate::{converter::types::StringCache, event::ipc::IpcEvent};
 
-const IPCWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Recv as u8;
-const IPCENDANDWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8;
-const IPCREPLYANDWAIT: u8 =
-    IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8 | IpcType::Reply as u8;
-const IPCCALLIPC: u8 = IpcType::Send as u8 | IpcType::Recv as u8;
-
-#[derive(Debug, TryFromPrimitive)]
-#[repr(u8)]
-enum IpcType {
-    Call = 0,
-    Send = 1,
-    Recv = 2,
-    OpenWait = 4,
-    Reply = 8,
-    Wait = IPCWAIT,
-    SendAndWait = IPCENDANDWAIT,
-    ReplyAndWait = IPCREPLYANDWAIT,
-    CallIpc = IPCCALLIPC,
-}
+use super::ipc_type::IpcType;
 
 #[derive(CtfEventClass)]
 #[event_name = "IPC"]
@@ -50,12 +30,7 @@ impl<'a> TryFrom<(IpcEvent, &'a String, &'a mut StringCache)> for Ipc<'a> {
         let rcv_name = v.1;
         let cache = v.2;
 
-        let type_number = (event.dst & 0xf) as u8;
-        let type_var: IpcType = type_number.try_into().unwrap_or_else(|_| {
-            warn!("Unknown IPC type number {type_number}");
-            IpcType::Send
-        });
-        let type_name = format!("{:?}", type_var).to_string();
+        let type_name = IpcType::num_to_str((event.dst & 0xf) as u8);
         cache.insert_str(&type_name)?;
         let type_ = cache.get_str(&type_name);
 
