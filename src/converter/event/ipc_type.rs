@@ -2,7 +2,7 @@ use log::warn;
 use num_enum::TryFromPrimitive;
 
 const IPCWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Recv as u8;
-const IPCENDANDWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8;
+const IPCSENDANDWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8;
 const IPCREPLYANDWAIT: u8 =
     IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8 | IpcType::Reply as u8;
 const IPCCALLIPC: u8 = IpcType::Send as u8 | IpcType::Recv as u8;
@@ -16,7 +16,7 @@ pub enum IpcType {
     OpenWait = 4,
     Reply = 8,
     Wait = IPCWAIT,
-    SendAndWait = IPCENDANDWAIT,
+    SendAndWait = IPCSENDANDWAIT,
     ReplyAndWait = IPCREPLYANDWAIT,
     CallIpc = IPCCALLIPC,
 }
