@@ -2,7 +2,7 @@ use core::str;
 use std::str::Utf8Error;
 
 pub fn i8_array_to_string(array: [i8; 32]) -> Result<String, Utf8Error> {
-    // TODO i am not sure why, but the name field in the Nam event sometimes has some gibberish bytes
+    // NOTE i am not sure why, but the name field in the Nam event sometimes has some gibberish bytes
     // after the first null byte, so we can't just use from_utf8
     let end = array.iter().position(|&c| c == 0).unwrap_or(array.len());
 

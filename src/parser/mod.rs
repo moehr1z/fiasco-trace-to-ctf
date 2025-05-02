@@ -51,7 +51,6 @@ impl EventParser {
         let event_type: EventType = event_type_num.try_into()?;
         reader.seek_relative(-EVENT_TYPE_POSITION - 1)?;
 
-        // TODO use a macro for this
         match event_type {
             EventType::Breakpoint => {
                 let event = BpEvent::read(&mut reader)?;

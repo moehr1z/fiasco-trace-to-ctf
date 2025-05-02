@@ -44,7 +44,6 @@ async fn main() {
     let event_buf: Arc<Mutex<VecDeque<Event>>> = Arc::new(Mutex::new(VecDeque::new()));
 
     // TODO error handling
-    // TODO name mapping
 
     // Receive the event bytes from the network and pass them to the parser
     let network_handle = task::spawn(async move {
@@ -95,10 +94,7 @@ async fn main() {
                             parser_tx.send(e).await.unwrap();
                             debug!("Parsed and sent event");
                         } else {
-                            // TODO this should somehow be handled instead of just dropping it, but
-                            // i believe the best way is to prevent it in the first place with a
-                            // buffer redesign
-                            debug!(
+                            warn!(
                                 "Found duplicate/out of order event (event nr: {event_number}, max nr: {biggest_event_num}"
                             );
                         }
@@ -151,15 +147,7 @@ async fn main() {
                         Ok(_) => {
                             debug!("Succesfully converted event");
 
-                            // stream_file.read_to_end(&mut stream_buf).await.unwrap();
-
-                            // send to live session handler
-                            // TODO don't copy
-                            // converter_tx
-                            //     .send(ConvMsg::Stream(stream_buf.clone()))
-                            //     .await
-                            //     .unwrap();
-
+                            // TODO send to live session handler
                             // TODO commit to disk
                         }
                         Err(e) => error!("Error converting event ({:?})", e),
@@ -178,67 +166,4 @@ async fn main() {
         .await;
 
     let _ = join!(network_handle, parser_handle);
-
-    //
-    // let converter = task::spawn_blocking(move || {
-    //     let mut converter = Converter::new(event_buf, HashMap::new()).unwrap();
-    //     converter.convert().unwrap();
-    // });
-
-    // Sort
-    // events.sort_by_key(|e| e.event_common().tsc);
-
-    // create mapping DB of pointer -> name, timestamp until valid
-    // let mut name_db: HashMap<L4Addr, Vec<(String, Option<u64>)>> = HashMap::new(); // vector of entries because you could reassign a pointer or rename the object
-    // for e in &events {
-    //     let ts = e.event_common().tsc;
-    //
-    //     // TODO are these all relevant events?
-    //     match e {
-    //         Event::Nam(ev) => {
-    //             let addr = ev.obj;
-    //             let addr = addr & 0xFFFFFFFFFFFFF000; // TODO somehow the last 3 bits of ctx are always 0, look up why
-    //
-    //             let entry = name_db.get_mut(&addr);
-    //
-    //             let bind = &ev.name.iter().map(|&c| c as u8).collect::<Vec<u8>>();
-    //             let name = str::from_utf8(bind).unwrap(); // TODO error handling
-    //             let name = name.replace('\0', "");
-    //             if name.is_empty() {
-    //                 continue;
-    //             }
-    //
-    //             match entry {
-    //                 None => {
-    //                     name_db.insert(addr, vec![(name, None)]);
-    //                 }
-    //                 Some(entry) => {
-    //                     // there already were some names for this pointer
-    //                     for e in &mut *entry {
-    //                         // the pointer was renamed so the prev name is only valid until the time of rename
-    //                         if e.1.is_none() {
-    //                             e.1 = Some(ts);
-    //                         }
-    //                     }
-    //                     entry.push((name, None));
-    //                 }
-    //             }
-    //         }
-    //         Event::Destroy(ev) => {
-    //             let addr = ev.obj;
-    //             let entry = name_db.get_mut(&addr);
-    //
-    //             // if it is none, some unnamed object was destroyed, so we don't care
-    //             if let Some(entry) = entry {
-    //                 for e in &mut *entry {
-    //                     // deleting the objects invalidates its name at time of deletion
-    //                     if e.1.is_none() {
-    //                         e.1 = Some(ts);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         _ => {}
-    //     }
-    // }
 }

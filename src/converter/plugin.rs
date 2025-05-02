@@ -232,7 +232,7 @@ impl TrcPluginState {
     }
 
     pub fn read_event(&mut self) -> Result<Option<Event>, Error> {
-        let mut events = self.events.lock().unwrap(); // TODO error handling
+        let mut events = self.events.lock().unwrap();
         if let Some(event) = events.pop_front() {
             Ok(Some(event))
         } else {

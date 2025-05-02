@@ -85,7 +85,7 @@ impl Drop for TrcCtfConverter {
 impl TrcCtfConverter {
     pub fn new() -> Self {
         let mut string_cache: StringCache = Default::default();
-        string_cache.insert_str("").unwrap(); // TODO error handling
+        string_cache.insert_str("").unwrap();
 
         Self {
             unknown_event_class: ptr::null_mut(),
@@ -254,7 +254,7 @@ impl TrcCtfConverter {
 
             let ctx_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 4);
-            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx & CTX_MASK); // TODO
+            ffi::bt_field_integer_unsigned_set_value(ctx_field, common.ctx & CTX_MASK);
 
             let pmc1_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 5);
