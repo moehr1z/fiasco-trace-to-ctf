@@ -25,11 +25,6 @@ use tokio::{join, task};
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";
 
-// enum ConvMsg {
-//     Meta(Vec<u8>),
-//     Stream(Vec<u8>),
-// }
-
 #[tokio::main]
 async fn main() {
     env_logger::init();
@@ -123,17 +118,6 @@ async fn main() {
             };
             let eof_signal = Arc::new(AtomicBool::new(false));
             let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts).unwrap();
-
-            // let mut stream_file_path = ctf_dir_path.to_string();
-            // stream_file_path.push_str("stream");
-            // println!("PATH: {}", stream_file_path);
-            // let mut stream_file = File::create(&stream_file_path).await.unwrap();
-            // let mut stream_buf = Vec::new();
-
-            // let mut meta_file_path = ctf_dir_path.to_string();
-            // meta_file_path.push_str("metadata");
-            // let mut meta_file = File::open(&meta_file_path).await.unwrap();
-            // let mut meta_buf = Vec::new();
 
             let _ = task::spawn_local(async move {
                 while let Some(event) = converter_rx.recv().await {
