@@ -6,6 +6,23 @@ use super::event::sched_migrate_task::SchedMigrateTask;
 use super::event::sched_switch::SchedSwitch;
 use super::event::unsupported::Unsupported;
 use super::types::{BorrowedCtfState, StringCache};
+use crate::event::bp::BpEvent;
+use crate::event::drq::DrqEvent;
+use crate::event::empty::EmptyEvent;
+use crate::event::exregs::ExregsEvent;
+use crate::event::fullsize::FullsizeEvent;
+use crate::event::gate::GateEvent;
+use crate::event::ieh::IehEvent;
+use crate::event::ipfh::IpfhEvent;
+use crate::event::irq::IrqEvent;
+use crate::event::ke::KeEvent;
+use crate::event::rcu::RcuEvent;
+use crate::event::sched::SchedEvent;
+use crate::event::svm::SvmEvent;
+use crate::event::timer::TimerEvent;
+use crate::event::tmap::TmapEvent;
+use crate::event::trap::TrapEvent;
+use crate::event::vcpu::VcpuEvent;
 use crate::event::{
     Event, common::EventCommon, destroy::DestroyEvent, event_type::EventType,
     factory::FactoryEvent, pf::PfEvent,
@@ -388,7 +405,6 @@ impl TrcCtfConverter {
                 IpcRes::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
-
             Event::Destroy(ev) => {
                 self.name_map.remove(&(ev.obj & CTX_MASK));
                 emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
@@ -399,11 +415,25 @@ impl TrcCtfConverter {
                 self.string_cache.insert_str(&ev.id.to_string())?;
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }
-
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),
-
-            // The rest are named events with no payload
-            _ => {
+            Event::Drq(ev) => emit_event!(DrqEvent, self, ev, ctf_state, event_common),
+            Event::Vcpu(ev) => emit_event!(VcpuEvent, self, ev, ctf_state, event_common),
+            Event::Gate(ev) => emit_event!(GateEvent, self, ev, ctf_state, event_common),
+            Event::Irq(ev) => emit_event!(IrqEvent, self, ev, ctf_state, event_common),
+            Event::Rcu(ev) => emit_event!(RcuEvent, self, ev, ctf_state, event_common),
+            Event::Tmap(ev) => emit_event!(TmapEvent, self, ev, ctf_state, event_common),
+            Event::Bp(ev) => emit_event!(BpEvent, self, ev, ctf_state, event_common),
+            Event::Empty(ev) => emit_event!(EmptyEvent, self, ev, ctf_state, event_common),
+            Event::Ke(ev) => emit_event!(KeEvent, self, ev, ctf_state, event_common),
+            Event::Sched(ev) => emit_event!(SchedEvent, self, ev, ctf_state, event_common),
+            Event::Trap(ev) => emit_event!(TrapEvent, self, ev, ctf_state, event_common),
+            Event::Fullsize(ev) => emit_event!(FullsizeEvent, self, ev, ctf_state, event_common),
+            Event::Ieh(ev) => emit_event!(IehEvent, self, ev, ctf_state, event_common),
+            Event::Ipfh(ev) => emit_event!(IpfhEvent, self, ev, ctf_state, event_common),
+            Event::Exregs(ev) => emit_event!(ExregsEvent, self, ev, ctf_state, event_common),
+            Event::Timer(ev) => emit_event!(TimerEvent, self, ev, ctf_state, event_common),
+            Event::Svm(ev) => emit_event!(SvmEvent, self, ev, ctf_state, event_common),
+            Event::KeBin(_) | Event::KeReg(_) => {
                 let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
                 let event_class = self.event_class(stream_class, event_type, |stream_class| {
                     Unsupported::event_class(event_type, stream_class)
