@@ -13,7 +13,6 @@ use log::{debug, error, info};
 use parser::EventParser;
 use std::collections::VecDeque;
 use std::io::Cursor;
-use std::path::Path;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
@@ -43,7 +42,10 @@ async fn main() {
     // Receive the event bytes from the network and pass them to the parser
     let network_handle = task::spawn(async move {
         info!("Listening on {}", IP_ADDRESS);
-        let listener = TcpListener::bind(IP_ADDRESS).await.unwrap();
+        let listener = TcpListener::bind(IP_ADDRESS).await.unwrap_or_else(|_| {
+            error!("Could not bind to provided address/port!");
+            panic!();
+        });
         match listener.accept().await {
             Ok((stream, addr)) => {
                 info!("Accepted connection from {:?}", addr);
@@ -51,8 +53,11 @@ async fn main() {
                 let mut buf: [u8; 128] = [0; 128];
 
                 while reader.read_exact(&mut buf).await.is_ok() {
-                    net_tx.send(buf).await.unwrap();
-                    debug!("Read and sent event bytes");
+                    if net_tx.send(buf).await.is_ok() {
+                        debug!("Read and sent event bytes");
+                    } else {
+                        warn!("Could not send event to parser. Dropping it...");
+                    }
                 }
             }
             Err(e) => error!("Error accepting TCP connection ({:?})", e),
@@ -86,8 +91,11 @@ async fn main() {
                             }
                             biggest_event_num = event_number;
                             first_event_observed = true;
-                            parser_tx.send(e).await.unwrap();
-                            debug!("Parsed and sent event");
+                            if parser_tx.send(e).await.is_ok() {
+                                debug!("Parsed and sent event");
+                            } else {
+                                warn!("Could not send event to converter. Dropping it...");
+                            }
                         } else {
                             warn!(
                                 "Found duplicate/out of order event (event nr: {event_number}, max nr: {biggest_event_num}"
@@ -107,23 +115,29 @@ async fn main() {
     local
         .run_until(async move {
             let ctf_dir_path = "/dev/shm/ctf_trace/";
-            let ctf_dir = Path::new(ctf_dir_path); // we use a tmpfs dir
             // because babeltrace only has a file system ctf sink, but we don't want to read the
             // data in again from disk to send it to the live session
             let opts = Opts {
                 clock_name: "monotonic".to_string(),
                 trace_name: "l4re".to_string(),
                 log_level: LoggingLevel::Warn,
-                output: ctf_dir.to_str().unwrap().into(),
+                output: ctf_dir_path.into(),
             };
             let eof_signal = Arc::new(AtomicBool::new(false));
-            let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts).unwrap();
+            let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts)
+                .unwrap_or_else(|_| {
+                    error!("Could not instantiate converter!");
+                    panic!();
+                });
 
             let _ = task::spawn_local(async move {
                 while let Some(event) = converter_rx.recv().await {
                     debug!("Received event");
                     {
-                        let mut event_buf = event_buf_c.lock().unwrap();
+                        let mut event_buf = event_buf_c.lock().unwrap_or_else(|_| {
+                            error!("Poisoned lock!");
+                            panic!()
+                        });
                         event_buf.push_back(event);
                     }
                     debug!("Trying to convert event...");

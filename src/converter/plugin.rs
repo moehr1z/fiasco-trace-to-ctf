@@ -8,6 +8,7 @@ use babeltrace2_sys::{
     source_plugin_descriptors,
 };
 use chrono::prelude::{DateTime, Utc};
+use log::error;
 use std::collections::VecDeque;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
@@ -232,7 +233,10 @@ impl TrcPluginState {
     }
 
     pub fn read_event(&mut self) -> Result<Option<Event>, Error> {
-        let mut events = self.events.lock().unwrap();
+        let mut events = self.events.lock().unwrap_or_else(|_| {
+            error!("Poisoned lock!");
+            panic!()
+        });
         if let Some(event) = events.pop_front() {
             Ok(Some(event))
         } else {
