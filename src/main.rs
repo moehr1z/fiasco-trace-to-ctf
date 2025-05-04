@@ -5,7 +5,7 @@ mod opts;
 mod parser;
 
 use crate::event::Event;
-use babeltrace2_sys::LoggingLevel;
+use clap::Parser;
 use converter::Converter;
 use core::str;
 use log::warn;
@@ -27,6 +27,8 @@ const IP_ADDRESS: &str = "0.0.0.0:8888";
 
 #[tokio::main]
 async fn main() {
+    let opts = Opts::parse();
+
     env_logger::init();
 
     // network -> parser
@@ -115,15 +117,8 @@ async fn main() {
     let local = task::LocalSet::new();
     local
         .run_until(async move {
-            let ctf_dir_path = "/dev/shm/ctf_trace/";
             // because babeltrace only has a file system ctf sink, but we don't want to read the
             // data in again from disk to send it to the live session
-            let opts = Opts {
-                clock_name: "monotonic".to_string(),
-                trace_name: "l4re".to_string(),
-                log_level: LoggingLevel::Warn,
-                output: ctf_dir_path.into(),
-            };
             let eof_signal = Arc::new(AtomicBool::new(false));
             let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts)
                 .unwrap_or_else(|_| {

@@ -11,7 +11,7 @@ pub struct Opts {
     pub clock_name: String,
 
     /// The CTF trace name
-    #[clap(long, default_value = "freertos")]
+    #[clap(long, default_value = "l4re")]
     pub trace_name: String,
 
     /// babeltrace2 log level
