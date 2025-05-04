@@ -1,14 +1,13 @@
 mod convert;
 mod event;
 mod interruptor;
-pub mod opts;
 mod plugin;
 mod types;
 
 use crate::event::Event;
+use crate::opts::Opts;
 use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
 use interruptor::Interruptor;
-use opts::Opts;
 use plugin::{TrcPlugin, TrcPluginState};
 use std::collections::VecDeque;
 use std::ffi::CString;

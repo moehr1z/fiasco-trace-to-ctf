@@ -1,7 +1,7 @@
 use super::interruptor::Interruptor;
-use super::opts::Opts;
 use super::{convert::TrcCtfConverter, types::BorrowedCtfState};
 use crate::event::Event;
+use crate::opts::Opts;
 use babeltrace2_sys::{
     BtResult, BtResultExt, Error, MessageIteratorStatus, Plugin, SelfComponent,
     SelfMessageIterator, SourcePluginDescriptor, SourcePluginHandler, ffi,

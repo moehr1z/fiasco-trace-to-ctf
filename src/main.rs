@@ -1,15 +1,16 @@
 mod converter;
 mod event;
 mod helpers;
+mod opts;
 mod parser;
 
 use crate::event::Event;
 use babeltrace2_sys::LoggingLevel;
 use converter::Converter;
-use converter::opts::Opts;
 use core::str;
 use log::warn;
 use log::{debug, error, info};
+use opts::Opts;
 use parser::EventParser;
 use std::collections::VecDeque;
 use std::io::Cursor;
