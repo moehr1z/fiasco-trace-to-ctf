@@ -30,6 +30,7 @@ pub struct TrcPluginState {
     stream_is_open: bool,
     stream: *mut ffi::bt_stream,
     packet: *mut ffi::bt_packet,
+    last_cpu_id: u8, // NOTE: this is a bit of a hack. We want trace compass to pick up the cpu id, but it doesn't pick it up if i put it in the event context, so we put it in the packet context and make a new packet on every cpu id change...
     converter: TrcCtfConverter,
 }
 
@@ -54,6 +55,7 @@ impl TrcPluginState {
             // NOTE: timestamp/event trackers get re-initialized on the first event
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
+            last_cpu_id: 0,
             converter: TrcCtfConverter::new(),
         })
     }
@@ -125,7 +127,7 @@ impl TrcPluginState {
             ffi::bt_trace_set_name(trace, self.trace_name.as_c_str().as_ptr());
 
             self.stream = ffi::bt_stream_create(stream_class, trace);
-            self.create_new_packet()?;
+            self.create_new_packet(0)?;
 
             // Put the references we don't need anymore
             ffi::bt_trace_put_ref(trace);
@@ -216,7 +218,7 @@ impl TrcPluginState {
         Ok(())
     }
 
-    pub fn create_new_packet(&mut self) -> Result<(), Error> {
+    pub fn create_new_packet(&mut self, cpu_id: u64) -> Result<(), Error> {
         unsafe {
             if !self.packet.is_null() {
                 ffi::bt_packet_put_ref(self.packet);
@@ -227,7 +229,8 @@ impl TrcPluginState {
             let packet_ctx_f = ffi::bt_packet_borrow_context_field(self.packet);
             // TODO always set to 0
             let cpu_id_f = ffi::bt_field_structure_borrow_member_field_by_index(packet_ctx_f, 0);
-            ffi::bt_field_integer_unsigned_set_value(cpu_id_f, 0);
+
+            ffi::bt_field_integer_unsigned_set_value(cpu_id_f, cpu_id);
         }
         Ok(())
     }
@@ -314,6 +317,28 @@ impl SourcePluginHandler for TrcPluginState {
 
         match self.read_event()? {
             Some(event) => {
+                let cpu_id = event.event_common().cpu;
+
+                if self.last_cpu_id != cpu_id {
+                    // Add packet end message
+                    let msg = unsafe {
+                        ffi::bt_message_packet_end_create(ctf_state.message_iter_mut(), self.packet)
+                    };
+                    ctf_state.push_message(msg)?;
+
+                    self.create_new_packet(cpu_id as u64)?;
+
+                    // Add packet begin message
+                    let msg = unsafe {
+                        ffi::bt_message_packet_beginning_create(
+                            ctf_state.message_iter_mut(),
+                            self.packet,
+                        )
+                    };
+                    ctf_state.push_message(msg)?;
+                }
+                self.last_cpu_id = cpu_id;
+
                 if !self.stream_is_open {
                     debug!("Opening stream");
                     self.stream_is_open = true;
