@@ -13,28 +13,26 @@ use log::{debug, error, info};
 use opts::Opts;
 use parser::EventParser;
 use std::collections::VecDeque;
-use std::io::Cursor;
+use std::io::{BufReader, Cursor, Read};
+use std::net::TcpListener;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
-use tokio::io::{AsyncReadExt, BufReader};
-use tokio::net::TcpListener;
-use tokio::sync::mpsc;
-use tokio::{join, task};
+use std::sync::mpsc;
+use std::thread;
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let opts = Opts::parse();
 
     env_logger::init();
 
     // network -> parser
-    let (net_tx, mut parser_rx) = mpsc::channel(32);
+    let (net_tx, parser_rx) = mpsc::channel();
     // parser -> converter
-    let (parser_tx, mut converter_rx) = mpsc::channel::<Event>(32);
+    let (parser_tx, converter_rx) = mpsc::channel::<Event>();
     // converter -> live session
     // let (converter_tx, mut live_rx) = mpsc::channel(32);
 
@@ -43,20 +41,20 @@ async fn main() {
     // TODO error handling
 
     // Receive the event bytes from the network and pass them to the parser
-    let network_handle = task::spawn(async move {
+    let network_handle = thread::spawn(move || {
         info!("Listening on {}", IP_ADDRESS);
-        let listener = TcpListener::bind(IP_ADDRESS).await.unwrap_or_else(|_| {
+        let listener = TcpListener::bind(IP_ADDRESS).unwrap_or_else(|_| {
             error!("Could not bind to provided address/port!");
             panic!();
         });
-        match listener.accept().await {
+        match listener.accept() {
             Ok((stream, addr)) => {
                 info!("Accepted connection from {:?}", addr);
                 let mut reader = BufReader::new(stream);
                 let mut buf: [u8; 128] = [0; 128];
 
-                while reader.read_exact(&mut buf).await.is_ok() {
-                    if net_tx.send(buf).await.is_ok() {
+                while reader.read_exact(&mut buf).is_ok() {
+                    if net_tx.send(buf).is_ok() {
                         debug!("Read and sent event bytes");
                     } else {
                         warn!("Could not send event to parser. Dropping it...");
@@ -69,11 +67,11 @@ async fn main() {
 
     // Parse the event bytes and pass the to the converter
     let event_buf_c = event_buf.clone();
-    let parser_handle = task::spawn(async move {
+    let parser_handle = thread::spawn(move || {
         let mut first_event_observed = false;
         let mut biggest_event_num: u64 = 0;
 
-        while let Some(event_bytes) = parser_rx.recv().await {
+        while let Ok(event_bytes) = parser_rx.recv() {
             debug!("Received event bytes");
             let mut reader = Cursor::new(event_bytes);
             let event = EventParser::next_event(&mut reader);
@@ -94,7 +92,7 @@ async fn main() {
                             }
                             biggest_event_num = event_number;
                             first_event_observed = true;
-                            if parser_tx.send(e).await.is_ok() {
+                            if parser_tx.send(e).is_ok() {
                                 debug!("Parsed and sent event");
                             } else {
                                 warn!("Could not send event to converter. Dropping it...");
@@ -114,50 +112,46 @@ async fn main() {
     });
 
     // Convert the events to CTF and pass the to the disk writer and live streamer
-    let local = task::LocalSet::new();
-    local
-        .run_until(async move {
-            // because babeltrace only has a file system ctf sink, but we don't want to read the
-            // data in again from disk to send it to the live session
-            let eof_signal = Arc::new(AtomicBool::new(false));
-            let mut conv = Converter::new(event_buf.clone(), eof_signal.clone(), opts)
-                .unwrap_or_else(|_| {
-                    error!("Could not instantiate converter!");
-                    panic!();
+    let converter_handle = thread::spawn(move || {
+        // because babeltrace only has a file system ctf sink, but we don't want to read the
+        // data in again from disk to send it to the live session
+        let eof_signal = Arc::new(AtomicBool::new(false));
+        let mut conv =
+            Converter::new(event_buf.clone(), eof_signal.clone(), opts).unwrap_or_else(|_| {
+                error!("Could not instantiate converter!");
+                panic!();
+            });
+
+        while let Ok(event) = converter_rx.recv() {
+            debug!("Received event");
+            {
+                let mut event_buf = event_buf_c.lock().unwrap_or_else(|_| {
+                    error!("Poisoned lock!");
+                    panic!()
                 });
+                event_buf.push_back(event);
+            }
+            debug!("Trying to convert event...");
+            match conv.convert_once() {
+                Ok(_) => {
+                    debug!("Succesfully converted event");
 
-            let _ = task::spawn_local(async move {
-                while let Some(event) = converter_rx.recv().await {
-                    debug!("Received event");
-                    {
-                        let mut event_buf = event_buf_c.lock().unwrap_or_else(|_| {
-                            error!("Poisoned lock!");
-                            panic!()
-                        });
-                        event_buf.push_back(event);
-                    }
-                    debug!("Trying to convert event...");
-                    match conv.convert_once() {
-                        Ok(_) => {
-                            debug!("Succesfully converted event");
-
-                            // TODO send to live session handler
-                            // TODO commit to disk
-                        }
-                        Err(e) => error!("Error converting event ({:?})", e),
-                    }
+                    // TODO send to live session handler
+                    // TODO commit to disk
                 }
+                Err(e) => error!("Error converting event ({:?})", e),
+            }
+        }
 
-                debug!("Closing converter stream...");
-                eof_signal.store(true, Relaxed);
-                match conv.convert() {
-                    Ok(_) => debug!("Succesfully closed converter stream"),
-                    Err(e) => error!("Error closing converter stream ({:?})", e),
-                }
-            })
-            .await;
-        })
-        .await;
+        debug!("Closing converter stream...");
+        eof_signal.store(true, Relaxed);
+        match conv.convert() {
+            Ok(_) => debug!("Succesfully closed converter stream"),
+            Err(e) => error!("Error closing converter stream ({:?})", e),
+        }
+    });
 
-    let _ = join!(network_handle, parser_handle);
+    network_handle.join().unwrap();
+    parser_handle.join().unwrap();
+    converter_handle.join().unwrap();
 }
