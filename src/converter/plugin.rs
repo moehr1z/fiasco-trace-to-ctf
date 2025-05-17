@@ -30,7 +30,7 @@ pub struct TrcPluginState {
     stream_is_open: bool,
     stream: *mut ffi::bt_stream,
     packet: *mut ffi::bt_packet,
-    last_cpu_id: u8, // NOTE: this is a bit of a hack. We want trace compass to pick up the cpu id, but it doesn't pick it up if i put it in the event context, so we put it in the packet context and make a new packet on every cpu id change...
+    cpu_id: u8,
     converter: TrcCtfConverter,
 }
 
@@ -40,6 +40,7 @@ impl TrcPluginState {
         events: Arc<Mutex<VecDeque<Event>>>,
         opts: &Opts,
         eof_signal: Arc<AtomicBool>,
+        cpu_id: u8,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
@@ -55,7 +56,7 @@ impl TrcPluginState {
             // NOTE: timestamp/event trackers get re-initialized on the first event
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
-            last_cpu_id: 0,
+            cpu_id,
             converter: TrcCtfConverter::new(),
         })
     }
@@ -66,6 +67,7 @@ impl TrcPluginState {
     ) -> Result<(), Error> {
         unsafe {
             let trace_class = ffi::bt_trace_class_create(component.inner_mut());
+            ffi::bt_trace_class_set_assigns_automatic_stream_class_id(trace_class, 0);
 
             // Create common event context
             let base_event_context = self.converter.create_event_common_context(trace_class)?;
@@ -75,14 +77,9 @@ impl TrcPluginState {
             let ret =
                 ffi::bt_clock_class_set_name(clock_class, self.clock_name.as_c_str().as_ptr());
             ret.capi_result()?;
-            // TODO
-            // ffi::bt_clock_class_set_frequency(
-            //     clock_class,
-            //     self.trd.timestamp_info.timer_frequency.get_raw() as _,
-            // );
             ffi::bt_clock_class_set_origin_is_unix_epoch(clock_class, 0);
 
-            let stream_class = ffi::bt_stream_class_create(trace_class);
+            let stream_class = ffi::bt_stream_class_create_with_id(trace_class, self.cpu_id as u64);
             ffi::bt_stream_class_set_default_clock_class(stream_class, clock_class);
             ffi::bt_stream_class_set_supports_packets(
                 stream_class,
@@ -127,7 +124,7 @@ impl TrcPluginState {
             ffi::bt_trace_set_name(trace, self.trace_name.as_c_str().as_ptr());
 
             self.stream = ffi::bt_stream_create(stream_class, trace);
-            self.create_new_packet(0)?;
+            self.create_new_packet(self.cpu_id.into())?;
 
             // Put the references we don't need anymore
             ffi::bt_trace_put_ref(trace);
@@ -317,28 +314,6 @@ impl SourcePluginHandler for TrcPluginState {
 
         match self.read_event()? {
             Some(event) => {
-                let cpu_id = event.event_common().cpu;
-
-                if self.last_cpu_id != cpu_id {
-                    // Add packet end message
-                    let msg = unsafe {
-                        ffi::bt_message_packet_end_create(ctf_state.message_iter_mut(), self.packet)
-                    };
-                    ctf_state.push_message(msg)?;
-
-                    self.create_new_packet(cpu_id as u64)?;
-
-                    // Add packet begin message
-                    let msg = unsafe {
-                        ffi::bt_message_packet_beginning_create(
-                            ctf_state.message_iter_mut(),
-                            self.packet,
-                        )
-                    };
-                    ctf_state.push_message(msg)?;
-                }
-                self.last_cpu_id = cpu_id;
-
                 if !self.stream_is_open {
                     debug!("Opening stream");
                     self.stream_is_open = true;

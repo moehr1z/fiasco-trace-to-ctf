@@ -16,6 +16,6 @@ byteorder = "1.5.0"
 thiserror = "2.0.11"
 num_enum = "0.7.3"
 binrw = "0.14.1"
-tokio = { version = "1.44.1", features = ["full"] }
 log = "0.4.27"
 env_logger = "0.11.7"
+regex = "1.11.1"
