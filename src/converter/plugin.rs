@@ -158,42 +158,6 @@ impl TrcPluginState {
                 c"lttng-modules".as_ptr() as _,
             );
             ret.capi_result()?;
-            // TODO
-            // let ret = ffi::bt_trace_set_environment_entry_integer(
-            //     trace,
-            //     b"tracer_major\0".as_ptr() as _,
-            //     2,
-            // );
-            // ret.capi_result()?;
-            // TODO
-            // let ret = ffi::bt_trace_set_environment_entry_integer(
-            //     trace,
-            //     b"tracer_minor\0".as_ptr() as _,
-            //     12,
-            // );
-            // ret.capi_result()?;
-            // TODO
-            // let ret = ffi::bt_trace_set_environment_entry_integer(
-            //     trace,
-            //     b"tracer_patchlevel\0".as_ptr() as _,
-            //     5,
-            // );
-            // ret.capi_result()?;
-            // TODO
-            // let ret = ffi::bt_trace_set_environment_entry_string(
-            //     trace,
-            //     b"trace_buffering_scheme\0".as_ptr() as _,
-            //     b"global\0".as_ptr() as _,
-            // );
-            // ret.capi_result()?;
-            // TODO
-            // let val = CString::new(self.trd.header.endianness.to_string())?;
-            // let ret = ffi::bt_trace_set_environment_entry_string(
-            //     trace,
-            //     b"trc_endianness\0".as_ptr() as _,
-            //     val.as_c_str().as_ptr(),
-            // );
-            // ret.capi_result()?;
             let val = CString::new(format!(
                 "{}",
                 self.trace_creation_time.format("%Y%m%dT%H%M%S+0000")
@@ -224,7 +188,6 @@ impl TrcPluginState {
             self.packet = ffi::bt_packet_create(self.stream);
 
             let packet_ctx_f = ffi::bt_packet_borrow_context_field(self.packet);
-            // TODO always set to 0
             let cpu_id_f = ffi::bt_field_structure_borrow_member_field_by_index(packet_ctx_f, 0);
 
             ffi::bt_field_integer_unsigned_set_value(cpu_id_f, cpu_id);

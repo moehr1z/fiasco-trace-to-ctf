@@ -51,15 +51,9 @@ macro_rules! emit_event {
     }};
 }
 
-// TODO remove unused event classes
 pub struct TrcCtfConverter {
-    unknown_event_class: *mut ffi::bt_event_class,
-    user_event_class: *mut ffi::bt_event_class,
     sched_switch_event_class: *mut ffi::bt_event_class,
     sched_migrate_task_event_class: *mut ffi::bt_event_class,
-    irq_handler_entry_event_class: *mut ffi::bt_event_class,
-    irq_handler_exit_event_class: *mut ffi::bt_event_class,
-    sched_wakeup_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
     name_map: HashMap<u64, (String, String)>, // ctx pointer -> (name, dbg_id)
@@ -71,13 +65,8 @@ impl Drop for TrcCtfConverter {
             for (_, event_class) in self.event_classes.drain() {
                 ffi::bt_event_class_put_ref(event_class);
             }
-            ffi::bt_event_class_put_ref(self.sched_wakeup_event_class);
-            ffi::bt_event_class_put_ref(self.irq_handler_entry_event_class);
-            ffi::bt_event_class_put_ref(self.irq_handler_exit_event_class);
             ffi::bt_event_class_put_ref(self.sched_switch_event_class);
             ffi::bt_event_class_put_ref(self.sched_migrate_task_event_class);
-            ffi::bt_event_class_put_ref(self.user_event_class);
-            ffi::bt_event_class_put_ref(self.unknown_event_class);
         }
     }
 }
@@ -88,13 +77,8 @@ impl TrcCtfConverter {
         string_cache.insert_str("").unwrap();
 
         Self {
-            unknown_event_class: ptr::null_mut(),
-            user_event_class: ptr::null_mut(),
             sched_switch_event_class: ptr::null_mut(),
             sched_migrate_task_event_class: ptr::null_mut(),
-            irq_handler_entry_event_class: ptr::null_mut(),
-            irq_handler_exit_event_class: ptr::null_mut(),
-            sched_wakeup_event_class: ptr::null_mut(),
             event_classes: Default::default(),
             string_cache,
             name_map: HashMap::new(),
