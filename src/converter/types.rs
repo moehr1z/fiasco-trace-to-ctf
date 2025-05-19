@@ -1,39 +1,38 @@
-use crate::event::event_type::EventType;
 use babeltrace2_sys::{Error, MessageIteratorStatus, SelfMessageIterator, ffi};
-use std::collections::{HashMap, hash_map};
+use std::collections::HashMap;
 use std::ffi::{CStr, CString};
 
 #[derive(Default)]
 pub struct StringCache {
-    strings: HashMap<String, CString>,
-    event_types: HashMap<EventType, CString>,
+    indices: HashMap<String, usize>,
+    strings: Vec<CString>,
 }
 
 impl StringCache {
-    pub fn insert_str(&mut self, key: &str) -> Result<(), Error> {
-        if !self.strings.contains_key(key) {
-            self.strings.insert(key.to_string(), CString::new(key)?);
+    pub fn insert_str(&mut self, key: &str) -> Result<usize, Error> {
+        if let Some(&id) = self.indices.get(key) {
+            return Ok(id);
         }
-        Ok(())
+
+        let cstr = CString::new(key)?;
+        let id = self.strings.len();
+        self.strings.push(cstr);
+        self.indices.insert(key.to_string(), id);
+        Ok(id)
     }
 
     pub fn get_str(&self, key: &str) -> &CStr {
-        self.strings
-            .get(key)
-            .expect("String cache string entry doesn't exist")
+        let id = self.indices.get(key).unwrap_or_else(|| {
+            panic!(
+                "String cache string entry doesn't exist ({}) INDICES: \n{:?} STRINGS: \n{:?}",
+                key, self.indices, self.strings
+            )
+        });
+        self.strings[*id].as_c_str()
     }
 
-    pub fn insert_type(&mut self, key: EventType) -> Result<(), Error> {
-        if let hash_map::Entry::Vacant(e) = self.event_types.entry(key) {
-            e.insert(CString::new(key.to_string())?);
-        }
-        Ok(())
-    }
-
-    pub fn get_type(&self, key: &EventType) -> &CStr {
-        self.event_types
-            .get(key)
-            .expect("String cache event type entry doesn't exist")
+    pub fn get_str_by_id(&self, key: usize) -> &CStr {
+        self.strings[key].as_c_str()
     }
 }
 

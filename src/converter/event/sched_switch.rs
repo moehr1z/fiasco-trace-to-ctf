@@ -1,12 +1,13 @@
 use crate::converter::CTX_MASK;
 use crate::converter::types::StringCache;
-use crate::event::{context_switch::ContextSwitchEvent, event_type::EventType};
+use crate::event::context_switch::ContextSwitchEvent;
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
+use dashmap::DashMap;
 use enum_iterator::Sequence;
-use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ffi::CStr;
+use std::sync::Arc;
 
 #[repr(i64)]
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Sequence)]
@@ -53,7 +54,6 @@ impl TaskState {
 #[derive(CtfEventClass)]
 #[event_name = "sched_switch"]
 pub struct SchedSwitch<'a> {
-    pub src_event_type: &'a CStr,
     pub prev_comm: &'a CStr,
     pub prev_tid: i64,
     pub prev_prio: i64,
@@ -65,69 +65,62 @@ pub struct SchedSwitch<'a> {
 
 impl<'a>
     TryFrom<(
-        EventType,
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut HashMap<u64, (String, String)>,
+        &'a mut Arc<DashMap<u64, (String, String)>>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
 
     fn try_from(
         value: (
-            EventType,
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut HashMap<u64, (String, String)>,
+            &'a mut Arc<DashMap<u64, (String, String)>>,
         ),
     ) -> Result<Self, Self::Error> {
-        let event_type = value.0;
-        let event = value.1;
-        let cache = value.2;
-        let name_map = value.3;
+        let (event, cache, name_map) = value;
 
         let src = event.common.ctx & CTX_MASK;
         let dst = event.dst & CTX_MASK;
 
-        let mut prev_comm = src.to_string();
         let mut prev_tid: i64 = src as i64;
-        if let Some((name, dbg_id)) = name_map.get(&src) {
-            if !name.is_empty() {
-                prev_comm = name.clone();
-            } else {
-                prev_comm = dbg_id.clone();
-            }
+        let prev_comm_id = if let Some(r) = name_map.get(&src) {
+            let (name, dbg_id) = r.value();
             if let Ok(tid_i64) = dbg_id.parse() {
                 prev_tid = tid_i64
             }
-        }
-
-        let mut next_comm = dst.to_string();
-        let mut next_tid: i64 = dst as i64;
-        if let Some((name, dbg_id)) = name_map.get(&dst) {
             if !name.is_empty() {
-                next_comm = name.clone();
+                cache.insert_str(name)?
             } else {
-                next_comm = dbg_id.clone();
+                cache.insert_str(dbg_id)?
             }
+        } else {
+            cache.insert_str(&src.to_string())?
+        };
+
+        let mut next_tid: i64 = dst as i64;
+
+        let next_comm_id = if let Some(r) = name_map.get(&dst) {
+            let (name, dbg_id) = r.value();
             if let Ok(tid_i64) = dbg_id.parse() {
                 next_tid = tid_i64
             }
-        }
-
-        cache.insert_type(event_type)?;
-        cache.insert_str(&src.to_string())?;
-        cache.insert_str(&dst.to_string())?;
-        cache.insert_str(&prev_comm)?;
-        cache.insert_str(&next_comm)?;
+            if !name.is_empty() {
+                cache.insert_str(name)?
+            } else {
+                cache.insert_str(dbg_id)?
+            }
+        } else {
+            cache.insert_str(&dst.to_string())?
+        };
 
         Ok(Self {
-            src_event_type: cache.get_type(&event_type),
-            prev_comm: cache.get_str(&prev_comm),
+            prev_comm: cache.get_str_by_id(prev_comm_id),
             prev_tid,
             prev_prio: event.from_prio as i64,
             prev_state: TaskState::Running, // TODO always running?
-            next_comm: cache.get_str(&next_comm),
+            next_comm: cache.get_str_by_id(next_comm_id),
             next_tid,
             next_prio: 9999, // TODO get actual next prio
         })

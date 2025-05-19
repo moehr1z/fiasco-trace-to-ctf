@@ -17,13 +17,14 @@ impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
     type Error = Error;
 
     fn try_from(value: (NamEvent, &'a mut StringCache)) -> Result<Self, Self::Error> {
-        let event = value.0;
-        let cache = value.1;
+        let (event, cache) = value;
+        let name = &helpers::i8_array_to_string(event.name)?;
+        cache.insert_str(name)?;
 
         Ok(Self {
             obj: event.obj,
             id: event.id,
-            name: cache.get_str(&helpers::i8_array_to_string(event.name)?),
+            name: cache.get_str(name),
         })
     }
 }

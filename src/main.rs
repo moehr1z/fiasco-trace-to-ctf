@@ -9,6 +9,7 @@ use crate::event::Event;
 use clap::Parser;
 use converter::Converter;
 use core::str;
+use dashmap::DashMap;
 use log::warn;
 use log::{debug, error, info};
 use opts::Opts;
@@ -139,6 +140,7 @@ fn main() {
         let eof_signal = Arc::new(AtomicBool::new(false));
         let mut converters: HashMap<u8, Converter> = HashMap::new();
         let mut event_streams: HashMap<u8, Arc<Mutex<VecDeque<Event>>>> = HashMap::new();
+        let name_map: Arc<DashMap<u64, (String, String)>> = Arc::new(DashMap::new()); // ctx pointer -> (name, dbg_id)
 
         while let Ok(event) = converter_rx.recv() {
             let cpu_id = event.event_common().cpu;
@@ -148,11 +150,18 @@ fn main() {
 
                 let mut opts_c = opts.clone();
                 opts_c.output = format!("{}_{cpu_id}", opts_c.output.to_str().unwrap()).into(); // TODO unwrap
-                Converter::new(event_buf, eof_signal.clone(), opts_c, cpu_id, intr.clone())
-                    .unwrap_or_else(|_| {
-                        error!("Could not instantiate converter!");
-                        panic!();
-                    })
+                Converter::new(
+                    event_buf,
+                    eof_signal.clone(),
+                    opts_c,
+                    cpu_id,
+                    intr.clone(),
+                    name_map.clone(),
+                )
+                .unwrap_or_else(|_| {
+                    error!("Could not instantiate converter!");
+                    panic!();
+                })
             });
 
             let conv = converters.get_mut(&cpu_id).unwrap();

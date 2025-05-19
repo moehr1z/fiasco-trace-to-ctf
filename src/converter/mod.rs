@@ -7,6 +7,7 @@ mod types;
 use crate::event::Event;
 use crate::opts::Opts;
 use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
+use dashmap::DashMap;
 use interruptor::Interruptor;
 use plugin::{TrcPlugin, TrcPluginState};
 use std::collections::VecDeque;
@@ -28,6 +29,7 @@ impl Converter {
         opts: Opts,
         cpu_id: u8,
         intr: Interruptor,
+        name_map: Arc<DashMap<u64, (String, String)>>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let output_path = CString::new(opts.output.to_str().unwrap())?;
         let params = CtfPluginSinkFsInitParams::new(
@@ -39,7 +41,7 @@ impl Converter {
         )?;
 
         let state_inner: Box<dyn SourcePluginHandler> = Box::new(TrcPluginState::new(
-            intr, events, &opts, eof_signal, cpu_id,
+            intr, events, &opts, eof_signal, cpu_id, name_map,
         )?);
         let state = Box::new(state_inner);
 

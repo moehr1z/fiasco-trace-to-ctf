@@ -29,9 +29,11 @@ use crate::event::{
 };
 use crate::helpers;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
+use dashmap::DashMap;
 use log::warn;
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
+use std::sync::Arc;
 
 // macro to emit basic events which don't require special processing (basically everything which
 // uses the CtfEventClass macro)
@@ -56,7 +58,7 @@ pub struct TrcCtfConverter {
     sched_migrate_task_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: HashMap<u64, (String, String)>, // ctx pointer -> (name, dbg_id)
+    name_map: Arc<DashMap<u64, (String, String)>>, // ctx pointer -> (name, dbg_id)
 }
 
 impl Drop for TrcCtfConverter {
@@ -72,7 +74,7 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new() -> Self {
+    pub fn new(name_map: Arc<DashMap<u64, (String, String)>>) -> Self {
         let mut string_cache: StringCache = Default::default();
         string_cache.insert_str("").unwrap();
 
@@ -81,7 +83,7 @@ impl TrcCtfConverter {
             sched_migrate_task_event_class: ptr::null_mut(),
             event_classes: Default::default(),
             string_cache,
-            name_map: HashMap::new(),
+            name_map,
         }
     }
 
@@ -254,22 +256,27 @@ impl TrcCtfConverter {
 
             let name_dbg_tuple = self.name_map.get(&(common.ctx & CTX_MASK));
 
+            let c_name_id;
+            let c_dbg_id_id;
+
+            if let Some(r) = name_dbg_tuple {
+                let (name, dbg_id) = r.value();
+                c_name_id = self.string_cache.insert_str(name)?;
+                c_dbg_id_id = self.string_cache.insert_str(dbg_id)?;
+            } else {
+                c_name_id = self.string_cache.insert_str("")?;
+                c_dbg_id_id = c_name_id;
+            }
+
+            let c_name = self.string_cache.get_str_by_id(c_name_id);
+            let c_dbg_id = self.string_cache.get_str_by_id(c_dbg_id_id);
+
             let name_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 8);
-            let c_name = if let Some((n, _)) = name_dbg_tuple {
-                self.string_cache.get_str(n)
-            } else {
-                self.string_cache.get_str("")
-            };
             ffi::bt_field_string_set_value(name_field, c_name.as_ptr());
 
             let dbg_id_field =
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 9);
-            let c_dbg_id = if let Some((_, d)) = name_dbg_tuple {
-                self.string_cache.get_str(d)
-            } else {
-                self.string_cache.get_str("")
-            };
             ffi::bt_field_string_set_value(dbg_id_field, c_dbg_id.as_ptr());
 
             Ok(())
@@ -319,8 +326,6 @@ impl TrcCtfConverter {
 
                 self.name_map
                     .insert(ev.obj & CTX_MASK, (name.clone(), ev.id.to_string()));
-                self.string_cache.insert_str(&name)?;
-                self.string_cache.insert_str(&ev.id.to_string())?;
 
                 if was_valid {
                     let stream_class =
@@ -340,13 +345,8 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                SchedSwitch::try_from((
-                    event_type,
-                    ev,
-                    &mut self.string_cache,
-                    &mut self.name_map,
-                ))?
-                .emit_event(ctf_event)?;
+                SchedSwitch::try_from((ev, &mut self.string_cache, &mut self.name_map))?
+                    .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::Migration(ev) => {
@@ -366,11 +366,12 @@ impl TrcCtfConverter {
                 self.add_event_common_ctx(event_common, ctf_event)?;
 
                 // TODO this is slow, use an id -> name map
-                let res = self
-                    .name_map
-                    .iter()
-                    .find(|(_, (_name, id))| *id == ev.dbg_id.to_string());
-                let rcv_name = if let Some((_, (name, _))) = res {
+                let res = self.name_map.iter().find(|r| {
+                    let (_, (_name, id)) = r.pair();
+                    *id == ev.dbg_id.to_string()
+                });
+                let rcv_name = if let Some(r) = res {
+                    let (_, (name, _)) = r.pair();
                     name.to_string()
                 } else {
                     "".to_string()
@@ -396,7 +397,6 @@ impl TrcCtfConverter {
             Event::Factory(ev) => {
                 self.name_map
                     .insert(ev.newo & CTX_MASK, ("".to_string(), ev.id.to_string()));
-                self.string_cache.insert_str(&ev.id.to_string())?;
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),

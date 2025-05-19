@@ -8,6 +8,7 @@ use babeltrace2_sys::{
     source_plugin_descriptors,
 };
 use chrono::prelude::{DateTime, Utc};
+use dashmap::DashMap;
 use log::error;
 use std::collections::VecDeque;
 use std::sync::atomic::AtomicBool;
@@ -41,6 +42,7 @@ impl TrcPluginState {
         opts: &Opts,
         eof_signal: Arc<AtomicBool>,
         cpu_id: u8,
+        name_map: Arc<DashMap<u64, (String, String)>>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
@@ -57,7 +59,7 @@ impl TrcPluginState {
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
             cpu_id,
-            converter: TrcCtfConverter::new(),
+            converter: TrcCtfConverter::new(name_map),
         })
     }
 

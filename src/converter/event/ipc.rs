@@ -26,15 +26,11 @@ impl<'a> TryFrom<(IpcEvent, &'a String, &'a mut StringCache)> for Ipc<'a> {
     type Error = Error;
 
     fn try_from(v: (IpcEvent, &'a String, &'a mut StringCache)) -> Result<Self, Self::Error> {
-        let event = v.0;
-        let rcv_name = v.1;
-        let cache = v.2;
+        let (event, rcv_name, cache) = v;
 
         let type_name = IpcType::num_to_str((event.dst & 0xf) as u8);
         cache.insert_str(&type_name)?;
-        let type_ = cache.get_str(&type_name);
-
-        let rcv_name = cache.get_str(rcv_name);
+        cache.insert_str(rcv_name)?;
 
         Ok(Self {
             tag: event.tag,
@@ -45,8 +41,8 @@ impl<'a> TryFrom<(IpcEvent, &'a String, &'a mut StringCache)> for Ipc<'a> {
             label: event.label,
             timeout: event.timeout,
             to_abs_rcv: event.to_abs_rcv,
-            rcv_name,
-            type_,
+            rcv_name: cache.get_str(rcv_name),
+            type_: cache.get_str(&type_name),
         })
     }
 }

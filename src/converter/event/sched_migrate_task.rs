@@ -1,7 +1,8 @@
-use std::{collections::HashMap, ffi::CStr};
+use std::{ffi::CStr, sync::Arc};
 
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
+use dashmap::DashMap;
 
 use crate::{
     converter::{CTX_MASK, types::StringCache},
@@ -22,7 +23,7 @@ impl<'a>
     TryFrom<(
         MigrationEvent,
         &'a mut StringCache,
-        &'a mut HashMap<u64, (String, String)>,
+        &'a mut Arc<DashMap<u64, (String, String)>>,
     )> for SchedMigrateTask<'a>
 {
     type Error = Error;
@@ -31,31 +32,31 @@ impl<'a>
         value: (
             MigrationEvent,
             &'a mut StringCache,
-            &'a mut HashMap<u64, (String, String)>,
+            &'a mut Arc<DashMap<u64, (String, String)>>,
         ),
     ) -> Result<Self, Self::Error> {
-        let event = value.0;
-        let cache = value.1;
-        let name_map = value.2;
+        let (event, cache, name_map) = value;
 
         let ctx = event.common.ctx & CTX_MASK;
-        let mut comm = ctx.to_string();
         let mut tid = ctx as i64;
-        if let Some((name, dbg_id)) = name_map.get(&ctx) {
-            if !name.is_empty() {
-                comm = name.clone();
-            } else {
-                comm = dbg_id.clone();
-            }
+
+        let comm_id = if let Some(r) = name_map.get(&ctx) {
+            let (name, dbg_id) = r.value();
             if let Ok(tid_i64) = dbg_id.parse() {
                 tid = tid_i64
             }
-        }
 
-        cache.insert_str(&comm)?;
+            if !name.is_empty() {
+                cache.insert_str(name)?
+            } else {
+                cache.insert_str(dbg_id)?
+            }
+        } else {
+            cache.insert_str(&ctx.to_string())?
+        };
 
         Ok(Self {
-            comm: cache.get_str(&comm),
+            comm: cache.get_str_by_id(comm_id),
             tid,
             prio: 0, // TODO
             orig_cpu: event.src_cpu as i32,
