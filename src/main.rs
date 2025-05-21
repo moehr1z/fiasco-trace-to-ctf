@@ -15,12 +15,13 @@ use log::{debug, error, info};
 use opts::Opts;
 use parser::EventParser;
 use regex::Regex;
+use std::cell::RefCell;
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, BufReader, Cursor, Read, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::mpsc;
@@ -139,13 +140,14 @@ fn main() {
         // data in again from disk to send it to the live session
         let eof_signal = Arc::new(AtomicBool::new(false));
         let mut converters: HashMap<u8, Converter> = HashMap::new();
-        let mut event_streams: HashMap<u8, Arc<Mutex<VecDeque<Event>>>> = HashMap::new();
+        let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
         let name_map: Arc<DashMap<u64, (String, String)>> = Arc::new(DashMap::new()); // ctx pointer -> (name, dbg_id)
 
         while let Ok(event) = converter_rx.recv() {
             let cpu_id = event.event_common().cpu;
             converters.entry(cpu_id).or_insert_with(|| {
-                let event_buf = Arc::new(Mutex::new(VecDeque::new()));
+                let event_buf: Rc<RefCell<VecDeque<Event>>> =
+                    Rc::new(RefCell::new(VecDeque::new()));
                 event_streams.insert(cpu_id, event_buf.clone());
 
                 let mut opts_c = opts.clone();
@@ -168,15 +170,11 @@ fn main() {
 
             debug!("Received event");
             {
-                let mut event_buf = event_streams
+                event_streams
                     .get_mut(&cpu_id)
                     .unwrap()
-                    .lock()
-                    .unwrap_or_else(|_| {
-                        error!("Poisoned lock!");
-                        panic!()
-                    });
-                event_buf.push_back(event);
+                    .borrow_mut()
+                    .push_back(event);
             }
             debug!("Trying to convert event...");
             match conv.convert_once() {

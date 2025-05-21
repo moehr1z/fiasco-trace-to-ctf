@@ -9,11 +9,12 @@ use babeltrace2_sys::{
 };
 use chrono::prelude::{DateTime, Utc};
 use dashmap::DashMap;
-use log::error;
+use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
-use std::sync::{Arc, Mutex};
 use std::{
     ffi::{CStr, CString},
     ptr,
@@ -22,7 +23,7 @@ use tracing::debug;
 
 pub struct TrcPluginState {
     interruptor: Interruptor,
-    events: Arc<Mutex<VecDeque<Event>>>,
+    events: Rc<RefCell<VecDeque<Event>>>,
     clock_name: CString,
     trace_name: CString,
     trace_creation_time: DateTime<Utc>,
@@ -38,7 +39,7 @@ pub struct TrcPluginState {
 impl TrcPluginState {
     pub fn new(
         interruptor: Interruptor,
-        events: Arc<Mutex<VecDeque<Event>>>,
+        events: Rc<RefCell<VecDeque<Event>>>,
         opts: &Opts,
         eof_signal: Arc<AtomicBool>,
         cpu_id: u8,
@@ -198,11 +199,7 @@ impl TrcPluginState {
     }
 
     pub fn read_event(&mut self) -> Result<Option<Event>, Error> {
-        let mut events = self.events.lock().unwrap_or_else(|_| {
-            error!("Poisoned lock!");
-            panic!()
-        });
-        if let Some(event) = events.pop_front() {
+        if let Some(event) = self.events.borrow_mut().pop_front() {
             Ok(Some(event))
         } else {
             Ok(None)

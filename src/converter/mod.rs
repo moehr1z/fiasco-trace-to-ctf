@@ -10,10 +10,11 @@ use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, Sou
 use dashmap::DashMap;
 use interruptor::Interruptor;
 use plugin::{TrcPlugin, TrcPluginState};
+use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::ffi::CString;
+use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::Mutex;
 use std::sync::atomic::AtomicBool;
 
 const CTX_MASK: u64 = 0xFFFFFFFFFFFFF000;
@@ -24,7 +25,7 @@ pub struct Converter {
 
 impl Converter {
     pub fn new(
-        events: Arc<Mutex<VecDeque<Event>>>,
+        events: Rc<RefCell<VecDeque<Event>>>,
         eof_signal: Arc<AtomicBool>,
         opts: Opts,
         cpu_id: u8,
