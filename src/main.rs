@@ -194,18 +194,20 @@ fn main() {
                 Err(e) => error!("Error closing converter stream ({:?})", e),
             }
         }
+
+        // retrun the cpus of which we saw events, so we can merge those streams later
+        converters.into_keys().collect::<Vec<u8>>()
     });
 
     network_handle.join().unwrap();
     parser_handle.join().unwrap();
-    converter_handle.join().unwrap();
+    let cpus = converter_handle.join().unwrap();
 
-    merge_traces(opts_c.cpus, opts_c.output).unwrap(); // TODO
+    merge_traces(cpus, opts_c.output).unwrap();
 }
 
-fn merge_traces(cpus: u8, path: PathBuf) -> Result<(), io::Error> {
+fn merge_traces(cpus: Vec<u8>, path: PathBuf) -> Result<(), io::Error> {
     // Define input directories and output
-    let cpus = 0..cpus; // streams 0 through 4
     let out_dir = Path::new(&path);
 
     // Create output directory if it doesn't exist
@@ -214,7 +216,7 @@ fn merge_traces(cpus: u8, path: PathBuf) -> Result<(), io::Error> {
     }
 
     // Move and rename stream files
-    for cpu in cpus.clone() {
+    for cpu in &cpus {
         let src_dir = PathBuf::from(format!("{}_{}", path.display(), cpu));
         let stream_file = src_dir.join("stream");
         let dest_file = out_dir.join(format!("stream_{}", cpu));

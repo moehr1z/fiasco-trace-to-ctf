@@ -21,8 +21,4 @@ pub struct Opts {
     /// Output directory to write traces to
     #[clap(short = 'o', long, default_value = "ctf_trace")]
     pub output: PathBuf,
-
-    /// Number of CPUs
-    #[clap(short = 'c', long, default_value = "1")]
-    pub cpus: u8,
 }
