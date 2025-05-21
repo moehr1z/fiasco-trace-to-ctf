@@ -9,12 +9,10 @@ use babeltrace2_sys::{
 };
 use chrono::prelude::{DateTime, Utc};
 use dashmap::DashMap;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
 use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering::Relaxed;
 use std::{
     ffi::{CStr, CString},
     ptr,
@@ -28,7 +26,7 @@ pub struct TrcPluginState {
     trace_name: CString,
     trace_creation_time: DateTime<Utc>,
     first_event_observed: bool,
-    eof_reached: Arc<AtomicBool>,
+    eof_reached: Rc<Cell<bool>>,
     stream_is_open: bool,
     stream: *mut ffi::bt_stream,
     packet: *mut ffi::bt_packet,
@@ -41,7 +39,7 @@ impl TrcPluginState {
         interruptor: Interruptor,
         events: Rc<RefCell<VecDeque<Event>>>,
         opts: &Opts,
-        eof_signal: Arc<AtomicBool>,
+        eof_signal: Rc<Cell<bool>>,
         cpu_id: u8,
         name_map: Arc<DashMap<u64, (String, String)>>,
     ) -> Result<Self, Error> {
@@ -255,9 +253,9 @@ impl SourcePluginHandler for TrcPluginState {
 
         let mut ctf_state = BorrowedCtfState::new(self.stream, self.packet, msg_iter, messages);
 
-        if self.interruptor.is_set() & !self.eof_reached.load(Relaxed) {
+        if self.interruptor.is_set() & !self.eof_reached.get() {
             debug!("Early shutdown");
-            self.eof_reached.store(true, Relaxed);
+            self.eof_reached.set(true);
 
             // Add packet end message
             let msg = unsafe {
@@ -308,9 +306,9 @@ impl SourcePluginHandler for TrcPluginState {
                 if !self.stream_is_open && self.first_event_observed {
                     // Last iteration can't have messages
                     Ok(MessageIteratorStatus::Done)
-                } else if self.eof_reached.load(Relaxed) {
+                } else if self.eof_reached.get() {
                     debug!("End of file reached");
-                    self.eof_reached.store(true, Relaxed);
+                    self.eof_reached.set(true);
 
                     // Add packet end message
                     let msg = unsafe {

@@ -15,15 +15,13 @@ use log::{debug, error, info};
 use opts::Opts;
 use parser::EventParser;
 use regex::Regex;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, VecDeque};
 use std::io::{self, BufReader, Cursor, Read, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::Arc;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering::Relaxed;
 use std::sync::mpsc;
 use std::{fs, thread};
 
@@ -138,7 +136,7 @@ fn main() {
     let converter_handle = thread::spawn(move || {
         // because babeltrace only has a file system ctf sink, but we don't want to read the
         // data in again from disk to send it to the live session
-        let eof_signal = Arc::new(AtomicBool::new(false));
+        let eof_signal: Rc<Cell<bool>> = Rc::new(Cell::new(false));
         let mut converters: HashMap<u8, Converter> = HashMap::new();
         let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
         let name_map: Arc<DashMap<u64, (String, String)>> = Arc::new(DashMap::new()); // ctx pointer -> (name, dbg_id)
@@ -189,7 +187,7 @@ fn main() {
         }
 
         debug!("Closing converter stream...");
-        eof_signal.store(true, Relaxed);
+        eof_signal.set(true);
         for conv in converters.values_mut() {
             match conv.convert() {
                 Ok(_) => debug!("Succesfully closed converter stream"),
