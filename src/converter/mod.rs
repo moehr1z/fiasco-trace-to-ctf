@@ -7,14 +7,12 @@ mod types;
 use crate::event::Event;
 use crate::opts::Opts;
 use babeltrace2_sys::{CtfPluginSinkFsInitParams, EncoderPipeline, RunStatus, SourcePluginHandler};
-use dashmap::DashMap;
 use interruptor::Interruptor;
 use plugin::{TrcPlugin, TrcPluginState};
 use std::cell::{Cell, RefCell};
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::ffi::CString;
 use std::rc::Rc;
-use std::sync::Arc;
 
 const CTX_MASK: u64 = 0xFFFFFFFFFFFFF000;
 
@@ -29,7 +27,7 @@ impl Converter {
         opts: Opts,
         cpu_id: u8,
         intr: Interruptor,
-        name_map: Arc<DashMap<u64, (String, String)>>,
+        name_map: Rc<RefCell<HashMap<u64, (String, String)>>>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let output_path = CString::new(opts.output.to_str().unwrap())?;
         let params = CtfPluginSinkFsInitParams::new(

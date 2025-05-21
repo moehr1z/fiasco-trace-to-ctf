@@ -3,11 +3,12 @@ use crate::converter::types::StringCache;
 use crate::event::context_switch::ContextSwitchEvent;
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
-use dashmap::DashMap;
 use enum_iterator::Sequence;
+use std::cell::RefCell;
+use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::ffi::CStr;
-use std::sync::Arc;
+use std::rc::Rc;
 
 #[repr(i64)]
 #[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, Sequence)]
@@ -67,7 +68,7 @@ impl<'a>
     TryFrom<(
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut Arc<DashMap<u64, (String, String)>>,
+        &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -76,7 +77,7 @@ impl<'a>
         value: (
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut Arc<DashMap<u64, (String, String)>>,
+            &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
         ),
     ) -> Result<Self, Self::Error> {
         let (event, cache, name_map) = value;
@@ -85,8 +86,7 @@ impl<'a>
         let dst = event.dst & CTX_MASK;
 
         let mut prev_tid: i64 = src as i64;
-        let prev_comm_id = if let Some(r) = name_map.get(&src) {
-            let (name, dbg_id) = r.value();
+        let prev_comm_id = if let Some((name, dbg_id)) = name_map.borrow().get(&src) {
             if let Ok(tid_i64) = dbg_id.parse() {
                 prev_tid = tid_i64
             }
@@ -101,8 +101,7 @@ impl<'a>
 
         let mut next_tid: i64 = dst as i64;
 
-        let next_comm_id = if let Some(r) = name_map.get(&dst) {
-            let (name, dbg_id) = r.value();
+        let next_comm_id = if let Some((name, dbg_id)) = name_map.borrow().get(&dst) {
             if let Ok(tid_i64) = dbg_id.parse() {
                 next_tid = tid_i64
             }

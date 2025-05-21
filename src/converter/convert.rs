@@ -29,11 +29,11 @@ use crate::event::{
 };
 use crate::helpers;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
-use dashmap::DashMap;
 use log::warn;
+use std::cell::RefCell;
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
-use std::sync::Arc;
+use std::rc::Rc;
 
 // macro to emit basic events which don't require special processing (basically everything which
 // uses the CtfEventClass macro)
@@ -58,7 +58,7 @@ pub struct TrcCtfConverter {
     sched_migrate_task_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: Arc<DashMap<u64, (String, String)>>, // ctx pointer -> (name, dbg_id)
+    name_map: Rc<RefCell<HashMap<u64, (String, String)>>>, // ctx pointer -> (name, dbg_id)
 }
 
 impl Drop for TrcCtfConverter {
@@ -74,7 +74,7 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new(name_map: Arc<DashMap<u64, (String, String)>>) -> Self {
+    pub fn new(name_map: Rc<RefCell<HashMap<u64, (String, String)>>>) -> Self {
         let mut string_cache: StringCache = Default::default();
         string_cache.insert_str("").unwrap();
 
@@ -254,13 +254,13 @@ impl TrcCtfConverter {
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 7);
             ffi::bt_field_integer_unsigned_set_value(kclock_field, common.kclock as u64);
 
-            let name_dbg_tuple = self.name_map.get(&(common.ctx & CTX_MASK));
+            let map = self.name_map.borrow();
+            let name_dbg_tuple = map.get(&(common.ctx & CTX_MASK));
 
             let c_name_id;
             let c_dbg_id_id;
 
-            if let Some(r) = name_dbg_tuple {
-                let (name, dbg_id) = r.value();
+            if let Some((name, dbg_id)) = name_dbg_tuple {
                 c_name_id = self.string_cache.insert_str(name)?;
                 c_dbg_id_id = self.string_cache.insert_str(dbg_id)?;
             } else {
@@ -325,6 +325,7 @@ impl TrcCtfConverter {
                 };
 
                 self.name_map
+                    .borrow_mut()
                     .insert(ev.obj & CTX_MASK, (name.clone(), ev.id.to_string()));
 
                 if was_valid {
@@ -366,12 +367,11 @@ impl TrcCtfConverter {
                 self.add_event_common_ctx(event_common, ctf_event)?;
 
                 // TODO this is slow, use an id -> name map
-                let res = self.name_map.iter().find(|r| {
-                    let (_, (_name, id)) = r.pair();
-                    *id == ev.dbg_id.to_string()
-                });
-                let rcv_name = if let Some(r) = res {
-                    let (_, (name, _)) = r.pair();
+                let map = self.name_map.borrow();
+                let res = map
+                    .iter()
+                    .find(|(_, (_name, id))| *id == ev.dbg_id.to_string());
+                let rcv_name = if let Some((_, (name, _))) = res {
                     name.to_string()
                 } else {
                     "".to_string()
@@ -391,11 +391,12 @@ impl TrcCtfConverter {
                 ctf_state.push_message(msg)?;
             }
             Event::Destroy(ev) => {
-                self.name_map.remove(&(ev.obj & CTX_MASK));
+                self.name_map.borrow_mut().remove(&(ev.obj & CTX_MASK));
                 emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
                 self.name_map
+                    .borrow_mut()
                     .insert(ev.newo & CTX_MASK, ("".to_string(), ev.id.to_string()));
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }

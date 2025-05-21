@@ -9,7 +9,6 @@ use crate::event::Event;
 use clap::Parser;
 use converter::Converter;
 use core::str;
-use dashmap::DashMap;
 use log::warn;
 use log::{debug, error, info};
 use opts::Opts;
@@ -21,7 +20,6 @@ use std::io::{self, BufReader, Cursor, Read, Write};
 use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::sync::Arc;
 use std::sync::mpsc;
 use std::{fs, thread};
 
@@ -139,7 +137,8 @@ fn main() {
         let eof_signal: Rc<Cell<bool>> = Rc::new(Cell::new(false));
         let mut converters: HashMap<u8, Converter> = HashMap::new();
         let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
-        let name_map: Arc<DashMap<u64, (String, String)>> = Arc::new(DashMap::new()); // ctx pointer -> (name, dbg_id)
+        let name_map: Rc<RefCell<HashMap<u64, (String, String)>>> =
+            Rc::new(RefCell::new(HashMap::new())); // ctx pointer -> (name, dbg_id)
 
         while let Ok(event) = converter_rx.recv() {
             let cpu_id = event.event_common().cpu;

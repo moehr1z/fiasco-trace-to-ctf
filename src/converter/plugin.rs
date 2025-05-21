@@ -8,11 +8,9 @@ use babeltrace2_sys::{
     source_plugin_descriptors,
 };
 use chrono::prelude::{DateTime, Utc};
-use dashmap::DashMap;
 use std::cell::{Cell, RefCell};
-use std::collections::VecDeque;
+use std::collections::{HashMap, VecDeque};
 use std::rc::Rc;
-use std::sync::Arc;
 use std::{
     ffi::{CStr, CString},
     ptr,
@@ -41,7 +39,7 @@ impl TrcPluginState {
         opts: &Opts,
         eof_signal: Rc<Cell<bool>>,
         cpu_id: u8,
-        name_map: Arc<DashMap<u64, (String, String)>>,
+        name_map: Rc<RefCell<HashMap<u64, (String, String)>>>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
