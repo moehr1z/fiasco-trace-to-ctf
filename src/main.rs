@@ -21,6 +21,7 @@ use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::mpsc;
+use std::time::Instant;
 use std::{fs, thread};
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";
@@ -89,8 +90,14 @@ fn main() {
     let parser_handle = thread::spawn(move || {
         let mut first_event_observed = false;
         let mut biggest_event_num: u64 = 0;
+        let mut start_time: Option<Instant> = None;
+        let mut dropped_events_total: u64 = 0;
 
         while let Ok(event_bytes) = parser_rx.recv() {
+            if start_time.is_none() {
+                start_time = Some(Instant::now());
+            }
+
             debug!("Received event bytes");
             let mut reader = Cursor::new(event_bytes);
             let event = EventParser::next_event(&mut reader);
@@ -107,6 +114,7 @@ fn main() {
                                 0
                             };
                             if dropped_events > 0 {
+                                dropped_events_total += dropped_events;
                                 warn!("Dropped {dropped_events} events");
                             }
                             biggest_event_num = event_number;
@@ -128,6 +136,8 @@ fn main() {
                 }
             }
         }
+
+        (start_time, dropped_events_total)
     });
 
     // Convert the events to CTF and pass the to the disk writer and live streamer
@@ -136,9 +146,12 @@ fn main() {
         // data in again from disk to send it to the live session
         let eof_signal: Rc<Cell<bool>> = Rc::new(Cell::new(false));
         let mut converters: HashMap<u8, Converter> = HashMap::new();
+        // TODO put the event stream in the converter and make a func to return it
         let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
+        // TODO make own struct for the name map
         let name_map: Rc<RefCell<HashMap<u64, (String, String)>>> =
             Rc::new(RefCell::new(HashMap::new())); // ctx pointer -> (name, dbg_id)
+        let mut nr_conv_events: u64 = 0;
 
         while let Ok(event) = converter_rx.recv() {
             let cpu_id = event.event_common().cpu;
@@ -177,6 +190,7 @@ fn main() {
             match conv.convert_once() {
                 Ok(_) => {
                     debug!("Succesfully converted event");
+                    nr_conv_events += 1;
 
                     // TODO send to live session handler
                     // TODO commit to disk
@@ -195,12 +209,21 @@ fn main() {
         }
 
         // retrun the cpus of which we saw events, so we can merge those streams later
-        converters.into_keys().collect::<Vec<u8>>()
+        (converters.into_keys().collect::<Vec<u8>>(), nr_conv_events)
     });
 
     network_handle.join().unwrap();
-    parser_handle.join().unwrap();
-    let cpus = converter_handle.join().unwrap();
+    let (start_time, dropped_events) = parser_handle.join().unwrap();
+    let (cpus, conv_events) = converter_handle.join().unwrap();
+
+    if let Some(start) = start_time {
+        let runtime = start.elapsed();
+        let throughput = (conv_events as f64) / runtime.as_secs_f64();
+        println!("THROUGHPUT (EVENTS/SEC): {throughput}");
+    } else {
+        error!("Start time is None!");
+    }
+    println!("EVENTS DROPPED: {dropped_events}");
 
     merge_traces(cpus, opts_c.output).unwrap();
 }
