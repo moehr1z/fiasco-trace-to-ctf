@@ -216,10 +216,11 @@ fn main() {
     let (start_time, dropped_events) = parser_handle.join().unwrap();
     let (cpus, conv_events) = converter_handle.join().unwrap();
 
+    println!("EVENTS TOTAL: {conv_events}");
     if let Some(start) = start_time {
         let runtime = start.elapsed();
         let throughput = (conv_events as f64) / runtime.as_secs_f64();
-        println!("THROUGHPUT (EVENTS/SEC): {throughput}");
+        println!("THROUGHPUT: {throughput} (EVENTS/SEC)");
     } else {
         error!("Start time is None!");
     }
