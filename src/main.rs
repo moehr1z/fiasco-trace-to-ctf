@@ -21,7 +21,7 @@ use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::mpsc;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use std::{fs, thread};
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";
@@ -68,30 +68,44 @@ fn main() {
             error!("Could not bind to provided address/port!");
             panic!();
         });
+        let mut events_received: u64 = 0;
+        let mut start_time: Option<Instant> = None;
+
         match listener.accept() {
             Ok((stream, addr)) => {
-                info!("Accepted connection from {:?}", addr);
+                println!("Accepted connection from {:?}", addr);
                 let mut reader = BufReader::new(stream);
                 let mut buf: [u8; 128] = [0; 128];
 
                 while reader.read_exact(&mut buf).is_ok() {
-                    if net_tx.send(buf).is_ok() {
-                        debug!("Read and sent event bytes");
-                    } else {
-                        warn!("Could not send event to parser. Dropping it...");
+                    if start_time.is_none() {
+                        start_time = Some(Instant::now());
+                    }
+                    events_received += 1;
+                    match net_tx.send(buf) {
+                        Ok(_) => debug!("Parsed and sent event"),
+                        Err(e) => {
+                            error!("Could not send event to parser ({:?}). Dropping it...", e)
+                        }
                     }
                 }
             }
             Err(e) => error!("Error accepting TCP connection ({:?})", e),
         }
+
+        let runtime = start_time.unwrap().elapsed();
+        let throughput = ((events_received * 128) as f64) / runtime.as_secs_f64();
+        throughput
     });
 
     // Parse the event bytes and pass the to the converter
     let parser_handle = thread::spawn(move || {
         let mut first_event_observed = false;
         let mut biggest_event_num: u64 = 0;
+        let mut last_event_tsc: u64 = 0;
         let mut start_time: Option<Instant> = None;
         let mut dropped_events_total: u64 = 0;
+        let mut weird_events: u64 = 0;
 
         while let Ok(event_bytes) = parser_rx.recv() {
             if start_time.is_none() {
@@ -106,6 +120,7 @@ fn main() {
                 Ok(event) => {
                     if let Some(e) = event {
                         let event_number = e.event_common().number;
+                        let event_tsc = e.event_common().tsc;
                         debug!("Event count: {event_number}");
                         if event_number > biggest_event_num || !first_event_observed {
                             let dropped_events = if first_event_observed {
@@ -115,14 +130,28 @@ fn main() {
                             };
                             if dropped_events > 0 {
                                 dropped_events_total += dropped_events;
-                                warn!("Dropped {dropped_events} events");
+                                warn!(
+                                    "Dropped {dropped_events} events (event num: {event_number}, biggest event num: {biggest_event_num}"
+                                );
                             }
+
+                            if event_tsc < last_event_tsc {
+                                warn!("Rising event number, but falling timestamp! \n
+                                    event number: {event_number} \t biggest event number: {biggest_event_num} \n
+                                    event tsc: {event_tsc} \t last event tsc: {last_event_tsc}");
+                                weird_events += 1;
+                                continue;
+                            }
+
                             biggest_event_num = event_number;
+                            last_event_tsc = event_tsc;
                             first_event_observed = true;
-                            if parser_tx.send(e).is_ok() {
-                                debug!("Parsed and sent event");
-                            } else {
-                                warn!("Could not send event to converter. Dropping it...");
+                            match parser_tx.send(e) {
+                                Ok(_) => debug!("Parsed and sent event"),
+                                Err(e) => error!(
+                                    "Could not send event to converter ({:?}). Dropping it...",
+                                    e
+                                ),
                             }
                         } else {
                             warn!(
@@ -136,6 +165,8 @@ fn main() {
                 }
             }
         }
+
+        println!("THERE WERE {weird_events} WEIRD EVENTS");
 
         (start_time, dropped_events_total)
     });
@@ -162,6 +193,7 @@ fn main() {
 
                 let mut opts_c = opts.clone();
                 opts_c.output = format!("{}_{cpu_id}", opts_c.output.to_str().unwrap()).into(); // TODO unwrap
+                debug!("Instantiating converter {cpu_id}");
                 Converter::new(
                     event_buf,
                     eof_signal.clone(),
@@ -178,7 +210,7 @@ fn main() {
 
             let conv = converters.get_mut(&cpu_id).unwrap();
 
-            debug!("Received event");
+            debug!("Received event \n {:?}", event);
             {
                 event_streams
                     .get_mut(&cpu_id)
@@ -212,7 +244,7 @@ fn main() {
         (converters.into_keys().collect::<Vec<u8>>(), nr_conv_events)
     });
 
-    network_handle.join().unwrap();
+    let rcv_throughput = network_handle.join().unwrap();
     let (start_time, dropped_events) = parser_handle.join().unwrap();
     let (cpus, conv_events) = converter_handle.join().unwrap();
 
@@ -225,6 +257,8 @@ fn main() {
         error!("Start time is None!");
     }
     println!("EVENTS DROPPED: {dropped_events}");
+    println!("RECEIVE THROUHGPUT: {rcv_throughput}");
+    println!("NR CPUS: {}", cpus.len());
 
     merge_traces(cpus, opts_c.output).unwrap();
 }
