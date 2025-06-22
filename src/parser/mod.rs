@@ -5,6 +5,7 @@ const EVENT_TYPE_POSITION: i64 = 44;
 
 use crate::event::Event;
 use crate::event::bp::BpEvent;
+use crate::event::common::EventCommon;
 use crate::event::context_switch::ContextSwitchEvent;
 use crate::event::destroy::DestroyEvent;
 use crate::event::drq::DrqEvent;
@@ -154,11 +155,13 @@ impl EventParser {
                 Ok(Some(Event::Empty(event)))
             }
             EventType::Hidden => {
-                warn!("Got \"Hidden\" Event");
+                let event = EmptyEvent::read(&mut reader)?;
+                warn!("Got \"Hidden\" Event \n {:?}", event);
                 Err(error::Error::EventType(event_type_num))
             }
             EventType::Unused => {
-                warn!("Got \"Unused\" Event");
+                let event = EmptyEvent::read(&mut reader)?;
+                warn!("Got \"Unused\" Event \n {:?}", event);
                 Err(error::Error::EventType(event_type_num))
             }
         }
