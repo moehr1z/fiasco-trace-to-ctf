@@ -8,8 +8,7 @@ import pandas as pd
 
 
 def parse_benchmark_file(path):
-    # We’ll use an ordered dict mapping (rate, run_id) -> run_dict.
-    # When a duplicate key appears, we simply overwrite with the newer block.
+    # Ordered dict mapping (rate, run_id) -> run_dict
     run_map = OrderedDict()
     current = None
 
@@ -27,23 +26,14 @@ def parse_benchmark_file(path):
     with open(path, "r") as f:
         for line in f:
             line = line.strip()
-
-            # Detect start of a new RUN
             m = re_run_start.match(line)
             if m:
+                if current:
+                    current["max_rss"] = (
+                        max(current["all_rsses"]) if current["all_rsses"] else None
+                    )
+                    run_map[(current["rate"], current["run_id"])] = current
                 run_id = int(m.group(1))
-                # If a previous run was still "open" (no END line) we finalize it now
-                if current is not None:
-                    # finalize previous run
-                    if current["all_rsses"]:
-                        current["max_rss"] = max(current["all_rsses"])
-                    else:
-                        current["max_rss"] = None
-
-                    key = (current["rate"], current["run_id"])
-                    run_map[key] = current
-
-                # Begin a fresh run dict
                 current = {
                     "run_id": run_id,
                     "rate": None,
@@ -56,92 +46,47 @@ def parse_benchmark_file(path):
                     "n_cpus": None,
                 }
                 continue
-
-            # If we haven’t started any run yet, skip until first RUN
-            if current is None:
+            if not current:
                 continue
-
-            # RATE
-            m = re_rate.match(line)
-            if m:
-                current["rate"] = int(m.group(1))
+            if re_rate.match(line):
+                current["rate"] = int(re_rate.match(line).group(1))
                 continue
-
-            # RSS
-            m = re_rss.match(line)
-            if m:
-                rss_val = int(m.group(1))
-                current["all_rsses"].append(rss_val)
+            if re_rss.match(line):
+                current["all_rsses"].append(int(re_rss.match(line).group(1)))
                 continue
-
-            # THROUGHPUT
-            m = re_throughput.match(line)
-            if m:
-                current["throughput"] = float(m.group(1))
+            if re_throughput.match(line):
+                current["throughput"] = float(re_throughput.match(line).group(1))
                 continue
-
-            # EVENTS DROPPED
-            m = re_dropped.match(line)
-            if m:
-                current["dropped_events"] = int(m.group(1))
+            if re_rcv_throughput.match(line):
+                current["rcv_throughput"] = float(
+                    re_rcv_throughput.match(line).group(1)
+                )
                 continue
-
-            # RECEIVE THROUGHPUT
-            m = re_rcv_throughput.match(line)
-            if m:
-                current["rcv_throughput"] = float(m.group(1))
+            if re_dropped.match(line):
+                current["dropped_events"] = int(re_dropped.match(line).group(1))
                 continue
-
-            # NR CPUS
-            m = re_n_cpus.match(line)
-            if m:
-                current["n_cpus"] = int(m.group(1))
+            if re_n_cpus.match(line):
+                current["n_cpus"] = int(re_n_cpus.match(line).group(1))
                 continue
-
-            # AVG CPU
-            m = re_avg_cpu.match(line)
-            if m:
-                current["avg_cpu"] = float(m.group(1))
+            if re_avg_cpu.match(line):
+                current["avg_cpu"] = float(re_avg_cpu.match(line).group(1))
                 continue
-
-            # END of run
-            m = re_run_end.match(line)
-            if m:
-                end_id = int(m.group(1))
-                if current["run_id"] != end_id:
-                    print(
-                        f"Warning: mismatched END {end_id} for run {current['run_id']}"
-                    )
-                # finalize current run
-                if current["all_rsses"]:
-                    current["max_rss"] = max(current["all_rsses"])
-                else:
-                    current["max_rss"] = None
-
-                key = (current["rate"], current["run_id"])
-                run_map[key] = current
+            if re_run_end.match(line):
+                eid = int(re_run_end.match(line).group(1))
+                if current["run_id"] != eid:
+                    print(f"Warning: mismatched END {eid} for run {current['run_id']}")
+                current["max_rss"] = (
+                    max(current["all_rsses"]) if current["all_rsses"] else None
+                )
+                run_map[(current["rate"], current["run_id"])] = current
                 current = None
-                continue
-
-            # All other lines can be safely ignored
-
-    # If file ended without an explicit END for the last run
-    if current is not None:
-        if current["all_rsses"]:
-            current["max_rss"] = max(current["all_rsses"])
-        else:
-            current["max_rss"] = None
-        key = (current["rate"], current["run_id"])
-        run_map[key] = current
-
-    # Return only the final dicts in their insertion (chronological) order
+    if current:
+        current["max_rss"] = max(current["all_rsses"]) if current["all_rsses"] else None
+        run_map[(current["rate"], current["run_id"])] = current
     return list(run_map.values())
 
 
 def build_dataframe(runs):
-    """
-    Convert a list of run-dicts into a pandas DataFrame.
-    """
     rows = []
     for r in runs:
         rows.append(
@@ -156,33 +101,25 @@ def build_dataframe(runs):
                 "n_cpus": r["n_cpus"],
             }
         )
-    df = pd.DataFrame(rows)
-    return df
+    return pd.DataFrame(rows)
 
 
-def plot_boxplot(df, metric_col, ylabel, title, output_filename=None):
-    """
-    Create a boxplot of `metric_col` grouped by `rate`.
-    - df: DataFrame with at least ['rate', metric_col]
-    - ylabel: Y-axis label
-    - title: plot title
-    - output_filename: if given, save the figure there; otherwise plt.show()
-    """
-    rates = sorted(df["rate"].dropna().unique())
-    data_for_box = [df[df["rate"] == r][metric_col].dropna().values for r in rates]
-
+def plot_boxplot(
+    df, group_col, metric_col, xlabel, ylabel, title, output_filename=None
+):
+    values = sorted(df[group_col].dropna().unique())
+    data = [df[df[group_col] == v][metric_col].dropna().values for v in values]
     plt.figure(figsize=(8, 6))
     plt.boxplot(
-        data_for_box,
-        labels=[str(r) for r in rates],
+        data,
+        labels=[str(v) for v in values],
         patch_artist=True,
         boxprops=dict(facecolor="lightblue", linewidth=1),
     )
-    plt.xlabel("Event Rate (events/sec)")
+    plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
     plt.grid(axis="y", linestyle="--", alpha=0.6)
-
     if output_filename:
         plt.savefig(output_filename, bbox_inches="tight")
         print(f"Saved boxplot: {output_filename}")
@@ -192,75 +129,57 @@ def plot_boxplot(df, metric_col, ylabel, title, output_filename=None):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Parse benchmark output (dedup by RATE+RUN) and build boxplots grouped by rate."
+        description="Parse benchmark output and build boxplots grouped by event rate or CPU count."
     )
     parser.add_argument(
-        "--input", "-i", required=True, help="Path to the benchmark output text file"
+        "-i", "--input", required=True, help="Benchmark output file path"
     )
     parser.add_argument(
-        "--outdir",
-        "-o",
-        default=".",
-        help="Directory where the plots will be saved (default: current directory)",
+        "-o", "--outdir", default=".", help="Output directory for plots"
+    )
+    parser.add_argument(
+        "--x-axis",
+        choices=["rate", "cpus"],
+        default="rate",
+        help="Group plots by 'rate' or 'cpus'",
     )
     args = parser.parse_args()
 
-    # Parse and deduplicate
     runs = parse_benchmark_file(args.input)
     if not runs:
-        print("No valid runs found in the input file. Exiting.")
+        print("No valid runs found. Exiting.")
         return
-
     df = build_dataframe(runs)
-
-    base_title = ""
-
-    # 1) CPU usage boxplot
-    plot_boxplot(
-        df,
-        metric_col="avg_cpu",
-        ylabel="Average CPU Usage (%)",
-        title=base_title + "CPU Usage by Event Rate",
-        output_filename=f"{args.outdir}/cpu_usage_boxplot.pdf",
-    )
-
-    # 2) RAM usage (convert bytes to MiB)
     df["max_rss_mb"] = df["max_rss"] / (1024 * 1024)
-    plot_boxplot(
-        df,
-        metric_col="max_rss_mb",
-        ylabel="Max RAM Usage (MiB)",
-        title=base_title + "Max RAM Usage by Event Rate",
-        output_filename=f"{args.outdir}/ram_usage_boxplot.pdf",
-    )
-
-    # 3) Dropped events
-    plot_boxplot(
-        df,
-        metric_col="dropped_events",
-        ylabel="Dropped Events",
-        title=base_title + "Dropped Events by Event Rate",
-        output_filename=f"{args.outdir}/dropped_events_boxplot.pdf",
-    )
-
-    # 4) Throughput
-    plot_boxplot(
-        df,
-        metric_col="throughput",
-        ylabel="Throughput (events/sec)",
-        title=base_title + "Throughput by Event Rate",
-        output_filename=f"{args.outdir}/throughput_boxplot.pdf",
-    )
-
-    # 4) Receive Throughput
     df["rcv_throughput_mb"] = df["rcv_throughput"] / (1024 * 1024)
-    plot_boxplot(
-        df,
-        metric_col="rcv_throughput_mb",
-        ylabel="Receive Throughput (MB/sec)",
-        title=base_title + "Receive Throughput by Event Rate",
-        output_filename=f"{args.outdir}/rcv_throughput_boxplot.pdf",
-    )
+
+    if args.x_axis == "rate":
+        grp, xlabel, suf = "rate", "Event Rate (events/sec)", "by_rate"
+        const_vals = df["n_cpus"].dropna().unique()
+        const_label = "CPUs"
+    else:
+        grp, xlabel, suf = "n_cpus", "Number of CPUs", "by_cpus"
+        const_vals = df["rate"].dropna().unique()
+        const_label = "Rate"
+
+    # Format constant value string
+    if len(const_vals) == 1:
+        const_str = str(const_vals[0])
+    else:
+        const_str = ",".join(str(v) for v in sorted(const_vals))
+
+    metrics = [
+        ("avg_cpu", "Average CPU Usage (%)", "cpu_usage"),
+        ("max_rss_mb", "Max RAM Usage (MiB)", "ram_usage"),
+        ("dropped_events", "Dropped Events", "dropped_events"),
+        ("throughput", "Throughput (events/sec)", "throughput"),
+        ("rcv_throughput_mb", "Receive Throughput (MB/sec)", "rcv_throughput"),
+    ]
+
+    for metric, ylabel, prefix in metrics:
+        title = f"{ylabel} {suf} ({const_label}={const_str})"
+        filename = f"{args.outdir}/{prefix}_{suf}.pdf"
+        plot_boxplot(df, grp, metric, xlabel, ylabel, title, filename)
 
     print("All requested plots have been generated.")
 
