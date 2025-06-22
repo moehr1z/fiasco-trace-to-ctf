@@ -8,11 +8,8 @@ import pandas as pd
 
 
 def parse_benchmark_file(path):
-    # Ordered dict mapping (rate, run_id) -> run_dict
     run_map = OrderedDict()
     current = None
-
-    # Regex patterns
     re_run_start = re.compile(r"^RUN\s+(\d+)")
     re_rate = re.compile(r"^RATE\s+(\d+)")
     re_rss = re.compile(r"^RSS=(\d+)\s+BYTES")
@@ -119,6 +116,7 @@ def plot_boxplot(
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
+    plt.ylim(bottom=0)
     plt.grid(axis="y", linestyle="--", alpha=0.6)
     if output_filename:
         plt.savefig(output_filename, bbox_inches="tight")
@@ -154,30 +152,29 @@ def main():
     df["rcv_throughput_mb"] = df["rcv_throughput"] / (1024 * 1024)
 
     if args.x_axis == "rate":
-        grp, xlabel, suf = "rate", "Event Rate (events/sec)", "by_rate"
+        grp, xlabel, suf = "rate", "Event-Rate (Events/Sek.)", "by_rate"
         const_vals = df["n_cpus"].dropna().unique()
         const_label = "CPUs"
     else:
-        grp, xlabel, suf = "n_cpus", "Number of CPUs", "by_cpus"
+        grp, xlabel, suf = "n_cpus", "Anzahl CPUs", "by_cpus"
         const_vals = df["rate"].dropna().unique()
-        const_label = "Rate"
+        const_label = "Event-Rate"
 
-    # Format constant value string
     if len(const_vals) == 1:
         const_str = str(const_vals[0])
     else:
         const_str = ",".join(str(v) for v in sorted(const_vals))
 
     metrics = [
-        ("avg_cpu", "Average CPU Usage (%)", "cpu_usage"),
-        ("max_rss_mb", "Max RAM Usage (MiB)", "ram_usage"),
-        ("dropped_events", "Dropped Events", "dropped_events"),
-        ("throughput", "Throughput (events/sec)", "throughput"),
-        ("rcv_throughput_mb", "Receive Throughput (MB/sec)", "rcv_throughput"),
+        ("avg_cpu", "Durchschnittliche CPU-Auslastung (%)", "cpu_usage"),
+        ("max_rss_mb", "Maximale RAM-Auslastung (MiB)", "ram_usage"),
+        ("dropped_events", "Verlorene Events", "dropped_events"),
+        ("throughput", "Konvertierungsdurchsatz (Events/Sek.)", "throughput"),
+        ("rcv_throughput_mb", "Empfangsdurchsatz (MiB/Sek.)", "rcv_throughput"),
     ]
 
     for metric, ylabel, prefix in metrics:
-        title = f"{ylabel} {suf} ({const_label}={const_str})"
+        title = f"{ylabel} ({const_label}={const_str})"
         filename = f"{args.outdir}/{prefix}_{suf}.pdf"
         plot_boxplot(df, grp, metric, xlabel, ylabel, title, filename)
 
