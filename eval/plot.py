@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def parse_benchmark_file(path):
-    run_map = OrderedDict()
+def parse_benchmark_file(path, x_axis):
+    run_map_rate = OrderedDict()
+    run_map_cpus = OrderedDict()
     current = None
     re_run_start = re.compile(r"^RUN\s+(\d+)")
     re_rate = re.compile(r"^RATE\s+(\d+)")
@@ -29,7 +30,8 @@ def parse_benchmark_file(path):
                     current["max_rss"] = (
                         max(current["all_rsses"]) if current["all_rsses"] else None
                     )
-                    run_map[(current["rate"], current["run_id"])] = current
+                    run_map_rate[(current["rate"], current["run_id"])] = current
+                    run_map_cpus[(current["n_cpus"], current["run_id"])] = current
                 run_id = int(m.group(1))
                 current = {
                     "run_id": run_id,
@@ -75,12 +77,18 @@ def parse_benchmark_file(path):
                 current["max_rss"] = (
                     max(current["all_rsses"]) if current["all_rsses"] else None
                 )
-                run_map[(current["rate"], current["run_id"])] = current
+                run_map_rate[(current["rate"], current["run_id"])] = current
+                run_map_cpus[(current["n_cpus"], current["run_id"])] = current
                 current = None
     if current:
         current["max_rss"] = max(current["all_rsses"]) if current["all_rsses"] else None
-        run_map[(current["rate"], current["run_id"])] = current
-    return list(run_map.values())
+        run_map_rate[(current["rate"], current["run_id"])] = current
+        run_map_cpus[(current["n_cpus"], current["run_id"])] = current
+
+    if x_axis == "cpus":
+        return list(run_map_cpus.values())
+    else:
+        return list(run_map_rate.values())
 
 
 def build_dataframe(runs):
@@ -143,7 +151,7 @@ def main():
     )
     args = parser.parse_args()
 
-    runs = parse_benchmark_file(args.input)
+    runs = parse_benchmark_file(args.input, args.x_axis)
     if not runs:
         print("No valid runs found. Exiting.")
         return
