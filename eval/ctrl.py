@@ -4,10 +4,15 @@ import socket
 import subprocess
 import time
 import psutil
+import struct
 
 HOST = "0.0.0.0"
 PORT = 9999
-CONVERTER_CMD = ["./run.sh", "-l error"]  # NOTE add -r here if running real benchmark
+CONVERTER_CMD = [
+    "./run.sh",
+    "-l error",
+    "-r",
+]  # NOTE add -r here if running real benchmark
 
 
 def start_converter():
@@ -37,11 +42,14 @@ def start_converter():
 
         print(f"AVG CPU: {avg_cpu_percent:.2f}%")
 
-        proc.wait()
+        return_code = proc.wait()
+
+        print(f"Process exited with code {return_code}")
 
 
 def main():
     run = 0
+    rate = 0
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -51,20 +59,29 @@ def main():
 
         while True:
             conn, addr = s.accept()
+            print(f"Connection from {addr}")
             with conn:
-                print(f"Connection from {addr}")
-                data = conn.recv(1024)
-                print(f"Received raw data: {data}")
-                if data and data[0] == 1:
-                    print(f"RUN {run}")
-                    start_converter()
-                    print(f"END {run}")
-                    run = run + 1
-                elif data and data[0] == 2:
-                    print("Signaled to stop")
-                    exit()
+                data = conn.recv(100)
+                if data:
+                    print(f"Received raw data: {data}")
+                    opcode = data[0]
+                    print(f"Opcode: {opcode}")
+                    if opcode == 1:
+                        print(f"RUN {run}")
+                        print(f"RATE {rate}")
+                        start_converter()
+                        print(f"END {run}")
+                    elif opcode == 2:
+                        print("Signaled to stop")
+                        exit()
+                    elif opcode == 3:
+                        rate = struct.unpack("I", data[1:5])[0]
+                    elif opcode == 4:
+                        run = struct.unpack("I", data[1:5])[0]
+                    else:
+                        print("Unexpected or malformed message received.")
                 else:
-                    print("Unexpected or malformed message received.")
+                    print("Client disconnected.")
 
 
 if __name__ == "__main__":
