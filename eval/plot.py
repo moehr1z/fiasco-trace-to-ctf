@@ -11,19 +11,20 @@ def parse_benchmark_file(path, x_axis):
     run_map_rate = OrderedDict()
     run_map_cpus = OrderedDict()
     current = None
-    re_run_start = re.compile(r"^RUN\s+(\d+)")
-    re_rate = re.compile(r"^RATE\s+(\d+)")
-    re_rss = re.compile(r"^RSS=(\d+)\s+BYTES")
-    re_throughput = re.compile(r"^THROUGHPUT:\s+([\d.]+)\s+\(EVENTS/SEC\)")
-    re_rcv_throughput = re.compile(r"^RECEIVE THROUHGPUT:\s+([\d.]+)")
-    re_dropped = re.compile(r"^EVENTS DROPPED:\s+(\d+)")
-    re_n_cpus = re.compile(r"^NR CPUS:\s+(\d+)")
-    re_avg_cpu = re.compile(r"^AVG CPU:\s*([\d.]+)%")
-    re_run_end = re.compile(r"^END\s+(\d+)")
+    ansi_escape = re.compile(r"\x1b\[[0-9;]*m")
+    re_run_start = re.compile(r"^[^\w]*RUN\s+(\d+)")
+    re_rate = re.compile(r"^[^\w]*RATE\s+(\d+)")
+    re_rss = re.compile(r"^[^\w]*RSS=(\d+)\s+BYTES")
+    re_throughput = re.compile(r"^[^\w]*THROUGHPUT:\s+([\d.]+)\s+\(EVENTS/SEC\)")
+    re_rcv_throughput = re.compile(r"^[^\w]*RECEIVE THROUHGPUT:\s+([\d.]+)")
+    re_dropped = re.compile(r"^[^\w]*EVENTS DROPPED:\s+(\d+)")
+    re_n_cpus = re.compile(r"^[^\w]*NR CPUS:\s+(\d+)")
+    re_avg_cpu = re.compile(r"^[^\w]*AVG CPU:\s*([\d.]+)%")
+    re_run_end = re.compile(r"^[^\w]*END\s+(\d+)")
 
     with open(path, "r") as f:
         for line in f:
-            line = line.strip()
+            line = ansi_escape.sub("", line.strip())
             m = re_run_start.match(line)
             if m:
                 if current:
