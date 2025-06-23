@@ -183,6 +183,9 @@ def main():
     ]
 
     for metric, ylabel, prefix in metrics:
+        if df[metric].dropna().empty:
+            print(f"Skipping {metric}: no data")
+            continue
         title = f"{ylabel} ({const_label}={const_str})"
         filename = f"{args.outdir}/{prefix}_{suf}.pdf"
         plot_boxplot(df, grp, metric, xlabel, ylabel, title, filename)
