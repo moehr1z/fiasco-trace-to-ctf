@@ -21,6 +21,7 @@ def parse_benchmark_file(path, x_axis):
     re_n_cpus = re.compile(r"^[^\w]*NR CPUS:\s+(\d+)")
     re_avg_cpu = re.compile(r"^[^\w]*AVG CPU:\s*([\d.]+)%")
     re_run_end = re.compile(r"^[^\w]*END\s+(\d+)")
+    re_events_total = re.compile(r"^[^\w]*EVENTS TOTAL:\s+(\d+)")
 
     with open(path, "r") as f:
         for line in f:
@@ -44,6 +45,7 @@ def parse_benchmark_file(path, x_axis):
                     "throughput": None,
                     "rcv_throughput": None,
                     "n_cpus": None,
+                    "events_total": None,
                 }
                 continue
             if not current:
@@ -70,6 +72,9 @@ def parse_benchmark_file(path, x_axis):
                 continue
             if re_avg_cpu.match(line):
                 current["avg_cpu"] = float(re_avg_cpu.match(line).group(1))
+                continue
+            if re_events_total.match(line):
+                current["events_total"] = int(re_events_total.match(line).group(1))
                 continue
             if re_run_end.match(line):
                 eid = int(re_run_end.match(line).group(1))
@@ -105,6 +110,7 @@ def build_dataframe(runs):
                 "throughput": r["throughput"],
                 "rcv_throughput": r["rcv_throughput"],
                 "n_cpus": r["n_cpus"],
+                "events_total": r["events_total"],
             }
         )
     return pd.DataFrame(rows)
@@ -180,6 +186,7 @@ def main():
         ("dropped_events", "Verlorene Events", "dropped_events"),
         ("throughput", "Konvertierungsdurchsatz (Events/Sek.)", "throughput"),
         ("rcv_throughput_mb", "Empfangsdurchsatz (MiB/Sek.)", "rcv_throughput"),
+        ("events_total", "Anzahl Events", "events_total"),
     ]
 
     for metric, ylabel, prefix in metrics:
