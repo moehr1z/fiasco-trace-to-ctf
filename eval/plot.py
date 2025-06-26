@@ -5,6 +5,18 @@ import argparse
 from collections import OrderedDict
 import matplotlib.pyplot as plt
 import pandas as pd
+import matplotlib.ticker as ticker
+
+
+def human_format(x, pos):
+    if x >= 1e9:
+        return f"{x * 1.0 / 1e9:.1f}G"
+    elif x >= 1e6:
+        return f"{x * 1.0 / 1e6:.1f}M"
+    elif x >= 1e3:
+        return f"{x * 1.0 / 1e3:.1f}K"
+    else:
+        return f"{x:.0f}"
 
 
 def parse_benchmark_file(path, x_axis):
@@ -136,6 +148,7 @@ def plot_boxplot(
         bottom=y_min - 0.05 * (max([max(d) for d in data if len(d) > 0] + [1]) - y_min)
     )
     plt.grid(axis="y", linestyle="--", alpha=0.6)
+    plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(human_format))
     if output_filename:
         plt.savefig(output_filename, bbox_inches="tight")
         print(f"Saved boxplot: {output_filename}")
