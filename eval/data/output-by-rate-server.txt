@@ -1,0 +1,2490 @@
+[H[2J**************************************************
+*    Welcome to PRIMERGY Remote Manager          *
+*    Firmware Revision 3.45P (1.00)              *
+*    SDR 3.36  ID 0614 RX2530M6                  *
+*    Firmware built   Nov 2 2022 16:21:29 JST    *
+**************************************************
+
+System Type  : PRIMERGY RX2530 M6
+System ID    : EWAB007401
+System Name  : Unknown
+System OS    : Unknown
+System Status: OK (Identify LED is OFF)
+Power Status : On
+Asset Tag    : System Asset Tag
+
+    Main Menu
+    
+(1) System Information...
+(2) Power Management...
+(3) Enclosure Information...
+(4) Service Processor...
+    
+(c) Change password
+(r) Console Redirection (EMS/SAC)
+(l) Console Logging
+
+Enter selection or (0) to quit: 
+
+Console Redirection or EMS (Emergency Management Services)
+To exit the Console Redirection (EMS/SAC) press <ESC> ( 
+Or press ~. (tilde dot)
+
+
+
+Do you really want to start the Console Redirection (yes/no)? yes[2J[01;01H[=3h[2J[01;01[2J[01;01H[=3h[2J[01;01H[2J[01;01H[=3h[2J[01;01H[0m[35m[40m[2J[01;01H[=3h[2J[01;01H[0m[37m[40m[2J[01;01H[=3h[2J[01;01H[2J[01;01H[06;01HCopyright 2016-2022 Fujitsu LIMITED
+BIOS V1.0.0.0 R1.19.0 for D3890-A1x
+iRMC Firmware rev 3.45P, SDR rev 3.36
+Asset Tag : System Asset Tag
+
+524288 MB memory installed.
+64 logical CPUs installed.
+<F2> BIOS Setup / <F12> Boot Menu
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[06;01HCopyright 2016-2022 Fujitsu LIMITED
+BIOS V1.0.0.0 R1.19.0 for D3890-A1x
+iRMC Firmware rev 3.45P, SDR rev 3.36
+Asset Tag : System Asset Tag
+
+524288 MB memory installed.
+64 logical CPUs installed.
+<F2> BIOS Setup / <F12> Boot Menu
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[06;01HCopyright 2016-2022 Fujitsu LIMITED
+BIOS V1.0.0.0 R1.19.0 for D3890-A1x
+iRMC Firmware rev 3.45P, SDR rev 3.36
+Asset Tag : System Asset Tag
+
+524288 MB memory installed.
+64 logical CPUs installed.
+<F2> BIOS Setup / <F12> Boot Menu
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[06;01HCopyright 2016-2022 Fujitsu LIMITED
+BIOS V1.0.0.0 R1.19.0 for D3890-A1x
+iRMC Firmware rev 3.45P, SDR rev 3.36
+Asset Tag : System Asset Tag
+
+524288 MB memory installed.
+64 logical CPUs installed.
+[2J[01;01H[=3h[2J[01;01H[2J[01;01H[06;01HCopyright 2016-2022 Fujitsu LIMITED
+BIOS V1.0.0.0 R1.19.0 for D3890-A1x
+iRMC Firmware rev 3.45P, SDR rev 3.36
+Asset Tag : System Asset Tag
+
+524288 MB memory installed.
+64 logical CPUs installed.
+Loading /bootstrap_fwq.efi
+Done, booting...
+EFI L4::Bootstrap
+UART IO: @3f8
+
+
+LL44  BBoooottssttrraappppeerr
+
+    BBuuiilldd::  ##2200  TTuuee  JJuunn  2244  1100::0077::1188  CCEESSTT  22002255,,  xx8866--6644,,  1133..33..00
+
+    RRAAMM::  00000000000000000000000000000000  --  000000000000000000000099eeffffff::  663366kkBB
+
+    RRAAMM::  00000000000000000000110000000000  --  000000000000000066ff553322ffffff::  11882222992244kkBB
+
+    RRAAMM::  0000000000000000777777ffff000000  --  0000000000000000777777ffffffffff::  44kkBB
+
+    RRAAMM::  00000000000000110000000000000000  --  000000000000880077ffffffffffffff::  553344777733776600kkBB
+
+    TToottaall  RRAAMM::  552244002200MMBB
+
+  Scanning fiasco
+  Scanning sigma0
+  Scanning moe rom/fwq.cfg
+  Moving up to 12 modules behind 2000000
+  Using 'modaddr 0' in modules.list might prevent moving modules.
+  moving module 00 { 50b9e000-50d940e7 } -> { 2000000-21f60e7 } [2056424]
+  moving module 01 { 50d95000-50d9b79f } -> { 21f7000-21fd79f } [26528]
+  moving module 02 { 50d9c000-50dd2aff } -> { 21fe000-2234aff } [224000]
+  moving module 03 { 50dd3000-50df67d7 } -> { 2235000-22587d7 } [145368]
+  moving module 04 { 50df7000-50e7f97f } -> { 2259000-22e197f } [559488]
+  moving module 05 { 50e80000-511312cf } -> { 22e2000-25932cf } [2822864]
+  moving module 06 { 51132000-51198b9f } -> { 2594000-25fab9f } [420768]
+  moving module 07 { 51199000-511ef967 } -> { 25fb000-2651967 } [354664]
+  moving module 08 { 511f0000-512bfc27 } -> { 2652000-2721c27 } [850984]
+  moving module 09 { 512c0000-512c0013 } -> { 2722000-2722013 } [20]
+  moving module 10 { 512c1000-512c147f } -> { 2723000-272347f } [1152]
+  moving module 11 { 512c2000-512c24d8 } -> { 2724000-27244d8 } [1241]
+  Loading fiasco
+  found node 0 kernel info page (via ELF) at 0x600000
+  Loading sigma0
+  Loading moe
+  found node 0 kernel options (via ELF) at 0x5c10c0
+  Sigma0 config    node: 0   ip:000000000010072c
+  Roottask config  node: 0   ip:0000000000246eb9
+Regions of list 'regions'
+    [     1000,      12ff] {      300} Root   vbe
+    [     8000,      8fff] {     1000} Kern   fiasco
+    [    9f000,     9ffff] {     1000} Arch   ACPI
+    [   100000,    10b487] {     b488} Sigma0 sigma0
+    [   240000,    27fc2f] {    3fc30} Root   moe
+    [   300000,    34bfff] {    4c000} Kern   fiasco
+    [   400000,    63afff] {   23b000} Kern   fiasco
+    [  2235000,   27244d8] {   4ef4d9} Root   Module
+    [  2725000,   2725fff] {     1000} Root   mbi_rt
+    [ 6fe66000,  76e65fff] {  7000000} Arch   ACPI
+    [ 76e66000,  777fefff] {   999000} Arch   ACPI
+    [ 777fe014,  777fe037] {       24} Info   ACPI
+  Starting kernel fiasco at 00000000003008f0
+
+[1;32mWelcome to the L4Re Microkernel!
+[0;32mL4Re Microkernel on x86-64
+Rev: 355909f5-dirty compiled with gcc 13.3.0 for x86    []
+Build: #59 Sun Jun 22 16:23:02 CEST 2025
+[0m
+
+HWP: enabled
+Superpages: yes
+Kmem: TSS mem at 7fb0000000 (393216 bytes)
+HWP: enabled
+ACPI: RSDP[0xffffffff0c000014]	r02 OEM:FUJ...
+Using x2APIC
+FPU0: SSE AVX 
+ACPI: FACS phys=75e39000 virt=0xffffffff0c758000
+ACPI: HW sig=0
+CPU[0]: GenuineIntel (6:6A:6:0)[000606a6] Model: Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz at 2599MHz
+
+
+Freeing init code/data: 4096 bytes (1 pages)
+
+MP: detecting APs...
+Calibrating timer loop...
+Previously unknown CPU, disabling CPU: 8c
+Timer calibration done.
+Previously unknown CPU, disabling CPU: b8
+MDB: use page size: 34
+Previously unknown CPU, disabling CPU: 9e
+MDB: use page size: 30
+Previously unknown CPU, disabling CPU: 9a
+MDB: use page size: 21
+Previously unknown CPU, disabling CPU: 92
+MDB: use page size: 12
+Previously unknown CPU, disabling CPU: b4
+SPreviously unknown CPU, disabling CPU: a8
+IPreviously unknown CPU, disabling CPU: 8a
+GPreviously unknown CPU, disabling CPU: 98
+MPreviously unknown CPU, disabling CPU: ae
+APreviously unknown CPU, disabling CPU: 96
+0Previously unknown CPU, disabling CPU: a6
+:Previously unknown CPU, disabling CPU: 88
+ Previously unknown CPU, disabling CPU: b6
+HPreviously unknown CPU, disabling CPU: be
+ePreviously unknown CPU, disabling CPU: 80
+lPreviously unknown CPU, disabling CPU: b0
+lPreviously unknown CPU, disabling CPU: a2
+oPreviously unknown CPU, disabling CPU: ac
+!Previously unknown CPU, disabling CPU: 84
+
+Previously unknown CPU, disabling CPU: 82
+ Previously unknown CPU, disabling CPU: b2
+ Previously unknown CPU, disabling CPU: 8e
+KPreviously unknown CPU, disabling CPU: bc
+IPreviously unknown CPU, disabling CPU: 94
+PPreviously unknown CPU, disabling CPU: 90
+ Previously unknown CPU, disabling CPU: ba
+@Previously unknown CPU, disabling CPU: a0
+ Previously unknown CPU, disabling CPU: a4
+6Previously unknown CPU, disabling CPU: 86
+00Previously unknown CPU, disabling CPU: 9c
+0Previously unknown CPU, disabling CPU: aa
+00
+  allocated 4KB for maintenance structures
+SIGMA0: Dump of all resource maps
+RAM:------------------------
+[0:RWX:0;fff]
+[4:RW-:1000;1fff]
+[0:RWX:2000;7fff]
+[0:RWX:9000;9efff]
+[0:RWX:10c000;23ffff]
+[4:RWX:240000;27ffff]
+[0:RWX:280000;3fffff]
+[0:RWX:63a000;2234fff]
+[4:RWX:2235000;2725fff]
+[0:RWX:2726000;6f532fff]
+[0:RWX:777ff000;777fffff]
+[0:RWX:100000000;7fafffffff]
+IOMEM:----------------------
+[0:RW-:9f000;fffff]
+[0:RW-:6f533000;777fefff]
+[0:RW-:77800000;97ffbfff]
+[0:RW-:97ffd000;a3ffbfff]
+[0:RW-:a3ffd000;afffbfff]
+[0:RW-:afffd000;bbffbfff]
+[0:RW-:bbffd000;c77fbfff]
+[0:RW-:c77fd000;cbffbfff]
+[0:RW-:cbffd000;d7ffbfff]
+[0:RW-:d7ffd000;e3ffbfff]
+[0:RW-:e3ffd000;efffbfff]
+[0:RW-:efffd000;fb7fbfff]
+[0:RW-:fb7fd000;febfffff]
+[0:RW-:fec01000;ffffffff]
+[0:RW-:8080000000;ffffffffffffffff]
+IO PORTS--------------------------
+[0:RW-:0;fffffff]
+MOE: rom name space cap -> [C:103000]
+MOE: rwfs name space cap -> [C:105000]
+  ROMFS: [2235000-22587d8] [C:107000] l4re
+  ROMFS: [2259000-22e1980] [C:109000] ned
+  ROMFS: [22e2000-25932d0] [C:10b000] io
+  ROMFS: [2594000-25faba0] [C:10d000] fwq
+  ROMFS: [25fb000-2651968] [C:10f000] l4vio_switch
+  ROMFS: [2652000-2721c28] [C:111000] trace-stream
+  ROMFS: [2722000-2722014] [C:113000] resolv.conf
+  ROMFS: [2723000-2723480] [C:115000] ixl.vbus
+  ROMFS: [2724000-27244d9] [C:117000] fwq.cfg
+  VESAFB: [C:11c010][C:11b000] @90000000 (size=300000)
+Ned says: Hi World!
+Ned: loading file: 'rom/fwq.cfg'
+[37mio      | Io service[0m
+[37mio      | Looking for ACPI root Pointer[0m
+[37mio      | ACPI: RSDP 0x00000000777FE014 000024 (v02 FUJ   )[0m
+[37mio      | ACPI: XSDT 0x000000007705C188 0000F4 (v01 FUJ    PC       00000000 FJ   00000001)[0m
+[37mio      | ACPI: FACP 0x00000000777F9000 000114 (v06 FUJ    PC       00000000 INTL 20091013)[0m
+[37mio      | ACPI: DSDT 0x0000000077786000 06993F (v02 FUJ    PC       00000003 INTL 20091013)[0m
+[37mio      | ACPI: FACS 0x0000000075E39000 000040[0m
+[37mio      | ACPI: SSDT 0x00000000777FC000 0004FF (v02 FUJ    PC       00000000 MSFT 0100000D)[0m
+[37mio      | ACPI: SSDT 0x00000000777FB000 0008EB (v02 INTEL  xh_wccrb 00000000 INTL 20200925)[0m
+[37mio      | ACPI: SSDT 0x00000000777FA000 000464 (v02 INTEL  RAS_ACPI 00000001 INTL 20200925)[0m
+[37mio      | ACPI: HMAT 0x00000000777F8000 000210 (v01 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: HPET 0x00000000777F7000 000038 (v01 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: MCFG 0x00000000777F6000 00003C (v01 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: MIGT 0x00000000777F5000 000040 (v01 FUJ    PC       00000000 INTL 20091013)[0m
+[37mio      | ACPI: MSCT 0x00000000777F4000 000090 (v01 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: PMTT 0x00000000777F2000 0011E8 (v02 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: WDDT 0x00000000777F1000 000040 (v01 FUJ    PC       00000000 INTL 20091013)[0m
+[37mio      | ACPI: WSMT 0x00000000777F0000 000028 (v01 FUJ    PC       00000000 INTL 20091013)[0m
+[37mio      | ACPI: APIC 0x0000000077785000 00045E (v04 FUJ    PC       00000000 INTL 20091013)[0m
+[37mio      | ACPI: SLIT 0x0000000077783000 00102C (v01 FUJ    PC       00000001 FJ   00000001)[0m
+[37mio      | ACPI: SRAT 0x000000007777C000 006430 (v03 FUJ    PC       00000002 FJ   00000001)[0m
+[37mio      | ACPI: OEM4 0x00000000775F4000 187A61 (v02 INTEL  CPU  CST 00003000 INTL 20200925)[0m
+[37mio      | ACPI: OEM1 0x00000000774E0000 113489 (v02 INTEL  CPU EIST 00003000 INTL 20200925)[0m
+[37mio      | ACPI: OEM2 0x0000000077499000 046031 (v02 INTEL  CPU  HWP 00003000 INTL 20200925)[0m
+[37mio      | ACPI: SSDT 0x0000000077422000 0764A5 (v02 INTEL  SSDT  PM 00004000 INTL 20200925)[0m
+[37mio      | ACPI: SSDT 0x000000007705E000 3C3A23 (v02 INTEL  SSDTNVDR 00001000 INTL 20200925)[0m
+[37mio      | ACPI: EINJ 0x000000007705D000 000150 (v01 FUJ    PC       00000001 INTL 00000001)[0m
+[37mio      | ACPI: NFIT 0x00000000777FD000 000488 (v01 FUJ    PC       00000002 INTL 20091013)[0m
+[37mio      | ACPI: PCAT 0x000000007705B000 00010C (v19 FUJ    PC       00000002 INTL 20091013)[0m
+[37mio      | ACPI: SSDT 0x0000000077053000 00777A (v02 INTEL  SpsNm    00000002 INTL 20200925)[0m
+[37mio      | ACPI: DMAR 0x0000000077052000 000230 (v01 FUJ    PC       00000001 INTL 20091013)[0m
+[37mio      | ACPI: SPCR 0x0000000077051000 000050 (v02 FUJ    PC       00000000 FJ   00000001)[0m
+[37mio      | [0m
+[37mio      | ACPI table initialization:[0m
+[37mio      | Table [DSDT: PC      ] (id 01) - 13345 Objects with 1539 Devices, 121 Regions, 5737 Methods (385/5352/37 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: PC      ] (id 07) -   46 Objects with   2 Devices,   4 Regions,   14 Methods (5/9/1 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: xh_wccrb] (id 08) -   39 Objects with   0 Devices,   0 Regions,   39 Methods (2/37/0 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: RAS_ACPI] (id 09) -   44 Objects with   2 Devices,   2 Regions,   10 Methods (8/2/7 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: SSDT  PM] (id 0A) - 7174 Objects with   0 Devices, 512 Regions, 3584 Methods (1024/2560/0 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: SSDTNVDR] (id 0B) - 7794 Objects with  65 Devices,  20 Regions, 2594 Methods (2189/405/0 Serial/Non/Cvt)[0m
+[37mio      | Table [SSDT: SpsNm   ] (id 0C) -   57 Objects with   1 Devices,   2 Regions,   21 Methods (10/11/0 Serial/Non/Cvt)[0m
+[37mio      | ACPI: 7 ACPI AML tables successfully acquired and loaded[0m
+[37mio      | Final data object initialization: Namespace contains 28508 (0x6F5C) objects[0m
+[37mio      |  evxfevnt-0203 Enable                : System is already in ACPI mode[0m
+[37mio      | Initializing General Purpose Events (GPEs):[0m
+[37mio      |     Initialized GPE 00 to 7F [_GPE] 16 regs on interrupt 0x9 (SCI)[0m
+[37mio      | Initializing Device/Processor/Thermal objects and executing _INI/_STA methods:[0m
+[37mio      |     Executed 56 _INI methods requiring 21 _STA executions (examined 1611 objects)[0m
+[37mio      | ACPICA-Version:20241212, System in ACPI MODE, 32bit timer[0m
+[37mio      | ACPI: Enabled 5 GPEs in block 00 to 7F[0m
+[37mio      | ACS: 00:1c.0: enabled ACS (features=0xf)[0m
+[37mio      | ACS: 3e:02.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 3f:00.0: enabled ACS (features=0x0)[0m
+[37mio      | ACS: 3f:00.1: enabled ACS (features=0x0)[0m
+[37mio      | ACS: 3f:00.2: enabled ACS (features=0x0)[0m
+[37mio      | ACS: 3f:00.3: enabled ACS (features=0x0)[0m
+[37mio      | ACS: 52:02.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 52:03.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 52:04.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 52:05.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 8a:02.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 8a:03.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 8a:04.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: 8a:05.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: b4:02.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: b5:00.0: enabled ACS (features=0x0)[0m
+[37mio      | ACS: b5:00.1: enabled ACS (features=0x0)[0m
+[37mio      | ACS: d2:02.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: d2:03.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: d2:04.0: enabled ACS (features=0x1f)[0m
+[37mio      | ACS: d2:05.0: enabled ACS (features=0x1f)[0m
+[37mio      | WARNING: device 'H000' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H000' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H001' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H001' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H002' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H002' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H003' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H003' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H000' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H000' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H001' already assigned to another virtual bus.[0m
+[37mio      | WARNING: device 'H001' already assigned to another virtual bus.[0m
+[37mio      | Ready. Waiting for request.[0m
+[37ml4vio_sw| [WARN ] The Igb driver provides only a limited feature set. You have been warned![0m
+[37ml4vio_sw| [INFO ] Using MSI-X interrupts...[0m
+[37ml4vio_sw| [INFO ] Resetting Igb device.[0m
+[37ml4vio_sw| [INFO ] Reset completed, starting init phase.[0m
+[37ml4vio_sw| [INFO ] Using MAC address 6c:fe:54:5f:4f:96[0m
+[37ml4vio_sw| [INFO ] enabling promisc mode[0m
+[37ml4vio_sw| [INFO ] Waiting for link...[0m
+[37ml4vio_sw| [INFO ] Link speed is 1000 Mbit/s[0m
+[33mtrace-st| Interface 'vn0' configured statically:[0m
+[37m        | Interface 'vn0' configured statically:[0m
+[37m        |   IP address: 192.168.5.12[0m
+[37m        |   Netmask: 255.255.255.0[0m
+[37m        |   Gateway: 192.168.5.1[0m
+[37m        | Hello from fwq benchmark[0m
+[37m        | Running with rate variation[0m
+[33mtrace-st|   IP address: 192.168.5.12[0m
+[33mtrace-st|   Netmask: 255.255.255.0[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[33mtrace-st|   Gateway: 192.168.5.1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[33mtrace-st| Hello from trace-stream[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[33mtrace-st| Mapping tbuf...[0m
+[33mtrace-st| Tracebuffer size = 2097152[0m
+[33mtrace-st| Mapped to a00000, currently 0 entries[0m
+[33mtrace-st| Mapped tbuf (10485760).[0m
+[33mtrace-st| Enabling certain kernel log events...[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.113735%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 135807872 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.200121 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061800 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.199347%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136302080 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.244517 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061700 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.115774%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136302080 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.244517 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061700 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.160669%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136314880 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.246821 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061600 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.140566%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136314880 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.244514 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061600 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.139978%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136314880 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.246821 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061600 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.134323%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136366080 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.244499 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1062100 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.126483%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136276480 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.242217 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061700 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.105092%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136366080 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.244499 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1062200 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 100000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 100000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.114762%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 136250880 BYTES[0m
+[33mtrace-st| THROUGHPUT 12.241071 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 1061600 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 1.729438%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 285998080 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.442067 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2231800 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 2.226350%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 289153024 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.555460 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2246200 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 5.849894%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 287002624 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.396740 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2243800 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 2.139254%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 287540224 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.425022 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2245600 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.623656%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 285261824 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.403200 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2229800 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 1.267256%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 285340672 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.399002 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2230600 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 1.656643%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 285033472 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.388041 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2229400 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.813826%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 285289472 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.405565 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2229800 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 0.620650%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 284316672 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.398948 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2222800 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 200000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 200000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 2.227158%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 286236672 BYTES[0m
+[33mtrace-st| THROUGHPUT 24.475618 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 2230800 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 2.430472%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 436137472 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.578410 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3411300 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 4.350533%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 436668416 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.590761 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3414600 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 4.088596%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 440339968 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.724173 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3430800 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 3.359908%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 437829120 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.723517 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3410700 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 3.200349%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 436514816 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.590751 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3413400 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 3.752854%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 437651968 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.747442 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3407700 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 3.896058%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 436591616 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.626162 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3410700 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 4.557576%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 435670016 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.593914 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3406500 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 2.635940%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 436668416 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.632605 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3410700 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 300000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 300000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 3.728096%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 437244416 BYTES[0m
+[33mtrace-st| THROUGHPUT 36.594012 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 3418500 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.380053%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 594989568 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.882346 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4643600 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.430516%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 593952768 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.923605 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4631600 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 7.531608%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 593545216 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.894258 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4631200 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.497997%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 592367616 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.885928 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4622800 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.403931%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 594673664 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.810139 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4648000 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 6.640003%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 593799168 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.885619 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4634000 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.525965%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 592418816 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.852106 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4626400 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 6.572370%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 592779264 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.776390 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4636400 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 8.868594%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 591190016 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.831001 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4619200 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 400000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 400000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.474688%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 591960064 BYTES[0m
+[33mtrace-st| THROUGHPUT 48.843841 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 4623600 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 13.233297%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 759358464 BYTES[0m
+[33mtrace-st| THROUGHPUT 60.983635 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5938000 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 11.741642%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 759297024 BYTES[0m
+[33mtrace-st| THROUGHPUT 60.968432 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5939000 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 12.703642%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 756673024 BYTES[0m
+[33mtrace-st| THROUGHPUT 60.963051 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5919000 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 10.003195%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 760463872 BYTES[0m
+[33mtrace-st| THROUGHPUT 61.000493 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5945000 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 15.479275%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 758322176 BYTES[0m
+[33mtrace-st| THROUGHPUT 61.054655 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5923000 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 9.538245%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 762191872 BYTES[0m
+[33mtrace-st| THROUGHPUT 60.964758 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5962000 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 13.302587%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 757091328 BYTES[0m
+[33mtrace-st| THROUGHPUT 61.043165 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5914000 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 10.805285%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 763855872 BYTES[0m
+[33mtrace-st| THROUGHPUT 61.051771 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5967000 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 12.369111%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 761763328 BYTES[0m
+[33mtrace-st| THROUGHPUT 61.002109 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5954500 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 500000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 500000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 12.928861%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 761202176 BYTES[0m
+[33mtrace-st| THROUGHPUT 60.967411 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 5954000 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 3 to converter controller[0m
+[37m        | RUN 0[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 14.910977%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 934014976 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.149880 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7306800 events[0m
+[37m        | END 0[0m
+[37m        | RUN 1[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 16.276570%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 935022592 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.246840 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7305000 events[0m
+[37m        | END 1[0m
+[37m        | RUN 2[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 14.989963%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 934561792 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.264906 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7299000 events[0m
+[37m        | END 2[0m
+[37m        | RUN 3[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 16.768877%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 934154240 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.178816 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7305000 events[0m
+[37m        | END 3[0m
+[37m        | RUN 4[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 15.661155%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 932334592 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.258924 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7282800 events[0m
+[37m        | END 4[0m
+[37m        | RUN 5[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 15.777424%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 931212288 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.182797 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7281600 events[0m
+[37m        | END 5[0m
+[37m        | RUN 6[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 14.655057%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 934130688 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.158943 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7306800 events[0m
+[37m        | END 6[0m
+[37m        | RUN 7[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 13.469422%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 934331392 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.270936 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7297200 events[0m
+[37m        | END 7[0m
+[37m        | RUN 8[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 15.951506%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 931312640 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.172594 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7283400 events[0m
+[37m        | END 8[0m
+[37m        | RUN 9[0m
+[37m        | RATE 600000[0m
+[37m        | NR CPUS: 1[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 4 to converter controller[0m
+[37m        | Starting remote converter...[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 1 to converter controller[0m
+[37m        | Started remote converter.[0m
+[37m        | Starting trace stream server...[0m
+[33mtrace-st| Trace_server: START received[0m
+[33mtrace-st| Connecting to server (192.168.5.13:8888)...[0m
+[33mtrace-st| Connected to server.[0m
+[33mtrace-st| Starting to send trace buffer...[0m
+[37m        | Started trace stream server.[0m
+[37m        | Starting event generators...[0m
+[37m        | (16) Event generation rate is 600000.[0m
+[37m        | Started event generator 1.[0m
+[37m        | Starting benchmark...[0m
+[37m        | numthreads = 2[0m
+[37m        | thread number 0 being created.[0m
+[37m        | thread number 1 being created.[0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 1 [0m
+[37m        | Starting FWQ_CORE with work_length = 1048576[0m
+[37m        | thread number = 0 [0m
+[37m        | AVG CPU: 14.865821%[0m
+[37m        | Stopping trace stream server...[0m
+[33mtrace-st| Trace_server: STOP received[0m
+[33mtrace-st| I SENT 935897088 BYTES[0m
+[33mtrace-st| THROUGHPUT 73.159100 MEGABYTES/SECOND[0m
+[37m        | Stopped trace stream server.[0m
+[37m        | Stopping event generators...[0m
+[37m        | (16) Generated 7320600 events[0m
+[37m        | END 9[0m
+[37m        | Connected to converter controller socket.[0m
+[37m        | Sent operation 2 to converter controller[0m
+[37m        | Stopped remote converter.[0m
+[H[J
+[m(BPress any key to continue [H[2J**************************************************
+*    Welcome to PRIMERGY Remote Manager          *
+*    Firmware Revision 3.45P (1.00)              *
+*    SDR 3.36  ID 0614 RX2530M6                  *
+*    Firmware built   Nov 2 2022 16:21:29 JST    *
+**************************************************
+
+System Type  : PRIMERGY RX2530 M6
+System ID    : EWAB007401
+System Name  : Unknown
+System OS    : Unknown
+System Status: OK (Identify LED is OFF)
+Power Status : On
+Asset Tag    : System Asset Tag
+
+    Main Menu
+    
+(1) System Information...
+(2) Power Management...
+(3) Enclosure Information...
+(4) Service Processor...
+    
+(c) Change password
+(r) Console Redirection (EMS/SAC)
+(l) Console Logging
+
+Enter selection or (0) to quit: [H[2JConnection to 10.30.170.12 closed.
