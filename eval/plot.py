@@ -131,7 +131,10 @@ def plot_boxplot(
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
     plt.title(title)
-    plt.ylim(bottom=0)
+    y_min = min([min(d) for d in data if len(d) > 0] + [0])
+    plt.ylim(
+        bottom=y_min - 0.05 * (max([max(d) for d in data if len(d) > 0] + [1]) - y_min)
+    )
     plt.grid(axis="y", linestyle="--", alpha=0.6)
     if output_filename:
         plt.savefig(output_filename, bbox_inches="tight")
