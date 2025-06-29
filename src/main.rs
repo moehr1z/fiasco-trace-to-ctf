@@ -21,7 +21,7 @@ use std::net::TcpListener;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::mpsc;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 use std::{fs, thread};
 
 const IP_ADDRESS: &str = "0.0.0.0:8888";

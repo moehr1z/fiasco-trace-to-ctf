@@ -5,7 +5,6 @@ const EVENT_TYPE_POSITION: i64 = 44;
 
 use crate::event::Event;
 use crate::event::bp::BpEvent;
-use crate::event::common::EventCommon;
 use crate::event::context_switch::ContextSwitchEvent;
 use crate::event::destroy::DestroyEvent;
 use crate::event::drq::DrqEvent;
