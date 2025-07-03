@@ -99,23 +99,64 @@ impl<'a>
         let mut prev_tid: i64 = src as i64;
         let mut prev_state = TaskState::Running;
 
+        // handle thread of scheduling context
+        if let Some(o) = kernel_object_map
+            .borrow_mut()
+            .get_mut(&(event.from_sched & CTX_MASK))
+        {
+            let prio = event.from_prio;
+            let id;
+            let name;
+            if prio == 0 {
+                id = "0".to_string();
+                name = "idle".to_string();
+            } else {
+                id = o.id().to_string();
+                name = o.name().to_string();
+            }
+
+            match o {
+                KernelObject::Generic(_) => {
+                    let new_obj = KernelObject::Thread(ThreadObject {
+                        base: BaseKernelObject { id, name },
+                        state: ThreadState::Running,
+                        prio,
+                    });
+                    *o = new_obj;
+                }
+                KernelObject::Thread(t) => {
+                    t.prio = prio;
+                    t.base.id = id;
+                    t.base.name = name;
+                }
+            }
+        }
+
         // if the src kernel object is not of type thread yet make it so
+        // src may or may not be the same as the sched context
         if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
+            let prio = 1000;
+            let id = o.id().to_string();
+            let name = o.name().to_string();
+
             if let KernelObject::Generic(_) = o {
                 let new_obj = KernelObject::Thread(ThreadObject {
-                    base: BaseKernelObject {
-                        id: o.id().to_string(),
-                        name: o.name().to_string(),
-                    },
+                    base: BaseKernelObject { id, name },
                     state: ThreadState::Running,
-                    prio: 0,
+                    prio,
                 });
                 *o = new_obj;
             }
         }
 
-        let prev_comm_id = if let Some(o) = kernel_object_map.borrow().get(&src) {
+        let mut prev_prio = 1000;
+        let prev_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
             if let KernelObject::Thread(t) = o {
+                if (t.base.id == "6") {
+                    println!("6 prio: {}", t.prio);
+                }
+
+                prev_prio = t.prio;
                 prev_state = t.state.into();
                 let dbg_id = o.id();
                 let name = o.name();
@@ -147,14 +188,20 @@ impl<'a>
                         name: o.name().to_string(),
                     },
                     state: ThreadState::Running,
-                    prio: 0,
+                    prio: 1000,
                 });
                 *o = new_obj;
             }
         }
 
+        let mut next_prio = 1000;
         let next_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&dst) {
             if let KernelObject::Thread(t) = o {
+                if (t.base.id == "6") {
+                    println!("6 prio: {}", t.prio);
+                }
+
+                next_prio = t.prio;
                 t.state = ThreadState::Running;
                 let dbg_id = o.id();
                 let name = o.name();
@@ -178,11 +225,11 @@ impl<'a>
         Ok(Self {
             prev_comm: cache.get_str_by_id(prev_comm_id),
             prev_tid,
-            prev_prio: event.from_prio as i64,
+            prev_prio: prev_prio.try_into().unwrap(),
             prev_state,
             next_comm: cache.get_str_by_id(next_comm_id),
             next_tid,
-            next_prio: 9999, // TODO get actual next prio
+            next_prio: next_prio.try_into().unwrap(),
         })
     }
 }
