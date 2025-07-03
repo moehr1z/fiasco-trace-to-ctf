@@ -47,7 +47,7 @@ pub struct ThreadObject {
     pub prio: u64,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum ThreadState {
     Running,
     Blocked,

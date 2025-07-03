@@ -6,7 +6,7 @@ use super::event::ke_reg::KeReg;
 use super::event::nam::Nam;
 use super::event::sched_migrate_task::SchedMigrateTask;
 use super::event::sched_switch::SchedSwitch;
-use super::kernel_object::{BaseKernelObject, KernelObject, ThreadObject};
+use super::kernel_object::{BaseKernelObject, KernelObject};
 use super::types::{BorrowedCtfState, StringCache};
 use crate::converter::event::ke::Ke;
 use crate::event::bp::BpEvent;
@@ -358,7 +358,6 @@ impl TrcCtfConverter {
                 };
 
                 let pointer = ev.obj & CTX_MASK;
-                let pointer_ctx = event_common.ctx & CTX_MASK;
                 let id = ev.id.to_string();
                 match self.kernel_object_map.borrow_mut().entry(pointer) {
                     Entry::Occupied(mut entry) => {
@@ -367,21 +366,10 @@ impl TrcCtfConverter {
                         obj.set_name(name);
                     }
                     Entry::Vacant(entry) => {
-                        let new_obj = if pointer == pointer_ctx {
-                            KernelObject::Thread(ThreadObject {
-                                base: BaseKernelObject {
-                                    id,
-                                    name: name.to_string(),
-                                },
-                                state: super::kernel_object::ThreadState::Blocked,
-                                prio: 0,
-                            })
-                        } else {
-                            KernelObject::Generic(BaseKernelObject {
-                                id,
-                                name: name.to_string(),
-                            })
-                        };
+                        let new_obj = KernelObject::Generic(BaseKernelObject {
+                            id,
+                            name: name.to_string(),
+                        });
                         entry.insert(new_obj);
                     }
                 }
@@ -428,16 +416,8 @@ impl TrcCtfConverter {
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
 
-                // TODO this is slow, use an id -> name map
-                let map = self.kernel_object_map.borrow();
-                let res = map.iter().find(|(_, o)| *o.id() == ev.dbg_id.to_string());
-                let rcv_name = if let Some((_, o)) = res {
-                    o.name().to_string()
-                } else {
-                    "".to_string()
-                };
-
-                Ipc::try_from((ev, &rcv_name, &mut self.string_cache))?.emit_event(ctf_event)?;
+                Ipc::try_from((ev, &mut self.string_cache, &mut self.kernel_object_map))?
+                    .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::IpcRes(ev) => {
@@ -457,19 +437,9 @@ impl TrcCtfConverter {
                 emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
-                let pointer = ev.newo & CTX_MASK;
-                let pointer_ctx = event_common.ctx & CTX_MASK;
                 let id = ev.id.to_string();
                 let name = "".to_string();
-                let new_obj = if pointer == pointer_ctx {
-                    KernelObject::Thread(ThreadObject {
-                        base: BaseKernelObject { id, name },
-                        state: super::kernel_object::ThreadState::Blocked,
-                        prio: 0,
-                    })
-                } else {
-                    KernelObject::Generic(BaseKernelObject { id, name })
-                };
+                let new_obj = KernelObject::Generic(BaseKernelObject { id, name });
 
                 self.kernel_object_map
                     .borrow_mut()

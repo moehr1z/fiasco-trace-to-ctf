@@ -1,10 +1,11 @@
 use crate::converter::CTX_MASK;
-use crate::converter::kernel_object::KernelObject;
+use crate::converter::kernel_object::{BaseKernelObject, KernelObject, ThreadObject, ThreadState};
 use crate::converter::types::StringCache;
 use crate::event::context_switch::ContextSwitchEvent;
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 use enum_iterator::Sequence;
+use log::error;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::convert::TryFrom;
@@ -53,6 +54,15 @@ impl TaskState {
     }
 }
 
+impl From<ThreadState> for TaskState {
+    fn from(state: ThreadState) -> Self {
+        match state {
+            ThreadState::Running => TaskState::Running,
+            ThreadState::Blocked => TaskState::Stopped,
+        }
+    }
+}
+
 #[derive(CtfEventClass)]
 #[event_name = "sched_switch"]
 pub struct SchedSwitch<'a> {
@@ -87,17 +97,40 @@ impl<'a>
         let dst = event.dst & CTX_MASK;
 
         let mut prev_tid: i64 = src as i64;
-        let prev_comm_id = if let Some(o) = kernel_object_map.borrow().get(&src) {
-            let dbg_id = o.id();
-            let name = o.name();
+        let mut prev_state = TaskState::Running;
 
-            if let Ok(tid_i64) = dbg_id.parse() {
-                prev_tid = tid_i64
+        // if the src kernel object is not of type thread yet make it so
+        if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
+            if let KernelObject::Generic(_) = o {
+                let new_obj = KernelObject::Thread(ThreadObject {
+                    base: BaseKernelObject {
+                        id: o.id().to_string(),
+                        name: o.name().to_string(),
+                    },
+                    state: ThreadState::Running,
+                    prio: 0,
+                });
+                *o = new_obj;
             }
-            if !name.is_empty() {
-                cache.insert_str(name)?
+        }
+
+        let prev_comm_id = if let Some(o) = kernel_object_map.borrow().get(&src) {
+            if let KernelObject::Thread(t) = o {
+                prev_state = t.state.into();
+                let dbg_id = o.id();
+                let name = o.name();
+
+                if let Ok(tid_i64) = dbg_id.parse() {
+                    prev_tid = tid_i64
+                }
+                if !name.is_empty() {
+                    cache.insert_str(name)?
+                } else {
+                    cache.insert_str(dbg_id)?
+                }
             } else {
-                cache.insert_str(dbg_id)?
+                error!("sched_switch on a non thread kernel object!");
+                return Err(Error::PluginError("Non thread kernel object".to_string()));
             }
         } else {
             cache.insert_str(&src.to_string())?
@@ -105,17 +138,38 @@ impl<'a>
 
         let mut next_tid: i64 = dst as i64;
 
-        let next_comm_id = if let Some(o) = kernel_object_map.borrow().get(&dst) {
-            let dbg_id = o.id();
-            let name = o.name();
-
-            if let Ok(tid_i64) = dbg_id.parse() {
-                next_tid = tid_i64
+        // if the dst kernel object is not of type thread yet make it so
+        if let Some(o) = kernel_object_map.borrow_mut().get_mut(&dst) {
+            if let KernelObject::Generic(_) = o {
+                let new_obj = KernelObject::Thread(ThreadObject {
+                    base: BaseKernelObject {
+                        id: o.id().to_string(),
+                        name: o.name().to_string(),
+                    },
+                    state: ThreadState::Running,
+                    prio: 0,
+                });
+                *o = new_obj;
             }
-            if !name.is_empty() {
-                cache.insert_str(name)?
+        }
+
+        let next_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&dst) {
+            if let KernelObject::Thread(t) = o {
+                t.state = ThreadState::Running;
+                let dbg_id = o.id();
+                let name = o.name();
+
+                if let Ok(tid_i64) = dbg_id.parse() {
+                    next_tid = tid_i64
+                }
+                if !name.is_empty() {
+                    cache.insert_str(name)?
+                } else {
+                    cache.insert_str(dbg_id)?
+                }
             } else {
-                cache.insert_str(dbg_id)?
+                error!("sched_switch on a non thread kernel object!");
+                return Err(Error::PluginError("Non thread kernel object".to_string()));
             }
         } else {
             cache.insert_str(&dst.to_string())?
@@ -125,7 +179,7 @@ impl<'a>
             prev_comm: cache.get_str_by_id(prev_comm_id),
             prev_tid,
             prev_prio: event.from_prio as i64,
-            prev_state: TaskState::Running, // TODO always running?
+            prev_state,
             next_comm: cache.get_str_by_id(next_comm_id),
             next_tid,
             next_prio: 9999, // TODO get actual next prio

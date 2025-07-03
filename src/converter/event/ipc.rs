@@ -1,9 +1,17 @@
-use std::ffi::CStr;
+use std::{cell::RefCell, collections::HashMap, ffi::CStr, rc::Rc};
 
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
+use log::error;
 
-use crate::{converter::types::StringCache, event::ipc::IpcEvent};
+use crate::{
+    converter::{
+        CTX_MASK,
+        kernel_object::{KernelObject, ThreadState},
+        types::StringCache,
+    },
+    event::ipc::IpcEvent,
+};
 
 use super::ipc_type::IpcType;
 
@@ -22,11 +30,39 @@ pub struct Ipc<'a> {
     type_: &'a CStr,
 }
 
-impl<'a> TryFrom<(IpcEvent, &'a String, &'a mut StringCache)> for Ipc<'a> {
+impl<'a>
+    TryFrom<(
+        IpcEvent,
+        &'a mut StringCache,
+        &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
+    )> for Ipc<'a>
+{
     type Error = Error;
 
-    fn try_from(v: (IpcEvent, &'a String, &'a mut StringCache)) -> Result<Self, Self::Error> {
-        let (event, rcv_name, cache) = v;
+    fn try_from(
+        v: (
+            IpcEvent,
+            &'a mut StringCache,
+            &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
+        ),
+    ) -> Result<Self, Self::Error> {
+        let (event, cache, map) = v;
+
+        if let Some(o) = map.borrow_mut().get_mut(&(event.common.ctx & CTX_MASK)) {
+            if let KernelObject::Thread(t) = o {
+                t.state = ThreadState::Blocked;
+            } else {
+                error!("sched_switch on a non thread kernel object!");
+                return Err(Error::PluginError("Non thread kernel object".to_string()));
+            }
+        }
+
+        // TODO this is slow, use an id -> name map
+        let binding = map.borrow();
+        let res = binding
+            .iter()
+            .find(|(_, o)| *o.id() == event.dbg_id.to_string());
+        let rcv_name = if let Some((_, o)) = res { o.name() } else { "" };
 
         let type_name = IpcType::num_to_str((event.dst & 0xf) as u8);
         cache.insert_str(&type_name)?;
