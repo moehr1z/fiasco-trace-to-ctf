@@ -1,4 +1,5 @@
 use crate::converter::CTX_MASK;
+use crate::converter::kernel_object::KernelObject;
 use crate::converter::types::StringCache;
 use crate::event::context_switch::ContextSwitchEvent;
 use babeltrace2_sys::Error;
@@ -68,7 +69,7 @@ impl<'a>
     TryFrom<(
         ContextSwitchEvent,
         &'a mut StringCache,
-        &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
+        &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -77,16 +78,19 @@ impl<'a>
         value: (
             ContextSwitchEvent,
             &'a mut StringCache,
-            &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
+            &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
         ),
     ) -> Result<Self, Self::Error> {
-        let (event, cache, name_map) = value;
+        let (event, cache, kernel_object_map) = value;
 
         let src = event.common.ctx & CTX_MASK;
         let dst = event.dst & CTX_MASK;
 
         let mut prev_tid: i64 = src as i64;
-        let prev_comm_id = if let Some((name, dbg_id)) = name_map.borrow().get(&src) {
+        let prev_comm_id = if let Some(o) = kernel_object_map.borrow().get(&src) {
+            let dbg_id = o.id();
+            let name = o.name();
+
             if let Ok(tid_i64) = dbg_id.parse() {
                 prev_tid = tid_i64
             }
@@ -101,7 +105,10 @@ impl<'a>
 
         let mut next_tid: i64 = dst as i64;
 
-        let next_comm_id = if let Some((name, dbg_id)) = name_map.borrow().get(&dst) {
+        let next_comm_id = if let Some(o) = kernel_object_map.borrow().get(&dst) {
+            let dbg_id = o.id();
+            let name = o.name();
+
             if let Ok(tid_i64) = dbg_id.parse() {
                 next_tid = tid_i64
             }

@@ -1,4 +1,5 @@
 use super::interruptor::Interruptor;
+use super::kernel_object::KernelObject;
 use super::{convert::TrcCtfConverter, types::BorrowedCtfState};
 use crate::event::Event;
 use crate::opts::Opts;
@@ -39,7 +40,7 @@ impl TrcPluginState {
         opts: &Opts,
         eof_signal: Rc<Cell<bool>>,
         cpu_id: u8,
-        name_map: Rc<RefCell<HashMap<u64, (String, String)>>>,
+        kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
         let trace_name = CString::new(opts.trace_name.as_str())?;
@@ -56,7 +57,7 @@ impl TrcPluginState {
             stream: ptr::null_mut(),
             packet: ptr::null_mut(),
             cpu_id,
-            converter: TrcCtfConverter::new(name_map),
+            converter: TrcCtfConverter::new(kernel_object_map),
         })
     }
 

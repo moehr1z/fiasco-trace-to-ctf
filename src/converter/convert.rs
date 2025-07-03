@@ -6,6 +6,7 @@ use super::event::ke_reg::KeReg;
 use super::event::nam::Nam;
 use super::event::sched_migrate_task::SchedMigrateTask;
 use super::event::sched_switch::SchedSwitch;
+use super::kernel_object::{BaseKernelObject, KernelObject, ThreadObject};
 use super::types::{BorrowedCtfState, StringCache};
 use crate::converter::event::ke::Ke;
 use crate::event::bp::BpEvent;
@@ -59,7 +60,7 @@ pub struct TrcCtfConverter {
     sched_migrate_task_event_class: *mut ffi::bt_event_class,
     event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
     string_cache: StringCache,
-    name_map: Rc<RefCell<HashMap<u64, (String, String)>>>, // ctx pointer -> (name, dbg_id)
+    kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>,
 }
 
 impl Drop for TrcCtfConverter {
@@ -75,7 +76,7 @@ impl Drop for TrcCtfConverter {
 }
 
 impl TrcCtfConverter {
-    pub fn new(name_map: Rc<RefCell<HashMap<u64, (String, String)>>>) -> Self {
+    pub fn new(kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>) -> Self {
         let mut string_cache: StringCache = Default::default();
         string_cache.insert_str("").unwrap();
 
@@ -84,7 +85,7 @@ impl TrcCtfConverter {
             sched_migrate_task_event_class: ptr::null_mut(),
             event_classes: Default::default(),
             string_cache,
-            name_map,
+            kernel_object_map,
         }
     }
 
@@ -255,19 +256,20 @@ impl TrcCtfConverter {
                 ffi::bt_field_structure_borrow_member_field_by_index(common_ctx_field, 7);
             ffi::bt_field_integer_unsigned_set_value(kclock_field, common.kclock as u64);
 
-            let map = self.name_map.borrow();
-            let name_dbg_tuple = map.get(&(common.ctx & CTX_MASK));
+            let map = self.kernel_object_map.borrow();
+            let kernel_object = map.get(&(common.ctx & CTX_MASK));
 
-            let c_name_id;
-            let c_dbg_id_id;
-
-            if let Some((name, dbg_id)) = name_dbg_tuple {
-                c_name_id = self.string_cache.insert_str(name)?;
-                c_dbg_id_id = self.string_cache.insert_str(dbg_id)?;
-            } else {
-                c_name_id = self.string_cache.insert_str("")?;
-                c_dbg_id_id = c_name_id;
-            }
+            let (c_name_id, c_dbg_id_id) = match kernel_object {
+                Some(o) => {
+                    let id_1 = self.string_cache.insert_str(o.name())?;
+                    let id_2 = self.string_cache.insert_str(o.id())?;
+                    (id_1, id_2)
+                }
+                None => {
+                    let id_1 = self.string_cache.insert_str("")?;
+                    (id_1, id_1)
+                }
+            };
 
             let c_name = self.string_cache.get_str_by_id(c_name_id);
             let c_dbg_id = self.string_cache.get_str_by_id(c_dbg_id_id);
@@ -355,9 +357,34 @@ impl TrcCtfConverter {
                     "".to_string()
                 };
 
-                self.name_map
-                    .borrow_mut()
-                    .insert(ev.obj & CTX_MASK, (name.clone(), ev.id.to_string()));
+                let pointer = ev.obj & CTX_MASK;
+                let pointer_ctx = event_common.ctx & CTX_MASK;
+                let id = ev.id.to_string();
+                match self.kernel_object_map.borrow_mut().entry(pointer) {
+                    Entry::Occupied(mut entry) => {
+                        let obj = entry.get_mut();
+                        obj.set_id(id);
+                        obj.set_name(name);
+                    }
+                    Entry::Vacant(entry) => {
+                        let new_obj = if pointer == pointer_ctx {
+                            KernelObject::Thread(ThreadObject {
+                                base: BaseKernelObject {
+                                    id,
+                                    name: name.to_string(),
+                                },
+                                state: super::kernel_object::ThreadState::Blocked,
+                                prio: 0,
+                            })
+                        } else {
+                            KernelObject::Generic(BaseKernelObject {
+                                id,
+                                name: name.to_string(),
+                            })
+                        };
+                        entry.insert(new_obj);
+                    }
+                }
 
                 if was_valid {
                     let stream_class =
@@ -377,7 +404,7 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                SchedSwitch::try_from((ev, &mut self.string_cache, &mut self.name_map))?
+                SchedSwitch::try_from((ev, &mut self.string_cache, &mut self.kernel_object_map))?
                     .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
@@ -386,8 +413,12 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                SchedMigrateTask::try_from((ev, &mut self.string_cache, &mut self.name_map))?
-                    .emit_event(ctf_event)?;
+                SchedMigrateTask::try_from((
+                    ev,
+                    &mut self.string_cache,
+                    &mut self.kernel_object_map,
+                ))?
+                .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::Ipc(ev) => {
@@ -398,12 +429,10 @@ impl TrcCtfConverter {
                 self.add_event_common_ctx(event_common, ctf_event)?;
 
                 // TODO this is slow, use an id -> name map
-                let map = self.name_map.borrow();
-                let res = map
-                    .iter()
-                    .find(|(_, (_name, id))| *id == ev.dbg_id.to_string());
-                let rcv_name = if let Some((_, (name, _))) = res {
-                    name.to_string()
+                let map = self.kernel_object_map.borrow();
+                let res = map.iter().find(|(_, o)| *o.id() == ev.dbg_id.to_string());
+                let rcv_name = if let Some((_, o)) = res {
+                    o.name().to_string()
                 } else {
                     "".to_string()
                 };
@@ -422,13 +451,29 @@ impl TrcCtfConverter {
                 ctf_state.push_message(msg)?;
             }
             Event::Destroy(ev) => {
-                self.name_map.borrow_mut().remove(&(ev.obj & CTX_MASK));
+                self.kernel_object_map
+                    .borrow_mut()
+                    .remove(&(ev.obj & CTX_MASK));
                 emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
-                self.name_map
+                let pointer = ev.newo & CTX_MASK;
+                let pointer_ctx = event_common.ctx & CTX_MASK;
+                let id = ev.id.to_string();
+                let name = "".to_string();
+                let new_obj = if pointer == pointer_ctx {
+                    KernelObject::Thread(ThreadObject {
+                        base: BaseKernelObject { id, name },
+                        state: super::kernel_object::ThreadState::Blocked,
+                        prio: 0,
+                    })
+                } else {
+                    KernelObject::Generic(BaseKernelObject { id, name })
+                };
+
+                self.kernel_object_map
                     .borrow_mut()
-                    .insert(ev.newo & CTX_MASK, ("".to_string(), ev.id.to_string()));
+                    .insert(ev.newo & CTX_MASK, new_obj);
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),

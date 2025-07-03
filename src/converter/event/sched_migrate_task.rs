@@ -4,7 +4,7 @@ use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
 
 use crate::{
-    converter::{CTX_MASK, types::StringCache},
+    converter::{CTX_MASK, kernel_object::KernelObject, types::StringCache},
     event::migration::MigrationEvent,
 };
 
@@ -22,7 +22,7 @@ impl<'a>
     TryFrom<(
         MigrationEvent,
         &'a mut StringCache,
-        &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
+        &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
     )> for SchedMigrateTask<'a>
 {
     type Error = Error;
@@ -31,15 +31,18 @@ impl<'a>
         value: (
             MigrationEvent,
             &'a mut StringCache,
-            &'a mut Rc<RefCell<HashMap<u64, (String, String)>>>,
+            &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
         ),
     ) -> Result<Self, Self::Error> {
-        let (event, cache, name_map) = value;
+        let (event, cache, kernel_object_map) = value;
 
         let ctx = event.common.ctx & CTX_MASK;
         let mut tid = ctx as i64;
 
-        let comm_id = if let Some((name, dbg_id)) = name_map.borrow().get(&ctx) {
+        let comm_id = if let Some(o) = kernel_object_map.borrow().get(&ctx) {
+            let dbg_id = o.id();
+            let name = o.name();
+
             if let Ok(tid_i64) = dbg_id.parse() {
                 tid = tid_i64
             }

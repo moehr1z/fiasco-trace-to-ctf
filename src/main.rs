@@ -8,6 +8,7 @@ use crate::converter::interruptor::Interruptor;
 use crate::event::Event;
 use clap::Parser;
 use converter::Converter;
+use converter::kernel_object::KernelObject;
 use core::str;
 use log::warn;
 use log::{debug, error, info};
@@ -180,8 +181,8 @@ fn main() {
         // TODO put the event stream in the converter and make a func to return it
         let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
         // TODO make own struct for the name map
-        let name_map: Rc<RefCell<HashMap<u64, (String, String)>>> =
-            Rc::new(RefCell::new(HashMap::new())); // ctx pointer -> (name, dbg_id)
+        let kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>> =
+            Rc::new(RefCell::new(HashMap::new()));
         let mut nr_conv_events: u64 = 0;
 
         while let Ok(event) = converter_rx.recv() {
@@ -200,7 +201,7 @@ fn main() {
                     opts_c,
                     cpu_id,
                     intr.clone(),
-                    name_map.clone(),
+                    kernel_object_map.clone(),
                 )
                 .unwrap_or_else(|_| {
                     error!("Could not instantiate converter!");
