@@ -10,6 +10,10 @@ pub struct Opts {
     #[clap(long, default_value = "monotonic")]
     pub clock_name: String,
 
+    /// The clock frequency
+    #[clap(short = 'f', long)]
+    pub clock_frequency: u64,
+
     /// The CTF trace name
     #[clap(long, default_value = "l4re")]
     pub trace_name: String,

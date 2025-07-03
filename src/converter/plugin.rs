@@ -22,6 +22,7 @@ pub struct TrcPluginState {
     interruptor: Interruptor,
     events: Rc<RefCell<VecDeque<Event>>>,
     clock_name: CString,
+    clock_frequency: u64,
     trace_name: CString,
     trace_creation_time: DateTime<Utc>,
     first_event_observed: bool,
@@ -43,11 +44,13 @@ impl TrcPluginState {
         kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>,
     ) -> Result<Self, Error> {
         let clock_name = CString::new(opts.clock_name.as_str())?;
+        let clock_frequency = opts.clock_frequency;
         let trace_name = CString::new(opts.trace_name.as_str())?;
         Ok(Self {
             interruptor,
             events,
             clock_name,
+            clock_frequency,
             trace_name,
             trace_creation_time: Utc::now(),
             first_event_observed: false,
@@ -77,6 +80,7 @@ impl TrcPluginState {
             let ret =
                 ffi::bt_clock_class_set_name(clock_class, self.clock_name.as_c_str().as_ptr());
             ret.capi_result()?;
+            ffi::bt_clock_class_set_frequency(clock_class, self.clock_frequency as _);
             ffi::bt_clock_class_set_origin_is_unix_epoch(clock_class, 0);
 
             let stream_class = ffi::bt_stream_class_create_with_id(trace_class, self.cpu_id as u64);
