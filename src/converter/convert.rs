@@ -1,11 +1,13 @@
 use super::CTX_MASK;
 use super::event::ipc::Ipc;
 use super::event::ipc_res::IpcRes;
+use super::event::ke_bin::KeBin;
+use super::event::ke_reg::KeReg;
 use super::event::nam::Nam;
 use super::event::sched_migrate_task::SchedMigrateTask;
 use super::event::sched_switch::SchedSwitch;
-use super::event::unsupported::Unsupported;
 use super::types::{BorrowedCtfState, StringCache};
+use crate::converter::event::ke::Ke;
 use crate::event::bp::BpEvent;
 use crate::event::drq::DrqEvent;
 use crate::event::empty::EmptyEvent;
@@ -15,7 +17,6 @@ use crate::event::gate::GateEvent;
 use crate::event::ieh::IehEvent;
 use crate::event::ipfh::IpfhEvent;
 use crate::event::irq::IrqEvent;
-use crate::event::ke::KeEvent;
 use crate::event::rcu::RcuEvent;
 use crate::event::sched::SchedEvent;
 use crate::event::svm::SvmEvent;
@@ -308,6 +309,36 @@ impl TrcCtfConverter {
         let event_timestamp = event_common.tsc;
 
         match event {
+            Event::Ke(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class = self.event_class(stream_class, event_type, Ke::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+
+                Ke::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
+            Event::KeReg(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class = self.event_class(stream_class, event_type, KeReg::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+
+                KeReg::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
+            Event::KeBin(ev) => {
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class = self.event_class(stream_class, event_type, KeBin::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
+
+                KeBin::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
+            }
             Event::Nam(ev) => {
                 let mut was_valid = true;
                 let name = helpers::i8_array_to_string(ev.name);
@@ -409,7 +440,6 @@ impl TrcCtfConverter {
             Event::Tmap(ev) => emit_event!(TmapEvent, self, ev, ctf_state, event_common),
             Event::Bp(ev) => emit_event!(BpEvent, self, ev, ctf_state, event_common),
             Event::Empty(ev) => emit_event!(EmptyEvent, self, ev, ctf_state, event_common),
-            Event::Ke(ev) => emit_event!(KeEvent, self, ev, ctf_state, event_common),
             Event::Sched(ev) => emit_event!(SchedEvent, self, ev, ctf_state, event_common),
             Event::Trap(ev) => emit_event!(TrapEvent, self, ev, ctf_state, event_common),
             Event::Fullsize(ev) => emit_event!(FullsizeEvent, self, ev, ctf_state, event_common),
@@ -418,17 +448,6 @@ impl TrcCtfConverter {
             Event::Exregs(ev) => emit_event!(ExregsEvent, self, ev, ctf_state, event_common),
             Event::Timer(ev) => emit_event!(TimerEvent, self, ev, ctf_state, event_common),
             Event::Svm(ev) => emit_event!(SvmEvent, self, ev, ctf_state, event_common),
-            Event::KeBin(_) | Event::KeReg(_) => {
-                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
-                let event_class = self.event_class(stream_class, event_type, |stream_class| {
-                    Unsupported::event_class(event_type, stream_class)
-                })?;
-                let msg = ctf_state.create_message(event_class, event_timestamp);
-                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                self.add_event_common_ctx(event_common, ctf_event)?;
-                Unsupported {}.emit_event(ctf_event)?;
-                ctf_state.push_message(msg)?;
-            }
         }
 
         Ok(())

@@ -1,6 +1,9 @@
 pub mod ipc;
 pub mod ipc_res;
 pub mod ipc_type;
+pub mod ke;
+pub mod ke_bin;
+pub mod ke_reg;
 pub mod nam;
 pub mod sched_migrate_task;
 pub mod sched_switch;

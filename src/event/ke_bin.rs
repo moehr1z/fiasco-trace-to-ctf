@@ -10,6 +10,5 @@ use binrw::BinRead;
 pub struct KeBinEvent {
     pub common: EventCommon,
 
-    pub msg: [i8; 80], 
+    pub msg: [i8; 80],
 }
-

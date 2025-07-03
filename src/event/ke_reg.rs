@@ -5,12 +5,12 @@ use ctf_macros::CtfEventClass;
 
 use super::common::EventCommon;
 use binrw::BinRead;
-//TODO not yet implemented
-#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash, CtfEventClass)]
-#[event_name = "KEREG"]
+#[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 #[br(little)]
 pub struct KeRegEvent {
     pub common: EventCommon,
-
+    // TODO handle union
+    pub __pre_pad: [i8; 2],
+    pub v: [u64; 3],
+    pub msg: [i8; 56],
 }
-

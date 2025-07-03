@@ -17,6 +17,9 @@ use crate::event::ieh::IehEvent;
 use crate::event::ipc_res::IpcResEvent;
 use crate::event::ipfh::IpfhEvent;
 use crate::event::irq::IrqEvent;
+use crate::event::ke::KeEvent;
+use crate::event::ke_bin::KeBinEvent;
+use crate::event::ke_reg::KeRegEvent;
 use crate::event::migration::MigrationEvent;
 use crate::event::nam::NamEvent;
 use crate::event::rcu::RcuEvent;
@@ -147,11 +150,17 @@ impl EventParser {
                 warn!("IpcTrace event unknown.");
                 Err(error::Error::EventType(event_type_num))
             }
-            EventType::KeReg | EventType::KeBin | EventType::Ke => {
-                // TODO this is just a placeholder for testing, the real event has yet to be implemented
-                warn!("Ke events are not yet properly implemented.");
-                let event = EmptyEvent::read(&mut reader)?;
-                Ok(Some(Event::Empty(event)))
+            EventType::KeReg => {
+                let event = KeRegEvent::read(&mut reader)?;
+                Ok(Some(Event::KeReg(event)))
+            }
+            EventType::KeBin => {
+                let event = KeBinEvent::read(&mut reader)?;
+                Ok(Some(Event::KeBin(event)))
+            }
+            EventType::Ke => {
+                let event = KeEvent::read(&mut reader)?;
+                Ok(Some(Event::Ke(event)))
             }
             EventType::Hidden => {
                 let event = EmptyEvent::read(&mut reader)?;
