@@ -152,10 +152,6 @@ impl<'a>
         let mut prev_prio = 1000;
         let prev_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
             if let KernelObject::Thread(t) = o {
-                if (t.base.id == "6") {
-                    println!("6 prio: {}", t.prio);
-                }
-
                 prev_prio = t.prio;
                 prev_state = t.state.into();
                 let dbg_id = o.id();
@@ -197,10 +193,6 @@ impl<'a>
         let mut next_prio = 1000;
         let next_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&dst) {
             if let KernelObject::Thread(t) = o {
-                if (t.base.id == "6") {
-                    println!("6 prio: {}", t.prio);
-                }
-
                 next_prio = t.prio;
                 t.state = ThreadState::Running;
                 let dbg_id = o.id();
