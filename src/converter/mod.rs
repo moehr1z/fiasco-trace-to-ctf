@@ -1,6 +1,7 @@
 mod convert;
 mod event;
 pub mod interruptor;
+mod kernel_object;
 mod plugin;
 mod types;
 
