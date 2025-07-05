@@ -18,7 +18,8 @@ impl<'a> TryFrom<(NamEvent, &'a mut StringCache)> for Nam<'a> {
 
     fn try_from(value: (NamEvent, &'a mut StringCache)) -> Result<Self, Self::Error> {
         let (event, cache) = value;
-        let name = &helpers::i8_array_to_string(event.name)?;
+        let name = &helpers::i8_array_to_string(event.name);
+        let name = if let Ok(n) = name { n } else { "" };
         cache.insert_str(name)?;
 
         Ok(Self {

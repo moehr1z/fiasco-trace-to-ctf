@@ -342,7 +342,6 @@ impl TrcCtfConverter {
                 ctf_state.push_message(msg)?;
             }
             Event::Nam(ev) => {
-                let mut was_valid = true;
                 let name = helpers::i8_array_to_string(ev.name);
                 let name = if let Ok(n) = name {
                     n
@@ -353,7 +352,6 @@ impl TrcCtfConverter {
                         "Could not convert Nam event bytes to name string! (event nr: {}, bytes: {:?})",
                         ev.common.number, ev.name
                     );
-                    was_valid = false;
                     "".to_string()
                 };
 
@@ -374,18 +372,14 @@ impl TrcCtfConverter {
                     }
                 }
 
-                if was_valid {
-                    let stream_class =
-                        unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
-                    let event_class =
-                        self.event_class(stream_class, event_type, Nam::event_class)?;
-                    let msg = ctf_state.create_message(event_class, event_timestamp);
-                    let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
-                    self.add_event_common_ctx(event_common, ctf_event)?;
+                let stream_class = unsafe { ffi::bt_stream_borrow_class(ctf_state.stream_mut()) };
+                let event_class = self.event_class(stream_class, event_type, Nam::event_class)?;
+                let msg = ctf_state.create_message(event_class, event_timestamp);
+                let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
+                self.add_event_common_ctx(event_common, ctf_event)?;
 
-                    Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
-                    ctf_state.push_message(msg)?;
-                }
+                Nam::try_from((ev, &mut self.string_cache))?.emit_event(ctf_event)?;
+                ctf_state.push_message(msg)?;
             }
             Event::ContextSwitch(ev) => {
                 let event_class = self.sched_switch_event_class;
