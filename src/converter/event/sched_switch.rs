@@ -100,6 +100,7 @@ impl<'a>
         let mut prev_state = TaskState::Running;
 
         // handle thread of scheduling context
+        // src may or may not be the same as the sched context
         if let Some(o) = kernel_object_map
             .borrow_mut()
             .get_mut(&(event.from_sched & CTX_MASK))
@@ -109,7 +110,7 @@ impl<'a>
             let name;
             if prio == 0 {
                 id = "0".to_string();
-                name = "idle".to_string();
+                name = format!("idle {}", event.common.cpu).to_string();
             } else {
                 id = o.id().to_string();
                 name = o.name().to_string();
@@ -133,7 +134,6 @@ impl<'a>
         }
 
         // if the src kernel object is not of type thread yet make it so
-        // src may or may not be the same as the sched context
         if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
             let prio = 1000;
             let id = o.id().to_string();
