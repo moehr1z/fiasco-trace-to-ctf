@@ -2,7 +2,6 @@ use std::{cell::RefCell, collections::HashMap, ffi::CStr, rc::Rc};
 
 use babeltrace2_sys::Error;
 use ctf_macros::CtfEventClass;
-use log::error;
 
 use crate::{
     converter::{
@@ -51,9 +50,6 @@ impl<'a>
         if let Some(o) = map.borrow_mut().get_mut(&(event.common.ctx & CTX_MASK)) {
             if let KernelObject::Thread(t) = o {
                 t.state = ThreadState::Blocked;
-            } else {
-                error!("sched_switch on a non thread kernel object!");
-                return Err(Error::PluginError("Non thread kernel object".to_string()));
             }
         }
 
