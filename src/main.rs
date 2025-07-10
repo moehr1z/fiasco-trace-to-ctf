@@ -6,6 +6,7 @@ mod parser;
 
 use crate::converter::interruptor::Interruptor;
 use crate::event::Event;
+use babeltrace2_sys::RunStatus;
 use clap::Parser;
 use converter::Converter;
 use converter::kernel_object::KernelObject;
@@ -86,7 +87,8 @@ fn main() {
                     match net_tx.send(buf) {
                         Ok(_) => debug!("Parsed and sent event"),
                         Err(e) => {
-                            error!("Could not send event to parser ({:?}). Dropping it...", e)
+                            info!("Parser channel closed ({})", e);
+                            break;
                         }
                     }
                 }
@@ -124,22 +126,23 @@ fn main() {
                         let event_tsc = e.event_common().tsc;
                         debug!("Event count: {event_number}");
                         if event_number > biggest_event_num || !first_event_observed {
-                            let dropped_events = if first_event_observed {
-                                event_number - biggest_event_num - 1
+                            let event_diff = if first_event_observed {
+                                event_number - biggest_event_num
                             } else {
                                 0
                             };
-                            if dropped_events > 0 {
-                                dropped_events_total += dropped_events;
+                            if event_diff > 1 {
+                                dropped_events_total += event_diff - 1;
                                 warn!(
-                                    "Dropped {dropped_events} events (event num: {event_number}, biggest event num: {biggest_event_num}"
+                                    "Dropped {} events (event num: {event_number}, biggest event num: {biggest_event_num}",
+                                    event_diff - 1
                                 );
                             }
 
                             if event_tsc < last_event_tsc {
                                 warn!("Rising event number, but falling timestamp! \n
                                     event number: {event_number} \t biggest event number: {biggest_event_num} \n
-                                    event tsc: {event_tsc} \t last event tsc: {last_event_tsc}");
+                                    event tsc: {event_tsc} \t last event tsc: {last_event_tsc} \n {:?}", event);
                                 weird_events += 1;
                                 continue;
                             }
@@ -149,13 +152,13 @@ fn main() {
                             first_event_observed = true;
                             match parser_tx.send(e) {
                                 Ok(_) => debug!("Parsed and sent event"),
-                                Err(e) => error!(
-                                    "Could not send event to converter ({:?}). Dropping it...",
-                                    e
-                                ),
+                                Err(e) => {
+                                    info!("Converter channel closed ({})", e);
+                                    break;
+                                }
                             }
                         } else {
-                            warn!(
+                            info!(
                                 "Found duplicate/out of order event (event nr: {event_number}, max nr: {biggest_event_num}"
                             );
                         }
@@ -221,18 +224,18 @@ fn main() {
             }
             debug!("Trying to convert event...");
             match conv.convert_once() {
-                Ok(_) => {
+                Ok(s) => {
                     debug!("Succesfully converted event");
                     nr_conv_events += 1;
 
-                    // TODO send to live session handler
-                    // TODO commit to disk
+                    if s == RunStatus::End {
+                        break;
+                    }
                 }
                 Err(e) => error!("Error converting event ({:?})", e),
             }
         }
 
-        debug!("Closing converter stream...");
         eof_signal.set(true);
         for conv in converters.values_mut() {
             match conv.convert() {

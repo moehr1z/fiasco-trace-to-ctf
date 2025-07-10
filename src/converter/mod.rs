@@ -55,18 +55,18 @@ impl Converter {
         Ok(Self { pipeline })
     }
 
-    pub fn convert(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn convert(&mut self) -> Result<RunStatus, Box<dyn std::error::Error>> {
         loop {
             let run_status = self.pipeline.graph.run_once()?;
             if RunStatus::End == run_status {
                 break;
             }
         }
-        Ok(())
+        Ok(RunStatus::End)
     }
 
-    pub fn convert_once(&mut self) -> Result<(), Box<dyn std::error::Error>> {
-        self.pipeline.graph.run_once()?;
-        Ok(())
+    pub fn convert_once(&mut self) -> Result<RunStatus, Box<dyn std::error::Error>> {
+        let run_status = self.pipeline.graph.run_once()?;
+        Ok(run_status)
     }
 }

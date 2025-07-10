@@ -272,7 +272,8 @@ impl SourcePluginHandler for TrcPluginState {
             };
             ctf_state.push_message(msg)?;
 
-            return Ok(ctf_state.release());
+            ctf_state.release();
+            return Ok(MessageIteratorStatus::NoMessages);
         }
 
         match self.read_event()? {
