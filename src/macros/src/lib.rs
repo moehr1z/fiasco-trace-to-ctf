@@ -180,7 +180,7 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
 
     let event_class_impl = if name_from_event_type {
         quote! {
-            pub(crate) fn event_class(event_type: crate::event::event_type::EventType, stream_class: *mut babeltrace2_sys::ffi::bt_stream_class) -> Result<*mut babeltrace2_sys::ffi::bt_event_class, babeltrace2_sys::Error> {
+            pub(crate) fn event_class(event_type: String, stream_class: *mut babeltrace2_sys::ffi::bt_stream_class) -> Result<*mut babeltrace2_sys::ffi::bt_event_class, babeltrace2_sys::Error> {
                 use babeltrace2_sys::{ffi, BtResultExt};
                 use std::ffi::CString;
 
@@ -188,7 +188,7 @@ pub fn derive_ctf_event_class(input: TokenStream) -> TokenStream {
                     let trace_class = ffi::bt_stream_class_borrow_trace_class(stream_class);
 
                     let event_class = ffi::bt_event_class_create(stream_class);
-                    let event_name = CString::new(event_type.to_string())?;
+                    let event_name = CString::new(event_type)?;
                     let ret = ffi::bt_event_class_set_name(event_class, event_name.as_c_str().as_ptr() as _);
                     ret.capi_result()?;
 

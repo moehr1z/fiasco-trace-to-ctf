@@ -26,8 +26,7 @@ use crate::event::tmap::TmapEvent;
 use crate::event::trap::TrapEvent;
 use crate::event::vcpu::VcpuEvent;
 use crate::event::{
-    Event, common::EventCommon, destroy::DestroyEvent, event_type::EventType,
-    factory::FactoryEvent, pf::PfEvent,
+    Event, common::EventCommon, destroy::DestroyEvent, factory::FactoryEvent, pf::PfEvent,
 };
 use crate::helpers;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
@@ -40,13 +39,9 @@ use std::rc::Rc;
 // macro to emit basic events which don't require special processing (basically everything which
 // uses the CtfEventClass macro)
 macro_rules! emit_event {
-    ($evt:ty, $conv:ident, $ev:ident, $ctf_state:ident, $event_common:ident) => {{
+    ($ev_name:ident, $evt:ty, $conv:ident, $ev:ident, $ctf_state:ident, $event_common:ident) => {{
         let stream_class = unsafe { ffi::bt_stream_borrow_class($ctf_state.stream_mut()) };
-        let event_class = $conv.event_class(
-            stream_class,
-            $event_common.type_.try_into().unwrap(),
-            <$evt>::event_class,
-        )?;
+        let event_class = $conv.event_class(stream_class, $ev_name, <$evt>::event_class)?;
         let msg = $ctf_state.create_message(event_class, $event_common.tsc);
         let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
         $conv.add_event_common_ctx($event_common, ctf_event)?;
@@ -58,7 +53,7 @@ macro_rules! emit_event {
 pub struct TrcCtfConverter {
     sched_switch_event_class: *mut ffi::bt_event_class,
     sched_migrate_task_event_class: *mut ffi::bt_event_class,
-    event_classes: HashMap<EventType, *mut ffi::bt_event_class>,
+    event_classes: HashMap<String, *mut ffi::bt_event_class>,
     string_cache: StringCache,
     kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>,
 }
@@ -289,7 +284,7 @@ impl TrcCtfConverter {
     fn event_class<F>(
         &mut self,
         stream_class: *mut ffi::bt_stream_class,
-        event_type: EventType,
+        event_type: String,
         f: F,
     ) -> Result<*const ffi::bt_event_class, Error>
     where
@@ -306,7 +301,7 @@ impl TrcCtfConverter {
     }
 
     pub fn convert(&mut self, event: Event, ctf_state: &mut BorrowedCtfState) -> Result<(), Error> {
-        let event_type = event.event_type();
+        let event_type = event.to_string();
         let event_common = event.event_common();
         let event_timestamp = event_common.tsc;
 
@@ -428,7 +423,7 @@ impl TrcCtfConverter {
                 self.kernel_object_map
                     .borrow_mut()
                     .remove(&(ev.obj & CTX_MASK));
-                emit_event!(DestroyEvent, self, ev, ctf_state, event_common)
+                emit_event!(event_type, DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
                 let id = ev.id.to_string();
@@ -438,25 +433,45 @@ impl TrcCtfConverter {
                 self.kernel_object_map
                     .borrow_mut()
                     .insert(ev.obj & CTX_MASK, new_obj);
-                emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
+                emit_event!(event_type, FactoryEvent, self, ev, ctf_state, event_common)
             }
-            Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),
-            Event::Drq(ev) => emit_event!(DrqEvent, self, ev, ctf_state, event_common),
-            Event::Vcpu(ev) => emit_event!(VcpuEvent, self, ev, ctf_state, event_common),
-            Event::Gate(ev) => emit_event!(GateEvent, self, ev, ctf_state, event_common),
-            Event::Irq(ev) => emit_event!(IrqEvent, self, ev, ctf_state, event_common),
-            Event::Rcu(ev) => emit_event!(RcuEvent, self, ev, ctf_state, event_common),
-            Event::Tmap(ev) => emit_event!(TmapEvent, self, ev, ctf_state, event_common),
-            Event::Bp(ev) => emit_event!(BpEvent, self, ev, ctf_state, event_common),
-            Event::Empty(ev) => emit_event!(EmptyEvent, self, ev, ctf_state, event_common),
-            Event::Sched(ev) => emit_event!(SchedEvent, self, ev, ctf_state, event_common),
-            Event::Trap(ev) => emit_event!(TrapEvent, self, ev, ctf_state, event_common),
-            Event::Fullsize(ev) => emit_event!(FullsizeEvent, self, ev, ctf_state, event_common),
-            Event::Ieh(ev) => emit_event!(IehEvent, self, ev, ctf_state, event_common),
-            Event::Ipfh(ev) => emit_event!(IpfhEvent, self, ev, ctf_state, event_common),
-            Event::Exregs(ev) => emit_event!(ExregsEvent, self, ev, ctf_state, event_common),
-            Event::Timer(ev) => emit_event!(TimerEvent, self, ev, ctf_state, event_common),
-            Event::Svm(ev) => emit_event!(SvmEvent, self, ev, ctf_state, event_common),
+            Event::Pf(ev) => emit_event!(event_type, PfEvent, self, ev, ctf_state, event_common),
+            Event::Drq(ev) => emit_event!(event_type, DrqEvent, self, ev, ctf_state, event_common),
+            Event::Vcpu(ev) => {
+                emit_event!(event_type, VcpuEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Gate(ev) => {
+                emit_event!(event_type, GateEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Irq(ev) => emit_event!(event_type, IrqEvent, self, ev, ctf_state, event_common),
+            Event::Rcu(ev) => emit_event!(event_type, RcuEvent, self, ev, ctf_state, event_common),
+            Event::Tmap(ev) => {
+                emit_event!(event_type, TmapEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Bp(ev) => emit_event!(event_type, BpEvent, self, ev, ctf_state, event_common),
+            Event::Empty(ev) => {
+                emit_event!(event_type, EmptyEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Sched(ev) => {
+                emit_event!(event_type, SchedEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Trap(ev) => {
+                emit_event!(event_type, TrapEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Fullsize(ev) => {
+                emit_event!(event_type, FullsizeEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Ieh(ev) => emit_event!(event_type, IehEvent, self, ev, ctf_state, event_common),
+            Event::Ipfh(ev) => {
+                emit_event!(event_type, IpfhEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Exregs(ev) => {
+                emit_event!(event_type, ExregsEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Timer(ev) => {
+                emit_event!(event_type, TimerEvent, self, ev, ctf_state, event_common)
+            }
+            Event::Svm(ev) => emit_event!(event_type, SvmEvent, self, ev, ctf_state, event_common),
         }
 
         Ok(())

@@ -28,6 +28,8 @@ pub mod tmap;
 pub mod trap;
 pub mod vcpu;
 
+use core::fmt;
+
 use super::event::{
     bp::BpEvent, common::EventCommon, context_switch::ContextSwitchEvent, destroy::DestroyEvent,
     drq::DrqEvent, empty::EmptyEvent, event_type::EventType, exregs::ExregsEvent,
@@ -105,14 +107,39 @@ impl Event {
             Svm(e) => e.common,
         }
     }
+}
 
-    // TODO this does not actually really get used anywhere, since every event is given an explicit
-    // name, which is used for generating the event class. It would be best to remove this function
-    // entirely
-    pub fn event_type(&self) -> EventType {
-        use EventType::*;
+impl fmt::Display for Event {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use Event::*;
         match self {
-            _ => Unused,
+            Drq(_) => write!(f, "DRQ"),
+            Vcpu(_) => write!(f, "VCPU"),
+            Factory(_) => write!(f, "FACTORY"),
+            Gate(_) => write!(f, "GATE"),
+            Irq(_) => write!(f, "IRQ"),
+            Destroy(_) => write!(f, "DESTROY"),
+            Nam(_) => write!(f, "NAM"),
+            Rcu(_) => write!(f, "RCU"),
+            Tmap(_) => write!(f, "TMAP"),
+            Bp(_) => write!(f, "BP"),
+            ContextSwitch(_) => write!(f, "CONTEXTSWITCH"),
+            Empty(_) => write!(f, "EMPTY"),
+            Ipc(_) => write!(f, "IPC"),
+            IpcRes(_) => write!(f, "IPCRES"),
+            Ke(_) => write!(f, "KE"),
+            KeBin(_) => write!(f, "KEBIN"),
+            KeReg(_) => write!(f, "KEREG"),
+            Pf(_) => write!(f, "PF"),
+            Sched(_) => write!(f, "SCHED"),
+            Trap(_) => write!(f, "TRAP"),
+            Fullsize(_) => write!(f, "FULLSIZE"),
+            Ieh(_) => write!(f, "IEH"),
+            Ipfh(_) => write!(f, "IPFH"),
+            Exregs(_) => write!(f, "EXREGS"),
+            Migration(_) => write!(f, "MIGRATION"),
+            Timer(_) => write!(f, "TIMER"),
+            Svm(_) => write!(f, "SVM"),
         }
     }
 }
