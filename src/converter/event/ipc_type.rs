@@ -1,4 +1,4 @@
-use log::warn;
+use log::error;
 use num_enum::TryFromPrimitive;
 
 const IPCWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Recv as u8;
@@ -6,6 +6,7 @@ const IPCSENDANDWAIT: u8 = IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcTy
 const IPCREPLYANDWAIT: u8 =
     IpcType::OpenWait as u8 | IpcType::Send as u8 | IpcType::Recv as u8 | IpcType::Reply as u8;
 const IPCCALLIPC: u8 = IpcType::Send as u8 | IpcType::Recv as u8;
+const SENDRCAP: u8 = IpcType::Send as u8 | IpcType::Reply as u8;
 
 #[derive(Debug, TryFromPrimitive)]
 #[repr(u8)]
@@ -19,13 +20,15 @@ pub enum IpcType {
     SendAndWait = IPCSENDANDWAIT,
     ReplyAndWait = IPCREPLYANDWAIT,
     CallIpc = IPCCALLIPC,
+    SendRcap = SENDRCAP,
+    Unk,
 }
 
 impl IpcType {
     pub fn num_to_str(type_number: u8) -> String {
         let type_var: IpcType = type_number.try_into().unwrap_or_else(|_| {
-            warn!("Unknown IPC type number {type_number}");
-            IpcType::Send
+            error!("Unknown IPC type number {type_number}");
+            IpcType::Unk
         });
 
         format!("{:?}", type_var).to_string()
