@@ -31,7 +31,7 @@ use crate::event::{
 };
 use crate::helpers;
 use babeltrace2_sys::{BtResultExt, Error, ffi};
-use log::warn;
+use log::info;
 use std::cell::RefCell;
 use std::collections::{HashMap, hash_map::Entry};
 use std::ptr;
@@ -348,7 +348,7 @@ impl TrcCtfConverter {
                 } else {
                     // TODO not sure why, but sometimes when you enable IPC events there's some
                     // gibberish in some name fields
-                    warn!(
+                    info!(
                         "Could not convert Nam event bytes to name string! (event nr: {}, bytes: {:?})",
                         ev.common.number, ev.name
                     );
@@ -437,7 +437,7 @@ impl TrcCtfConverter {
 
                 self.kernel_object_map
                     .borrow_mut()
-                    .insert(ev.newo & CTX_MASK, new_obj);
+                    .insert(ev.obj & CTX_MASK, new_obj);
                 emit_event!(FactoryEvent, self, ev, ctf_state, event_common)
             }
             Event::Pf(ev) => emit_event!(PfEvent, self, ev, ctf_state, event_common),

@@ -17,5 +17,5 @@ pub struct FactoryEvent {
     pub id: u64,
     pub ram: u64,
     pub newo: u64,
+    pub obj: u64,
 }
-
