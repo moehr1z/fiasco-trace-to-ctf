@@ -106,36 +106,13 @@ impl Event {
         }
     }
 
+    // TODO this does not actually really get used anywhere, since every event is given an explicit
+    // name, which is used for generating the event class. It would be best to remove this function
+    // entirely
     pub fn event_type(&self) -> EventType {
         use EventType::*;
         match self {
-            Event::Drq(_) => Unused,
-            Event::Vcpu(_) => Unused,
-            Event::Factory(_) => Unused,
-            Event::Gate(_) => Unused,
-            Event::Irq(_) => Unused,
-            Event::Destroy(_) => Unused,
-            Event::Nam(_) => Unused,
-            Event::Rcu(_) => Unused,
-            Event::Tmap(_) => Unused,
-            Event::Bp(_) => Unused,
-            Event::ContextSwitch(_) => ContextSwitch,
-            Event::Empty(_) => Unused,
-            Event::Ipc(_) => Ipc,
-            Event::IpcRes(_) => IpcRes,
-            Event::Ke(_) => Ke,
-            Event::KeBin(_) => KeBin,
-            Event::KeReg(_) => KeReg,
-            Event::Pf(_) => Pf,
-            Event::Sched(_) => Unused,
-            Event::Trap(_) => Unused,
-            Event::Fullsize(_) => Unused,
-            Event::Ieh(_) => Unused,
-            Event::Ipfh(_) => Unused,
-            Event::Exregs(_) => Unused,
-            Event::Migration(_) => Unused,
-            Event::Timer(_) => Unused,
-            Event::Svm(_) => Unused,
+            _ => Unused,
         }
     }
 }
