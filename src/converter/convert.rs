@@ -426,7 +426,10 @@ impl TrcCtfConverter {
                 emit_event!(event_type, DestroyEvent, self, ev, ctf_state, event_common)
             }
             Event::Factory(ev) => {
-                let id = ev.id.to_string();
+                let id = ev.newo.to_string();
+                if id == "0" {
+                    println!("CREATED OBJ WITH ID 0");
+                }
                 let name = "".to_string();
                 let new_obj = KernelObject::Generic(BaseKernelObject { id, name });
 
