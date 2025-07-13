@@ -105,10 +105,8 @@ fn main() {
     let parser_handle = thread::spawn(move || {
         let mut first_event_observed = false;
         let mut biggest_event_num: u64 = 0;
-        let mut last_event_tsc: u64 = 0;
         let mut start_time: Option<Instant> = None;
         let mut dropped_events_total: u64 = 0;
-        let mut weird_events: u64 = 0;
 
         while let Ok(event_bytes) = parser_rx.recv() {
             if start_time.is_none() {
@@ -123,7 +121,6 @@ fn main() {
                 Ok(event) => {
                     if let Some(e) = event {
                         let event_number = e.event_common().number;
-                        let event_tsc = e.event_common().tsc;
                         debug!("Event count: {event_number}");
                         if event_number > biggest_event_num || !first_event_observed {
                             let event_diff = if first_event_observed {
@@ -139,16 +136,7 @@ fn main() {
                                 );
                             }
 
-                            if event_tsc < last_event_tsc {
-                                warn!("Rising event number, but falling timestamp! \n
-                                    event number: {event_number} \t biggest event number: {biggest_event_num} \n
-                                    event tsc: {event_tsc} \t last event tsc: {last_event_tsc} \n {:?}", event);
-                                weird_events += 1;
-                                continue;
-                            }
-
                             biggest_event_num = event_number;
-                            last_event_tsc = event_tsc;
                             first_event_observed = true;
                             match parser_tx.send(e) {
                                 Ok(_) => debug!("Parsed and sent event"),
@@ -169,8 +157,6 @@ fn main() {
                 }
             }
         }
-
-        println!("THERE WERE {weird_events} WEIRD EVENTS");
 
         (start_time, dropped_events_total)
     });
