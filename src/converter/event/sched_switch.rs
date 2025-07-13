@@ -120,7 +120,7 @@ impl<'a>
                 KernelObject::Generic(_) => {
                     let new_obj = KernelObject::Thread(ThreadObject {
                         base: BaseKernelObject { id, name },
-                        state: ThreadState::Running,
+                        state: ThreadState::Blocked,
                         prio,
                     });
                     *o = new_obj;
@@ -135,21 +135,21 @@ impl<'a>
 
         // if the src kernel object is not of type thread yet make it so
         if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
-            let prio = 1000;
+            let prio = event.from_prio;
             let id = o.id().to_string();
             let name = o.name().to_string();
 
             if let KernelObject::Generic(_) = o {
                 let new_obj = KernelObject::Thread(ThreadObject {
                     base: BaseKernelObject { id, name },
-                    state: ThreadState::Running,
+                    state: ThreadState::Blocked,
                     prio,
                 });
                 *o = new_obj;
             }
         }
 
-        let mut prev_prio = 1000;
+        let mut prev_prio = event.from_prio;
         let prev_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&src) {
             if let KernelObject::Thread(t) = o {
                 prev_prio = t.prio;
@@ -183,7 +183,7 @@ impl<'a>
                         id: o.id().to_string(),
                         name: o.name().to_string(),
                     },
-                    state: ThreadState::Running,
+                    state: ThreadState::Blocked,
                     prio: 1000,
                 });
                 *o = new_obj;
