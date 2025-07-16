@@ -38,10 +38,12 @@ impl<'a>
 
         let ctx = event.common.ctx & CTX_MASK;
         let mut tid = ctx as i64;
+        let mut prio = 0;
 
-        let comm_id = if let Some(o) = kernel_object_map.borrow().get(&ctx) {
-            let dbg_id = o.id();
-            let name = o.name();
+        let comm_id = if let Some(KernelObject::Thread(o)) = kernel_object_map.borrow().get(&ctx) {
+            let dbg_id = &o.base.id;
+            let name = &o.base.name;
+            prio = o.prio as i64;
 
             if let Ok(tid_i64) = dbg_id.parse() {
                 tid = tid_i64
@@ -59,7 +61,7 @@ impl<'a>
         Ok(Self {
             comm: cache.get_str_by_id(comm_id),
             tid,
-            prio: 0, // TODO
+            prio,
             orig_cpu: event.src_cpu as i32,
             dest_cpu: event.target_cpu as i32,
         })
