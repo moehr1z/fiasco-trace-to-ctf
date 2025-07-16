@@ -9,7 +9,6 @@ use binrw::BinRead;
 #[br(little)]
 pub struct KeRegEvent {
     pub common: EventCommon,
-    // TODO handle union
     pub __pre_pad: [i8; 2],
     pub v: [u64; 3],
     pub msg: [i8; 56],

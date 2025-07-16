@@ -5,7 +5,6 @@ use ctf_macros::CtfEventClass;
 
 use super::common::EventCommon;
 use binrw::BinRead;
-//TODO not yet implemented
 #[derive(BinRead, Copy, Debug, Clone, Eq, PartialEq, PartialOrd, Ord, Hash)]
 #[br(little)]
 pub struct KeEvent {

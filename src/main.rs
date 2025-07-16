@@ -58,10 +58,6 @@ fn main() {
     let (net_tx, parser_rx) = mpsc::channel();
     // parser -> converter
     let (parser_tx, converter_rx) = mpsc::channel::<Event>();
-    // converter -> live session
-    // let (converter_tx, mut live_rx) = mpsc::channel(32);
-
-    // TODO error handling
 
     // Receive the event bytes from the network and pass them to the parser
     let network_handle = thread::spawn(move || {
@@ -169,7 +165,6 @@ fn main() {
         let mut converters: HashMap<u8, Converter> = HashMap::new();
         // TODO put the event stream in the converter and make a func to return it
         let mut event_streams: HashMap<u8, Rc<RefCell<VecDeque<Event>>>> = HashMap::new();
-        // TODO make own struct for the name map
         let kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>> =
             Rc::new(RefCell::new(HashMap::new()));
         let mut nr_conv_events: u64 = 0;
