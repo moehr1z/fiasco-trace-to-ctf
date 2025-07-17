@@ -269,7 +269,7 @@ class Fiasco_tbuf(gdb.Command):
         return behind_last_member
 
     def print_single_struct(self, t, sname):
-        # TODO ke and ke_reg are a bit complicated to implement, have to do that sometime
+        # TODO update this, ke and ke_reg is now implemented
         if sname == "Ke" or sname == "KeReg":
             self.printlogi(0, "//TODO not yet implemented\n")
             self.print_derive_traits(sname)
