@@ -144,11 +144,20 @@ def plot_boxplot(
     plt.ylabel(ylabel)
     plt.title(title)
     y_min = min([min(d) for d in data if len(d) > 0] + [0])
-    plt.ylim(
-        bottom=y_min - 0.05 * (max([max(d) for d in data if len(d) > 0] + [1]) - y_min)
-    )
+    y_max = max([max(d) for d in data if len(d) > 0] + [1])
+
     plt.grid(axis="y", linestyle="--", alpha=0.6)
     plt.gca().yaxis.set_major_formatter(ticker.FuncFormatter(human_format))
+    if y_max == 1 and y_min == 0:
+        plt.gca().yaxis.set_major_locator(ticker.FixedLocator([0, 1, 2]))
+        plt.ylim(bottom=-0.1, top=2.0)
+    else:
+        plt.ylim(
+            bottom=y_min
+            - 0.05 * (max([max(d) for d in data if len(d) > 0] + [1]) - y_min),
+            top=y_max + 0.05 * y_max,
+        )
+
     if output_filename:
         plt.savefig(output_filename, bbox_inches="tight")
         print(f"Saved boxplot: {output_filename}")
