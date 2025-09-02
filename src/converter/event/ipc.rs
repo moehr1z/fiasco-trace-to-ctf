@@ -27,6 +27,7 @@ pub struct Ipc<'a> {
     to_abs_rcv: u64,
     rcv_name: &'a CStr,
     type_: &'a CStr,
+    dst_thread_name: &'a CStr,
 }
 
 impl<'a>
@@ -53,16 +54,29 @@ impl<'a>
             }
         }
 
-        // TODO this is slow, use an id -> name map
+        // TODO: this is slow, use an id -> name map
         let binding = map.borrow();
         let res = binding
             .iter()
             .find(|(_, o)| *o.id() == event.dbg_id.to_string());
-        let rcv_name = if let Some((_, o)) = res { o.name() } else { "" };
+        let mut rcv_name = "";
+        let mut dst_thread_name = "";
+        if let Some((_, o)) = res {
+            rcv_name = o.name();
+
+            if let KernelObject::Gate(g) = o {
+                if let Some(k) = binding.get(&g.thread) {
+                    dst_thread_name = if k.name() != "" { k.name() } else { k.id() }
+                }
+            }
+        }
 
         let type_name = IpcType::num_to_str((event.dst & 0xf) as u8);
         cache.insert_str(&type_name)?;
         cache.insert_str(rcv_name)?;
+        cache.insert_str(dst_thread_name)?;
+
+        // if let Some(dst_thread) = binding.get()
 
         Ok(Self {
             tag: event.tag,
@@ -75,6 +89,7 @@ impl<'a>
             to_abs_rcv: event.to_abs_rcv,
             rcv_name: cache.get_str(rcv_name),
             type_: cache.get_str(&type_name),
+            dst_thread_name: cache.get_str(dst_thread_name),
         })
     }
 }
