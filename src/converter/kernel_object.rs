@@ -1,13 +1,14 @@
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseKernelObject {
     pub id: String,
     pub name: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum KernelObject {
     Generic(BaseKernelObject),
     Thread(ThreadObject),
+    Gate(GateObject),
 }
 
 impl KernelObject {
@@ -15,6 +16,7 @@ impl KernelObject {
         match self {
             KernelObject::Generic(obj) => &obj.id,
             KernelObject::Thread(obj) => &obj.base.id,
+            KernelObject::Gate(obj) => &obj.base.id,
         }
     }
 
@@ -22,6 +24,7 @@ impl KernelObject {
         match self {
             KernelObject::Generic(obj) => &obj.name,
             KernelObject::Thread(obj) => &obj.base.name,
+            KernelObject::Gate(obj) => &obj.base.name,
         }
     }
 
@@ -29,6 +32,7 @@ impl KernelObject {
         match self {
             KernelObject::Generic(obj) => obj.id = id,
             KernelObject::Thread(obj) => obj.base.id = id,
+            KernelObject::Gate(obj) => obj.base.id = id,
         }
     }
 
@@ -36,11 +40,18 @@ impl KernelObject {
         match self {
             KernelObject::Generic(obj) => obj.name = name.into(),
             KernelObject::Thread(obj) => obj.base.name = name.into(),
+            KernelObject::Gate(obj) => obj.base.name = name.into(),
         }
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+pub struct GateObject {
+    pub base: BaseKernelObject,
+    pub thread: u64,
+}
+
+#[derive(Debug, Clone)]
 pub struct ThreadObject {
     pub base: BaseKernelObject,
     pub state: ThreadState,
