@@ -10,6 +10,7 @@ pub struct Opts {
     #[clap(long, default_value = "monotonic")]
     pub clock_name: String,
 
+    // TODO:get frequency from the L4 server so it doesn't have to be set manually
     /// The clock frequency
     #[clap(short = 'f', long)]
     pub clock_frequency: u64,
