@@ -12,7 +12,7 @@ pub struct NamEvent {
 
     pub __pre_pad: [i8; 2],
     pub obj: u64,
+    pub thread: u64,
     pub id: u64,
-    pub name: [i8; 32], 
+    pub name: [i8; 32],
 }
-
