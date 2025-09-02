@@ -9,6 +9,7 @@ use super::event::sched_switch::SchedSwitch;
 use super::kernel_object::{BaseKernelObject, KernelObject};
 use super::types::{BorrowedCtfState, StringCache};
 use crate::converter::event::ke::Ke;
+use crate::converter::kernel_object::{GateObject, ThreadObject};
 use crate::event::bp::BpEvent;
 use crate::event::drq::DrqEvent;
 use crate::event::empty::EmptyEvent;
@@ -56,6 +57,7 @@ pub struct TrcCtfConverter {
     event_classes: HashMap<String, *mut ffi::bt_event_class>,
     string_cache: StringCache,
     kernel_object_map: Rc<RefCell<HashMap<u64, KernelObject>>>,
+    last_sched_in: Option<ThreadObject>,
 }
 
 impl Drop for TrcCtfConverter {
@@ -81,6 +83,7 @@ impl TrcCtfConverter {
             event_classes: Default::default(),
             string_cache,
             kernel_object_map,
+            last_sched_in: None,
         }
     }
 
@@ -350,7 +353,11 @@ impl TrcCtfConverter {
                     "".to_string()
                 };
 
-                let pointer = ev.obj & CTX_MASK;
+                let pointer = if ev.thread == 0 {
+                    ev.obj & CTX_MASK
+                } else {
+                    ev.obj
+                };
                 let id = ev.id.to_string();
                 match self.kernel_object_map.borrow_mut().entry(pointer) {
                     Entry::Occupied(mut entry) => {
@@ -358,11 +365,22 @@ impl TrcCtfConverter {
                         obj.set_id(id);
                         obj.set_name(name);
                     }
+
                     Entry::Vacant(entry) => {
-                        let new_obj = KernelObject::Generic(BaseKernelObject {
+                        let new_obj;
+                        let base = BaseKernelObject {
                             id,
                             name: name.to_string(),
-                        });
+                        };
+                        if ev.thread != 0 {
+                            new_obj = KernelObject::Gate(GateObject {
+                                base,
+                                thread: ev.thread & CTX_MASK,
+                            });
+                        } else {
+                            new_obj = KernelObject::Generic(base);
+                        }
+
                         entry.insert(new_obj);
                     }
                 }
@@ -381,8 +399,13 @@ impl TrcCtfConverter {
                 let msg = ctf_state.create_message(event_class, event_timestamp);
                 let ctf_event = unsafe { ffi::bt_message_event_borrow_event(msg) };
                 self.add_event_common_ctx(event_common, ctf_event)?;
-                SchedSwitch::try_from((ev, &mut self.string_cache, &mut self.kernel_object_map))?
-                    .emit_event(ctf_event)?;
+                SchedSwitch::try_from((
+                    ev,
+                    &mut self.string_cache,
+                    &mut self.kernel_object_map,
+                    &mut self.last_sched_in,
+                ))?
+                .emit_event(ctf_event)?;
                 ctf_state.push_message(msg)?;
             }
             Event::Migration(ev) => {
@@ -428,9 +451,6 @@ impl TrcCtfConverter {
             }
             Event::Factory(ev) => {
                 let id = ev.newo.to_string();
-                if id == "0" {
-                    println!("CREATED OBJ WITH ID 0");
-                }
                 let name = "".to_string();
                 let new_obj = KernelObject::Generic(BaseKernelObject { id, name });
 

@@ -75,11 +75,13 @@ pub struct SchedSwitch<'a> {
     pub next_prio: i64,
 }
 
+// TODO: this is pretty convoluted as of now and should be simplified sometime
 impl<'a>
     TryFrom<(
         ContextSwitchEvent,
         &'a mut StringCache,
         &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
+        &'a mut Option<ThreadObject>,
     )> for SchedSwitch<'a>
 {
     type Error = Error;
@@ -89,9 +91,10 @@ impl<'a>
             ContextSwitchEvent,
             &'a mut StringCache,
             &'a mut Rc<RefCell<HashMap<u64, KernelObject>>>,
+            &'a mut Option<ThreadObject>,
         ),
     ) -> Result<Self, Self::Error> {
-        let (event, cache, kernel_object_map) = value;
+        let (event, cache, kernel_object_map, last_sched_in) = value;
 
         let src = event.common.ctx & CTX_MASK;
         let dst = event.dst & CTX_MASK;
@@ -130,6 +133,10 @@ impl<'a>
                     t.base.id = id;
                     t.base.name = name;
                 }
+                _ => {
+                    error!("Sched switch on none thread object");
+                    return Err(Error::PluginError("Non thread kernel object".to_string()));
+                }
             }
         }
 
@@ -154,12 +161,25 @@ impl<'a>
             if let KernelObject::Thread(t) = o {
                 prev_prio = t.prio;
                 prev_state = t.state.into();
-                let dbg_id = o.id();
-                let name = o.name();
+                let mut dbg_id = o.id();
+                let mut name = o.name();
+
+                // last dst is not the same as this ones src, so we entered an exluded thread,
+                // which switched to another excluded thread (not traced), which switched back to
+                // some not excluded thread
+                if let Some(last_thread) = last_sched_in {
+                    if last_thread.base.id != dbg_id {
+                        prev_prio = last_thread.prio;
+                        prev_state = last_thread.state.into();
+                        dbg_id = &last_thread.base.id;
+                        name = &last_thread.base.name;
+                    }
+                }
 
                 if let Ok(tid_i64) = dbg_id.parse() {
                     prev_tid = tid_i64
                 }
+
                 if !name.is_empty() {
                     cache.insert_str(name)?
                 } else {
@@ -193,6 +213,8 @@ impl<'a>
         let mut next_prio = 1000;
         let next_comm_id = if let Some(o) = kernel_object_map.borrow_mut().get_mut(&dst) {
             if let KernelObject::Thread(t) = o {
+                *last_sched_in = Some(t.clone());
+
                 next_prio = t.prio;
                 t.state = ThreadState::Running;
                 let dbg_id = o.id();
